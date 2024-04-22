@@ -1,0 +1,26 @@
+# .NET Core
+*.dll
+*.exe
+*.pdb
+*.user
+*.suo
+*.tmp
+*.swp
+*.bak
+bin/
+obj/
+obj/
+*.log
+*.vscode/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Node.js
+node_modules/
+
+# HTML, CSS, JS
+*.html~
+*.css.map
+*.js.map
