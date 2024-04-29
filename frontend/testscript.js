@@ -4,27 +4,75 @@ const fetchButton = document.querySelector('.fetchDataButton');
 const ctx = document.getElementById('myChart');
 const urlOrders = 'http://localhost:3000/orders';
 const urlTotalNumbers = 'http://localhost:3000/totalnumbers';
-let totalRevenue = 0;
-let totalOrders = 0;
-let totalCustomers = 0;
+const canvaHeight = "150";
 
 
 fetchButton.addEventListener('click', () =>{
     fetch(urlTotalNumbers)
     .then(res => res.json())
     .then(data => {
-        totalRevenue = data[0].totalRevenue;
-        totalOrders = data[0].totalOrders;
-        totalCustomers = data[0].totalCustomers;
-        const ctx = document.getElementById('myChart');
+      const totalNumbers = data[0]; // Alle Daten in einer Variable speichern
 
-        new Chart(ctx, {
+      // Zugriff auf die einzelnen Kennzahlen
+      const totalRevenue = totalNumbers.Gesamtumsatz;
+      const totalOrders = totalNumbers.Gesamtanzahl_der_Bestellungen;
+      const totalCustomers = totalNumbers.Anzahl_der_Kunden;
+
+      // Zugriff auf die Kategoriedaten
+      const categoryOrders = totalNumbers.Anzahl_der_Bestellungen_pro_Kategorie;
+      const categoryProducts = totalNumbers.Anzahl_der_Produkte_pro_Kategorie;
+      const storeOrders = totalNumbers.Anzahl_der_Bestellungen_pro_Laden;
+      const canvaCatOrd = document.getElementById('categoryOrders');
+      const canvaCatPro = document.getElementById('categoryProducts');
+      const canvaStoOrd = document.getElementById('storeOrders');
+     const chartDiv = document.getElementById("chartDiv");
+     chartDiv.style.display = "block";
+
+        new Chart(canvaCatOrd, {
           type: 'bar',
           data: {
-            labels: ["Revenue", "Orders", "Customers"],
+            labels: ["Elektronik", "Kleidung", "Haushalt", "Lebensmittel"],
             datasets: [{
-              label: 'Total',
-              data: [totalRevenue, totalOrders, totalCustomers],
+              label: 'Anzahl der Bestellungen Kategorie',
+              data: categoryOrders,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+
+        new Chart(canvaCatPro, {
+          type: 'bar',
+          data: {
+            labels: ["Elektronik", "Kleidung", "Haushalt", "Lebensmittel"],
+            datasets: [{
+              label: 'Anzahl der Produkte pro Kategorien',
+              data: categoryProducts,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+          }
+        });
+
+        new Chart(canvaStoOrd, {
+          type: 'bar',
+          data: {
+            labels: ["Store1", "Store2", "Store3", "Store4"],
+            datasets: [{
+              label: 'Anzahl der Bestellungen pro Laden',
+              data: storeOrders,
               borderWidth: 1
             }]
           },
@@ -41,7 +89,8 @@ fetchButton.addEventListener('click', () =>{
 
 
 
-
+//fetch list of data and create a table with it
+/*
     fetch(urlOrders)
     .then(res => res.json())
     .then(data => {
@@ -83,5 +132,5 @@ fetchButton.addEventListener('click', () =>{
         // Füge die Tabelle dem Hauptansichtscontainer hinzu
         mainChartView.appendChild(table);
     });
-
+*/
 });
