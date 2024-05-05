@@ -4,12 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
+using api.Models;
+using MySql.Data.EntityFrameworkCore.Extensions;
 
 
 namespace api.Controllers
 {
-    [Route("api/Stores")]
+    [Route("api/Models/Stores")]
     [ApiController]
     public class DataController : ControllerBase
     {
@@ -23,23 +27,23 @@ namespace api.Controllers
 
         public IActionResult GetAll() 
         {
-            var Stores = _context.Stores.ToList();
+            var Stores = _context.StoreData.ToList();
 
-            return ok(Stores);
+            return Ok(Stores);
         }
 
-        [HttpGet("{storeID}")]
+        [HttpGet("{Store}")]
 
         public IActionResult GetById([FromRoute] string id)
         {
-            var Stores = _context.Stores.Find(id);
+            var Stores = _context.StoreData.Find(id);
 
             if(Stores == null)
             {
                 return NotFound();
             }
 
-            return ok(Stores);
+            return Ok(Stores);
         }
     }
 }
