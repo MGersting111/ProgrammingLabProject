@@ -13,20 +13,24 @@ using MySql.Data.EntityFrameworkCore.Extensions;
 
 namespace api.Controllers
 {
-    [Route("api/Models/Stores")]
+    [Route("api/Stores")]
     [ApiController]
     public class DataController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
-        public DataController(ApplicationDBContext context)
+        private readonly StoreService _service;
+        public DataController(ApplicationDBContext context, StoreService service)
         {
             _context = context;
+            _service = service;
         }
 
         [HttpGet]
 
         public IActionResult GetAll() 
         {
+            //ruft Methode in StoreService auf
+            var allStores = _service.getAll();
             var Stores = _context.StoreData.ToList();
 
             return Ok(Stores);
