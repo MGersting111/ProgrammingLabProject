@@ -15,6 +15,8 @@ namespace api.Models
         public string Ingredients { get; set; } = string.Empty;
         public DateTime Launch { get; set; }
 
+        public List<OrderItem> OrderItems { get; set;} = new List<OrderItem>();
+
 
     }
 }

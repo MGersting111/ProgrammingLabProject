@@ -8,7 +8,7 @@ using api.Models;
 
 namespace api.Models
 {
-    public class Stores
+    public class Store
     {
         public string StoreID { get; set; } = string.Empty;
         public int Zipcode { get; set; }
@@ -18,5 +18,7 @@ namespace api.Models
         public string City { get; set; } = string.Empty;
         public string State { get; set; } = string.Empty;
         public double Distance {get; set; }
+
+        public List<Order> Orders { get; set; } = new List<Order>();
     }
 }

@@ -15,12 +15,13 @@ namespace api.Data
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options)
             : base(options)
         {
+            
         }
 
-        public DbSet<Stores> StoreData { get; set; }
-        // public DbSet<Customers> customers {get; set; }
-        // public DbSet<OrderItems> orderItems {get; set;}
-        // public DbSet<Products> products {get; set;}
+        public DbSet<Store> Stores { get; set; }
+        public DbSet<Customer> customers {get; set; }
+        public DbSet<OrderItem> orderItems {get; set;}
+        public DbSet<Product> products {get; set;}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

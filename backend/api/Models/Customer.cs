@@ -12,5 +12,8 @@ namespace api.Models
       public double Latitude { get; set; }
 
       public double Longitude { get; set; }
+
+      public List<Order> Orders { get; set; } = new List<Order>();
+
     }
 }

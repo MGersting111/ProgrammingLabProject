@@ -3,6 +3,10 @@ using api.Data;
 using Microsoft.EntityFrameworkCore;
 using MySql.Data.EntityFrameworkCore.Extensions;
 
+builder.Services.AddDbContext<ApplicationDBContext>(options =>{
+    options.MySql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
