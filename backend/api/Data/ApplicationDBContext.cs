@@ -2,11 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using MySql.Data.EntityFrameworkCore.Extensions;
-using System.Data.SqlClient;
-using MySql.Data.MySqlClient;
 using api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Data
 {
@@ -19,9 +16,10 @@ namespace api.Data
         }
 
         public DbSet<Store> Stores { get; set; }
-        public DbSet<Customer> customers {get; set; }
-        public DbSet<OrderItem> orderItems {get; set;}
-        public DbSet<Product> products {get; set;}
+        public DbSet<Customer> Customers {get; set; }
+        public DbSet<OrderItem> OrderItems {get; set;}
+        public DbSet<Product> Products {get; set;}
+        public DbSet<Order> Orders {get; set;}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -11,7 +11,7 @@ namespace api.Models
         public string SKU { get; set; } = string.Empty;
 
         public string ProductSKU { get; set; } = string.Empty;
-        public Product? product { get; set;}
+        public Product? Product { get; set;}
 
         //public string OrderID { get; set; } = string.Empty;
         public Order? Order { get; set; }

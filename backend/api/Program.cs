@@ -3,10 +3,6 @@ using api.Data;
 using Microsoft.EntityFrameworkCore;
 using MySql.Data.EntityFrameworkCore.Extensions;
 
-builder.Services.AddDbContext<ApplicationDBContext>(options =>{
-    options.MySql(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -14,6 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<ApplicationDBContext>(options =>{
+    options.MySql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDBContext>(options =>

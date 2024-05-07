@@ -11,14 +11,16 @@ using api.Models;
 using MySql.Data.EntityFrameworkCore.Extensions;
 
 
+
+
 namespace api.Controllers
 {
-    [Route("api/Models/Stores")]
+    [Route("api/Models/Store")]
     [ApiController]
-    public class DataController : ControllerBase
+    public class StoreController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
-        public DataController(ApplicationDBContext context)
+        public StoreController(ApplicationDBContext context)
         {
             _context = context;
         }
@@ -27,23 +29,23 @@ namespace api.Controllers
 
         public IActionResult GetAll() 
         {
-            var Stores = _context.StoreData.ToList();
+            var Stores = _context.Stores.ToList();
 
             return Ok(Stores);
         }
 
-        [HttpGet("{Store}")]
+        [HttpGet("{StoreID}")]
 
-        public IActionResult GetById([FromRoute] string id)
+        public IActionResult GetById([FromRoute] string StoreID)
         {
-            var Stores = _context.StoreData.Find(id);
+            var Store = _context.Stores.Find(StoreID);
 
-            if(Stores == null)
+            if(Store == null)
             {
                 return NotFound();
             }
 
-            return Ok(Stores);
+            return Ok(Store);
         }
     }
 }
