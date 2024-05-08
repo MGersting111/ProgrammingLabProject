@@ -36,9 +36,9 @@ namespace api.Controllers
 
         [HttpGet("{StoreID}")]
 
-        public IActionResult GetById([FromRoute] string StoreID)
+        public IActionResult GetById([FromRoute] string StoreId)
         {
-            var Store = _context.Stores.Find(StoreID);
+            var Store = _context.Stores.Find(StoreId);
 
             if(Store == null)
             {

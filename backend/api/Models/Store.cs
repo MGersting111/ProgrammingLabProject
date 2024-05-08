@@ -10,7 +10,7 @@ namespace api.Models
 {
     public class Store
     {
-        public string StoreID { get; set; } = string.Empty;
+        public string StoreId { get; set; } = string.Empty;
         public int Zipcode { get; set; }
         public string State_abbr { get; set; } = string.Empty;
         public double Latitude { get; set; }
