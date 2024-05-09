@@ -10,7 +10,7 @@ namespace api.Repository
 {
     private readonly ApplicationDBContext _context;
 
-    public StoreRepository(ApplicationDBContext context, )
+    public StoreRepository(ApplicationDBContext context )
     {
         _context = context;
     }

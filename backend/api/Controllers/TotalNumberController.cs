@@ -1,12 +1,18 @@
+using api.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
+using api.Models;
+using MySql.Data.EntityFrameworkCore.Extensions;
 namespace api.Controllers
 {
-    public class TotalNumberController
     
+
     [Route("api/TotalNumber")]
     [ApiController]
     public class TotalNumberController : ControllerBase
@@ -60,4 +66,4 @@ namespace api.Controllers
             return Ok(TotalNumber);
         }
     }
-}
+} 

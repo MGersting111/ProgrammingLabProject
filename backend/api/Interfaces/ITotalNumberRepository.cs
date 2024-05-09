@@ -7,6 +7,6 @@ namespace api.Interfaces
 {
     public interface ITotalNumberRepository
     {
-        Task<List<Store>> GetAllAsync();
+       
     }
 }

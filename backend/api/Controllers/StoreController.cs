@@ -17,6 +17,8 @@ namespace api.Controllers
 {
     [Route("api/Models/Store")]
     [ApiController]
+
+
     public class StoreController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
