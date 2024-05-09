@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using api.Models;
+using api.Interfaces;
 
 namespace api.Models
 {

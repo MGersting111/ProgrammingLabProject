@@ -9,6 +9,7 @@ using System.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using api.Models;
 using MySql.Data.EntityFrameworkCore.Extensions;
+using api.Interfaces;
 
 
 
@@ -35,21 +36,21 @@ namespace api.Controllers
         {
             var stores = _storeRepository.GetAllStores();
 
-            return Ok(Stores);
+            return Ok(stores);
         }
 
         [HttpGet("{StoreID}")]
 
         public IActionResult GetById([FromRoute] string StoreId)
         {
-            var store = _storeRepository.GetStoreById(storeId);
+            var store = _storeRepository.GetStoreById(StoreId);
 
             if(StoreId == null)
             {
                 return NotFound();
             }
 
-            return Ok(Store);
+            return Ok(StoreId);
         }
     }
 }

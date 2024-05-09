@@ -9,6 +9,9 @@ using System.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using api.Models;
 using MySql.Data.EntityFrameworkCore.Extensions;
+using api.Interfaces;
+using api.Repository;
+
 namespace api.Controllers
 {
     
@@ -35,35 +38,24 @@ namespace api.Controllers
             _customerRepository = customerRepository;
         }
 
-        [HttpGet("TotalStoreRevenue")]
+       // [HttpGet("TotalStoreRevenue")]
 
-        public IActionResult GetStoreRevenue(string StoreId) 
-        {
-            var Store = _storeRepository.GetStoreId(StoreId);
-            if (StoreId == null)
-                return NotFound();
+      //  public IActionResult GetStoreRevenue(string StoreId) 
+      //  {
+           // var Store = _storeRepository.GetStoreById(StoreId);
+           // if (StoreId == null)
+             //   return NotFound();
 
 
-            var Order = _orderRepository.GetOrderByStoreId(StoreId);
-            var OrderItem = _orderItemRepository.GetOrderItemByOrderId(OrderId);
-            var Product = _productRepository.GetProductBySku(Sku);
-            var totalStoreRevenue = Store.sum(revenue => Product.Price * Order.nItems);
+            //var Order = _orderRepository.GetOrderByStoreId(StoreId);
+            //var OrderItem = _orderItemRepository.GetOrderItemByOrderId(OrderId);
+            //var Product = _productRepository.GetProductBySku(Sku);
+            //var totalStoreRevenue = Store.sum(revenue => Product.Price * Order.nItems);
 
-            return Ok(totalStoreRevenue);
-        }
+            //return Ok(totalStoreRevenue);
+       // }
 
-        [HttpGet("{StoreID}")]
 
-        public IActionResult GetById([FromRoute] string StoreId)
-        {
-            var Store = _context.TotalNumber.Find(StoreId);
-
-            if(Store == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(TotalNumber);
-        }
+        
     }
 } 
