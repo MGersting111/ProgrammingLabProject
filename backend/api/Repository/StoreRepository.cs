@@ -5,8 +5,24 @@ using System.Threading.Tasks;
 
 namespace api.Repository
 {
-    public class StoreRepository
+    
+    public class StoreRepository : IStoreRepository
+{
+    private readonly ApplicationDBContext _context;
+
+    public StoreRepository(ApplicationDBContext context, )
     {
-        
+        _context = context;
     }
+
+    public List<Store> GetAllStores()
+    {
+        return _context.Stores.ToList();
+    }
+
+    public Store GetStoreById(string storeId)
+    {
+        return _context.Stores.Find(storeId);
+    }
+}
 }

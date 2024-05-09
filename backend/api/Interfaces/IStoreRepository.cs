@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 namespace api.Interfaces
 {
     public interface IStoreRepository
-    {
-        
-    }
+{
+    List<Store> GetAllStores();
+    Store GetStoreById(string storeId);
+}
+
+
 }

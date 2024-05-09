@@ -20,16 +20,18 @@ namespace api.Controllers
     public class StoreController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
-        public StoreController(ApplicationDBContext context)
+        private readonly IStoreRepository _storeRepository;
+        public StoreController(ApplicationDBContext context, IStoreRepository storeRepository)
         {
             _context = context;
+            _storeRepository = storeRepository;
         }
 
         [HttpGet]
 
         public IActionResult GetAll() 
         {
-            var Stores = _context.Stores.ToList();
+            var stores = _storeRepository.GetAllStores();
 
             return Ok(Stores);
         }
@@ -38,9 +40,9 @@ namespace api.Controllers
 
         public IActionResult GetById([FromRoute] string StoreId)
         {
-            var Store = _context.Stores.Find(StoreId);
+            var store = _storeRepository.GetStoreById(storeId);
 
-            if(Store == null)
+            if(StoreId == null)
             {
                 return NotFound();
             }
