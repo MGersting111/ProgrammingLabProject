@@ -2,6 +2,9 @@ using System;
 using api.Data;
 using Microsoft.EntityFrameworkCore;
 using MySql.Data.EntityFrameworkCore.Extensions;
+using api.Interfaces;
+using api.Models;
+using api.Repository;
 
 
 
@@ -13,6 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IStoreRepository, StoreRepository>();
+
 
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

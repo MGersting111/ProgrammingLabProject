@@ -18,14 +18,49 @@ namespace api.Repository
         _context = context;
     }
 
-    public List<Store> GetAllStores()
-    {
-        return _context.Stores.ToList();
-    }
+   public List<Store> GetAllStores()
+        {
+            return _context.Stores.ToList();
+        }
 
-    public Store GetStoreById(string storeId)
-    {
-        return _context.Stores.Find(storeId);
-    }
+        public Store GetStoreByStoreId(string StoreId)
+        {
+            return _context.Stores.Find(StoreId);
+        }
+
+        public Store GetStoreByZipcode(int Zipcode)
+        {
+            return _context.Stores.FirstOrDefault(s => s.Zipcode == Zipcode);
+        }
+
+        public Store GetStoreByState_abbr(string StateAbbr)
+        {
+            return _context.Stores.FirstOrDefault(s => s.State_abbr == StateAbbr);
+        }
+
+        public Store GetStoreByLatitude(double Latitude)
+        {
+            return _context.Stores.FirstOrDefault(s => s.Latitude == Latitude);
+        }
+
+         public Store GetStoreByLongitude(double Longitude)
+        {
+            return _context.Stores.FirstOrDefault(s => s.Longitude == Longitude);
+        }
+
+          public Store GetStoreByCity(string City)
+        {
+            return _context.Stores.FirstOrDefault(s => s.City == City);
+        }
+
+          public Store GetStoreByState(string State)
+        {
+            return _context.Stores.FirstOrDefault(s => s.State == State);
+        }
+
+          public Store GetStoreByDistance(double Distance)
+        {
+            return _context.Stores.FirstOrDefault(s => s.Distance == Distance);
+        }
 }
 }

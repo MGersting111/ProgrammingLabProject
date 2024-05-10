@@ -20,6 +20,6 @@ namespace api.Models
        //public string CustomerID { get; set; } = string.Empty;
        public Customer? customer { get; set; }
 
-       public List<OrderItem> OrderItems = new List<OrderItem>();
+       //public List<OrderItem> OrderItems = new List<OrderItem>();
     }
 }

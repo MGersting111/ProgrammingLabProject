@@ -20,31 +20,31 @@ namespace api.Controllers
             
         }
 
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var orderItems = _context.OrderItems
-            .Include(oi => oi.Product)
-            .Include(oi => oi.Order)
-            .ToList();
+       // [HttpGet]
+       // public IActionResult GetAll()
+       // {
+        //    var orderItems = _context.OrderItems
+        //    .Include(oi => oi.Product)
+        //    .Include(oi => oi.Order)
+       //     .ToList();
 
-            return Ok(orderItems);
-        }
+        //    return Ok(orderItems);
+     //   }
 
-        [HttpGet("{orderId}/{sku}")]
-        public IActionResult GetById([FromRoute] string orderId, string sku)
-        {
-            var orderItem = _context.OrderItems
-            .Include(oi => oi.Product)
-            .Include(oi => oi.Order)
-            .FirstOrDefault(oi => oi.OrderID == orderId && oi.SKU == sku);
+       // [HttpGet("{orderId}/{sku}")]
+      //  public IActionResult GetById([FromRoute] string orderId, string sku)
+       // {
+        //    var orderItem = _context.OrderItems
+          //  .Include(oi => oi.Product)
+         //   .Include(oi => oi.Order)
+         //   .FirstOrDefault(oi => oi.OrderID == orderId && oi.SKU == sku);
 
-            if(orderItem == null)
-            {
-                return NotFound();
-            }
+         //   if(orderItem == null)
+          //  {
+          //      return NotFound();
+          //  }
 
-            return Ok(orderItem);
-        }
+          //  return Ok(orderItem);
+       // }
     }
 }

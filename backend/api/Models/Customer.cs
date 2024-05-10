@@ -13,7 +13,7 @@ namespace api.Models
 
       public double Longitude { get; set; }
 
-      public List<Order> Orders { get; set; } = new List<Order>();
+      //public List<Order> Orders { get; set; } = new List<Order>();
 
     }
 }
