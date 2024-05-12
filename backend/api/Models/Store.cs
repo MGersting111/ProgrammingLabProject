@@ -20,6 +20,6 @@ namespace api.Models
         public string State { get; set; } = string.Empty;
         public double Distance {get; set; }
 
-        //public List<Order> Orders { get; set; } = new List<Order>();
+        public List<Order> Orders { get; set; } = new List<Order>();
     }
 }

@@ -7,14 +7,14 @@ namespace api.Models
 {
     public class OrderItem
     {
-        public string Id { get; set; } = string.Empty;
+        public int OrderId { get; set; }
         public string SKU { get; set; } = string.Empty;
 
-        public string ProductSKU { get; set; } = string.Empty;
-       // public Product? Product { get; set;}
+      
+        public Product? Product { get; set;}
 
         //public string OrderID { get; set; } = string.Empty;
-       // public Order? Order { get; set; }
+        public Order? Order { get; set; }
 
 
     }

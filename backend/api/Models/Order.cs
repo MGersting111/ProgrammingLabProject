@@ -10,11 +10,11 @@ namespace api.Models
        public int OrderId { get; set; }
        public string CustomerId { get; set; } = string.Empty;
        public string StoreId { get; set; } = string.Empty;
-       public DateTime OrderDate { get; set; }
+       public string OrderDate { get; set; }
        public int NItems { get; set; }
-       public int total { get; set; }
+       public double total { get; set; }
 
-       public string StoreStoreId { get; set;} = string.Empty;
+       //public string StoreId { get; set;} = string.Empty;
        public Store? Store { get; set;}
 
        //public string CustomerID { get; set; } = string.Empty;

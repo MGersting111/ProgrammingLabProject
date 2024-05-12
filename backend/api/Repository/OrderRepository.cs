@@ -13,6 +13,17 @@ namespace api.Repository
          private readonly ApplicationDBContext _context;
 
 
+    public OrderRepository(ApplicationDBContext context )
+    {
+        _context = context;
+    }
+    
+    public IEnumerable<Order> GetAllOrders()
+        {
+            return _context.Orders.ToList();
+        }
+        
+
     public Order GetOrderById(int OrderId)
     {
         return _context.Orders.Find(OrderId);
@@ -20,7 +31,27 @@ namespace api.Repository
 
     public Order GetOrderByStoreId(string StoreId)
     {
-        return _context.Orders.Find(StoreId);
+        return _context.Orders.FirstOrDefault(o => o.StoreId == StoreId);
     }
+
+    public Order GetOrderByCustomerId(string CustomerId)
+    {
+        return _context.Orders.FirstOrDefault(o => o.CustomerId == CustomerId);
+    }
+    public Order GetOrderByOrderDate(string OrderDate)
+    {
+        return _context.Orders.FirstOrDefault(o => o.OrderDate == OrderDate);
+    }
+    public Order GetOrderByNItems(int NItems)
+    {
+        return _context.Orders.FirstOrDefault(o => o.NItems == NItems);
+    }
+    public Order GetOrderByTotal(double total)
+    {
+        return _context.Orders.FirstOrDefault(o => o.total == total);
+    }
+
+    
+
     }
 }

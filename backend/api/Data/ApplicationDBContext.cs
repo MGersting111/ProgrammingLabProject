@@ -26,5 +26,10 @@ namespace api.Data
             string connectionString = "server=localhost;user=root;password=password;database=testdb;port=3306";
             optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
         }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Product>().HasKey(p => p.SKU); 
+            modelBuilder.Entity<OrderItem>().HasKey(oi => oi.OrderId);
+        }
     }
 }

@@ -1,10 +1,15 @@
+using api.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using api.Data;
+using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
+using api.Models;
+using MySql.Data.EntityFrameworkCore.Extensions;
+using api.Interfaces;
 
 
 namespace api.Controllers
@@ -13,38 +18,46 @@ namespace api.Controllers
     [ApiController]
     public class OrderItemController : ControllerBase
     {
-        private readonly ApplicationDBContext _context;
-        public OrderItemController(ApplicationDBContext context)
+        //private readonly ApplicationDBContext _context;
+        private readonly IOrderItemRepository _orderItemRepository;
+        public OrderItemController(IOrderItemRepository orderItemRepository)
         {
-            _context = context;
+            //_context = context;
+            _orderItemRepository = orderItemRepository;
             
         }
 
-       // [HttpGet]
-       // public IActionResult GetAll()
-       // {
-        //    var orderItems = _context.OrderItems
-        //    .Include(oi => oi.Product)
-        //    .Include(oi => oi.Order)
-       //     .ToList();
+       [HttpGet]
+       public IActionResult GetAll()
+        {
+           var orderItems = _orderItemRepository.GetAllOrderItems();
+      
 
-        //    return Ok(orderItems);
-     //   }
+            return Ok(orderItems);
+        }
 
-       // [HttpGet("{orderId}/{sku}")]
-      //  public IActionResult GetById([FromRoute] string orderId, string sku)
-       // {
-        //    var orderItem = _context.OrderItems
-          //  .Include(oi => oi.Product)
-         //   .Include(oi => oi.Order)
-         //   .FirstOrDefault(oi => oi.OrderID == orderId && oi.SKU == sku);
+        [HttpGet("{OrderId}")]
+        public IActionResult GetOrderItemByOrderId(int OrderId)
+        {
+            var orderItem = _orderItemRepository.GetOrderItemByOrderId(OrderId);
 
-         //   if(orderItem == null)
-          //  {
-          //      return NotFound();
-          //  }
+            if(OrderId == null)
+          {
+                return NotFound();
+          }
+          return Ok(OrderId);
+        }
+        [HttpGet("{SKU}")]
+        public IActionResult GetOrderItemBySKU(string SKU)
+        {
+            var orderItem = _orderItemRepository.GetOrderItemBySKU(SKU);
 
-          //  return Ok(orderItem);
-       // }
+            if(SKU == null)
+          {
+                return NotFound();
+          }
+          return Ok(SKU);
+        }
+
     }
 }

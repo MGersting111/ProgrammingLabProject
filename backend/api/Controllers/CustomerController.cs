@@ -1,42 +1,81 @@
+using api.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using api.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
+using api.Models;
+using MySql.Data.EntityFrameworkCore.Extensions;
+using api.Interfaces;
+
+
+
 
 namespace api.Controllers
 {
-    [Route("api/Customer")]
+    [Route("api/Models/Customer")]
     [ApiController]
     public class CustomerController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
-        public CustomerController(ApplicationDBContext context)
+        private readonly ICustomerRepository _customerRepository;
+        public CustomerController(ApplicationDBContext context, ICustomerRepository customerRepository)
         {
             _context = context;
+            _customerRepository = customerRepository;
             
         }
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            var customers = _context.Customers.ToList();
+            var customers = _customerRepository.GetAllCustomers();
 
             return Ok(customers);
         }
 
         [HttpGet("{CustomerID}")]
-        public IActionResult GetById([FromRoute] string CustomerID)
+        public IActionResult GetCustomerById(string CustomerID)
         {
-            var customer = _context.Customers.Find(CustomerID);
+            var customer = _customerRepository.GetCustomerById(CustomerID);
 
-            if(customer == null)
+            if(CustomerID == null)
             {
                 return NotFound();
             }
 
-            return Ok(customer);
+            return Ok(CustomerID);
         }
+
+        [HttpGet("{Latitude}")]
+        public IActionResult GetCustomerByLatitude(double Latitude)
+        {
+            var customer = _customerRepository.GetCustomerByLatitude(Latitude);
+
+            if(Latitude == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(Latitude);
+        }
+
+        [HttpGet("{Longitude}")]
+        public IActionResult GetCustomerByLongitude(double Longitude)
+        {
+            var customer = _customerRepository.GetCustomerByLongitude(Longitude);
+
+            if(Longitude == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(Longitude);
+        }
+
+
     }
 }
