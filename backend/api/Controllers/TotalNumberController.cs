@@ -32,19 +32,20 @@ namespace api.Controllers
         IStoreRepository storeRepository, ICustomerRepository customerRepository, IOrderRepository orderRepository )
         {
             _context = context;
-           _storeRepository = storeRepository;
-           _orderItemRepository = orderItemRepository;
-           _orderRepository = orderRepository;
-           _productRepository = productRepository;
-           _customerRepository = customerRepository;
-           _totalNumberRepository = totalNumberRepository;
+            _storeRepository = storeRepository;
+            _orderItemRepository = orderItemRepository;
+            _orderRepository = orderRepository;
+            _productRepository = productRepository;
+            _customerRepository = customerRepository;
+            _totalNumberRepository = totalNumberRepository;
         }
 
          [HttpGet("TotalStoreRevenue/{storeId}")]
         public  IActionResult GetTotalStoreRevenue(string storeId) 
         {
             double totalStoreRevenue = _totalNumberRepository.GetTotalStoreRevenue(storeId);
-            return Ok(totalStoreRevenue);
+            string formattedRevenue = string.Format("Revenue: {0}", totalStoreRevenue);
+            return Ok(formattedRevenue);
         }
     }
 }
