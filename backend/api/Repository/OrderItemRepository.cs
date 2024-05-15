@@ -21,13 +21,15 @@ namespace api.Repository
         {
             return _context.OrderItems.ToList();
         }
-        public OrderItem GetOrderItemByOrderId(int OrderId)
-    {
-        return _context.OrderItems.Find(OrderId);
-    }
+    
     public OrderItem GetOrderItemBySKU(string SKU)
     {
         return _context.OrderItems.FirstOrDefault(oi => oi.SKU == SKU);
     }
+
+    public IEnumerable<OrderItem> GetOrderItemByOrderId(int orderId)
+{
+    return _context.OrderItems.Where(orderItem => orderItem.OrderId == orderId).ToList();
+}
 }
 }

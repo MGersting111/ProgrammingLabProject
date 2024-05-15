@@ -18,7 +18,7 @@ namespace api.Repository
         _context = context;
     }
 
-   public List<Store> GetAllStores()
+        public List<Store> GetAllStores()
         {
             return _context.Stores.ToList();
         }

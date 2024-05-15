@@ -22,7 +22,14 @@ namespace api.Repository
         {
             return _context.Orders.ToList();
         }
-        
+    public IEnumerable<Order> Get10Orders()
+        {
+            return _context.Orders.Take(10).ToList();
+        }
+    public IEnumerable<Order> GetOrdersByStoreId(string storeId)
+{
+    return _context.Orders.Where(order => order.StoreId == storeId).ToList();
+}
 
     public Order GetOrderById(int OrderId)
     {

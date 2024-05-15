@@ -34,6 +34,14 @@ namespace api.Controllers
             return Ok(orders);
         }
 
+        [HttpGet ("Only10Order")]
+        public IActionResult Get10()
+        {
+            var orders = _orderRepository.Get10Orders();
+
+            return Ok(orders);
+        }
+
         [HttpGet("{OrderID}")]
         public IActionResult GetOrderById(int OrderId)
         {

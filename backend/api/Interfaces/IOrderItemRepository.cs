@@ -9,7 +9,9 @@ namespace api.Interfaces
     public interface IOrderItemRepository
     {
         IEnumerable<OrderItem> GetAllOrderItems();
-        OrderItem GetOrderItemByOrderId(int OrderId);
+    
         OrderItem GetOrderItemBySKU(string SKU);
+        IEnumerable<OrderItem> GetOrderItemByOrderId(int orderId);
+
     }
 }

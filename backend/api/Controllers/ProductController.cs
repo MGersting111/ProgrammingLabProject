@@ -36,9 +36,9 @@ namespace api.Controllers
         }
 
         [HttpGet("{SKU}")]
-        public IActionResult GetProductById(string SKU)
+        public IActionResult GetProductBySKU(string SKU)
         {
-            var product = _productRepository.GetProductById(SKU);
+            var product = _productRepository.GetProductBySKU(SKU);
 
             if(product == null)
             {

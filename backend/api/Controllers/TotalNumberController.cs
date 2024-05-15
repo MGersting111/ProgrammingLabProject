@@ -14,48 +14,37 @@ using api.Repository;
 
 namespace api.Controllers
 {
-    
+
 
     [Route("api/TotalNumber")]
     [ApiController]
     public class TotalNumberController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
-        private readonly ProductRepository _productRepository;
-        private readonly OrderItemRepository _orderItemRepository;
-        private readonly StoreRepository _storeRepository;
-        private readonly CustomerRepository _customerRepository;
-        private readonly OrderRepository _orderRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IOrderItemRepository _orderItemRepository;
+        private readonly IStoreRepository _storeRepository;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly ITotalNumberRepository _totalNumberRepository;
 
-        public TotalNumberController(ApplicationDBContext context, ProductRepository productRepository, OrderItemRepository orderItemRepository, StoreRepository storeRepository, 
-        CustomerRepository customerRepository, OrderRepository orderRepository)
+        public TotalNumberController(ApplicationDBContext context,  ITotalNumberRepository totalNumberRepository, IProductRepository productRepository, IOrderItemRepository orderItemRepository,
+        IStoreRepository storeRepository, ICustomerRepository customerRepository, IOrderRepository orderRepository )
         {
             _context = context;
-            _customerRepository = customerRepository;
-            _orderItemRepository = orderItemRepository;
-            _orderRepository = orderRepository;
-            _productRepository = productRepository;
-            _customerRepository = customerRepository;
+           _storeRepository = storeRepository;
+           _orderItemRepository = orderItemRepository;
+           _orderRepository = orderRepository;
+           _productRepository = productRepository;
+           _customerRepository = customerRepository;
+           _totalNumberRepository = totalNumberRepository;
         }
 
-       // [HttpGet("TotalStoreRevenue")]
-
-      //  public IActionResult GetStoreRevenue(string StoreId) 
-      //  {
-           // var Store = _storeRepository.GetStoreById(StoreId);
-           // if (StoreId == null)
-             //   return NotFound();
-
-
-            //var Order = _orderRepository.GetOrderByStoreId(StoreId);
-            //var OrderItem = _orderItemRepository.GetOrderItemByOrderId(OrderId);
-            //var Product = _productRepository.GetProductBySku(Sku);
-            //var totalStoreRevenue = Store.sum(revenue => Product.Price * Order.nItems);
-
-            //return Ok(totalStoreRevenue);
-       // }
-
-
-        
+         [HttpGet("TotalStoreRevenue/{storeId}")]
+        public  IActionResult GetTotalStoreRevenue(string storeId) 
+        {
+            double totalStoreRevenue = _totalNumberRepository.GetTotalStoreRevenue(storeId);
+            return Ok(totalStoreRevenue);
+        }
     }
-} 
+}

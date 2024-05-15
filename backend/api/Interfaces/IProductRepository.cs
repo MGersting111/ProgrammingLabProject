@@ -8,8 +8,8 @@ namespace api.Interfaces
 {
     public interface IProductRepository
     {
-        IEnumerable<Product> GetAllProducts();
-        Product GetProductById(string SKU);
+        List<Product> GetAllProducts();
+        Product GetProductBySKU(string SKU);
         Product GetProductByName(string Name);
         Product GetProductByPrice(double Price);
         Product GetProductByCategory(string Category);

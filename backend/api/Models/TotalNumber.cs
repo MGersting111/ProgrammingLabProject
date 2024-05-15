@@ -7,10 +7,10 @@ namespace api.Models
 {
     public class TotalNumbers
     {
-        public float TotalOrder { get; set; }
-        public float TotalCustomer { get; set; }
-        public float TotalOrderItem { get; set; }
-        public float TotalProduct  { get; set; }
-        public float TotalStore { get; set; }
+        public double TotalOrder { get; set; }
+        public double TotalCustomer { get; set; }
+        public double TotalOrderItem { get; set; }
+        public double TotalProduct  { get; set; }
+        public double TotalStoreRevenue { get; set; }
     }
 }

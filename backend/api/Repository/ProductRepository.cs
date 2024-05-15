@@ -18,12 +18,12 @@ namespace api.Repository
         _context = context;
     }
     
-    public IEnumerable<Product> GetAllProducts()
+        public List<Product> GetAllProducts()
         {
             return _context.Products.ToList();
         }
 
-        public Product GetProductById(string SKU)
+        public Product GetProductBySKU(string SKU)
         {
             return _context.Products.Find(SKU);
         }
