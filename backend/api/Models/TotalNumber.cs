@@ -12,5 +12,6 @@ namespace api.Models
         public double TotalOrderItem { get; set; }
         public double TotalProduct  { get; set; }
         public double TotalStoreRevenue { get; set; }
+        public double storeRevenues {get; set;}
     }
 }

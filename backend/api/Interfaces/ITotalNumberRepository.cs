@@ -11,5 +11,8 @@ namespace api.Interfaces
     public interface ITotalNumberRepository
     {
         double GetTotalStoreRevenue(string storeId);
+
+
+        Dictionary<string, double> GetFilteredStoreRevenues(FilterRevenue filter);
     }
 }

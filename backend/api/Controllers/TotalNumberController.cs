@@ -28,8 +28,8 @@ namespace api.Controllers
         private readonly IOrderRepository _orderRepository;
         private readonly ITotalNumberRepository _totalNumberRepository;
 
-        public TotalNumberController(ApplicationDBContext context,  ITotalNumberRepository totalNumberRepository, IProductRepository productRepository, IOrderItemRepository orderItemRepository,
-        IStoreRepository storeRepository, ICustomerRepository customerRepository, IOrderRepository orderRepository )
+        public TotalNumberController(ApplicationDBContext context, ITotalNumberRepository totalNumberRepository, IProductRepository productRepository, IOrderItemRepository orderItemRepository,
+        IStoreRepository storeRepository, ICustomerRepository customerRepository, IOrderRepository orderRepository)
         {
             _context = context;
             _storeRepository = storeRepository;
@@ -40,12 +40,19 @@ namespace api.Controllers
             _totalNumberRepository = totalNumberRepository;
         }
 
-         [HttpGet("TotalStoreRevenue/{storeId}")]
-        public  IActionResult GetTotalStoreRevenue(string storeId) 
+        [HttpGet("TotalStoreRevenue/{storeId}")]
+        public IActionResult GetTotalStoreRevenue(string storeId)
         {
             double totalStoreRevenue = _totalNumberRepository.GetTotalStoreRevenue(storeId);
-            string formattedRevenue = string.Format("Revenue: {0}", totalStoreRevenue);
-            return Ok(formattedRevenue);
+            return Ok(new { Revenue = totalStoreRevenue });
         }
+
+        [HttpGet("TotalStoreRevenues")]
+        public IActionResult GetTotalStoreRevenues([FromQuery]FilterRevenue filter)
+        {
+            var storeRevenues = _totalNumberRepository.GetFilteredStoreRevenues(filter);
+            return Ok(storeRevenues);
+        }
+
     }
 }
