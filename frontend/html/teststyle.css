@@ -1,0 +1,87 @@
+
+.custom-navbar {
+    background-color: rgb(119, 176, 170) !important;
+}
+.custom-navbar .nav-link {
+    color: white !important;
+}
+.custom-navbar {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+}
+.rotate img {
+    transform: rotate(50deg);
+}
+
+body {
+    background-color: rgb(0, 60, 68);
+}
+#sidebar {
+    width: 250px;
+    position: fixed;
+    top: 0;
+    right: 0; 
+    height: 100vh;
+    z-index: 999;
+    background: rgb(119, 176, 170);
+    color: #fff;
+    transition: all 0.3s;
+    border-left: 2px solid white;
+}
+#sidebar a {
+    color: #fff; 
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: row-reverse; 
+    width: 100%;
+}
+.sidebar .fa-xmark {
+    margin-left: 10px;
+}
+.sidebar.active {
+    left: 0;
+}
+
+.page-content {
+    transition: margin-left 0.3s ease; /* Add transition for smooth sliding effect */
+}
+.box-container {
+    display: flex; /*align boxes horizontally */
+    justify-content: space-around; /* space between boxes */
+    margin-top: 120px; /* Adjust top margin */
+}
+
+.box {
+    width: 30%; /* Set width of each box */
+    height: 300px; /* Set height of each box */
+    padding: 20px; /* Set padding inside each box */
+    background-color: rgb(119, 176, 170); /* Set background color of each box */
+    border-radius: 20px; /* Set border radius for rounded corners */
+}
+.dropdown .btn-primary {
+    background-color: rgb(119, 176, 170); /* Set the background color of the dropdown button */
+    border-color: rgb(119, 176, 170); /* Set the border color of the dropdown button */
+}
+.dropdown {
+    margin-bottom: 0; /* Remove bottom margin for dropdowns */
+}
+
+.col {
+    padding-right: 5px !important; /* Adjust right padding for columns */
+    padding-left: 5px !important; /* Adjust left padding for columns */
+}
+.arrow-container {
+    display: flex;
+    align-items: center;
+    width: 120px; /* Adjust width as needed */
+    height: 40px; /* Adjust height as needed */
+    background-color: rgb(119, 176, 170); /* Example background color */
+    border: 0px solid #fff; /* Example border */
+    
+}
+.arrow-icon {
+    margin: 100px; 
+}
