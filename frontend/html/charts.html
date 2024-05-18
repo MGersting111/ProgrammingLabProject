@@ -9,41 +9,49 @@
 </head>
 <body>
     
-<nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
-    <div class="container-fluid">
-        <a class="navbar-brand"></a>
-            <div class="navbar-text rotate">
-                <img src="https://images.vexels.com/media/users/3/185266/isolated/preview/815ded7afc1c54dfb5a60f81f68f928b-pizza-slice-icon-by-vexels.png" 
-                alt="Your Image" style="max-height: 40px;">
-            </div>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-      
-        <div class="navbar-text">
-            <a href="charts.html" class="btn btn-transparent">
-                <i class="fa-solid fa-chart-line fa-xl" style="color: #ffffff;"></i> <!--chart symbol-->
-            </a>
-            <div id="sidebar" class="sidebar">
-                <a href="#" class="btn btn-transparent" onclick="toggleSidebar()">
-                    <i class="fa-solid fa-xmark fa-xl" style="color: #ffffff;"></i>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand"</a>
+                <div class="navbar-text rotate">
+                    <img src="https://images.vexels.com/media/users/3/185266/isolated/preview/815ded7afc1c54dfb5a60f81f68f928b-pizza-slice-icon-by-vexels.png" 
+                    alt="Your Image" style="max-height: 40px;">
+                </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="navbar-text">
+                <a href="home.html" class="btn btn-transparent">
+                    <i class="fa-solid fa-chart-pie" style="color: #ffffff;"></i> <!--chart symbol-->
                 </a>
-                <ul class="list-unstyled">
-                    <li><a href="home.html" class="btn btn-transparent">Home</a></li>
-                    <li><a href="#" class="btn btn-transparent">Profile</a></li>
-                    <li><a href="#" class="btn btn-transparent">Settings</a></li>
-                    <li><a href="#" class="btn btn-transparent">Support</a></li>
-                    <li><a href="#" class="btn btn-transparent">Dashboard</a></li>
-                </ul>
+                <a href="charts.html" class="btn btn-transparent">
+                    <i class="fa-solid fa-chart-line fa-xl" style="color: #ffffff;"></i> <!--chart symbol-->
+                </a>
+                <a href="table.html" class="btn btn-transparent">
+                    <i class="fa-solid fa-table" style="color: #ffffff;"></i> <!--chart symbol-->
+                </a>
+                <a href="filterTotalNumbers.html" class="btn btn-transparent">
+                    <i class="fa-solid fa-filter" style="color: #ffffff;"></i> <!--chart symbol-->
+                </a>
+                <div id="sidebar" class="sidebar">
+                    <a href="#" class="btn btn-transparent" onclick="toggleSidebar()">
+                        <i class="fa-solid fa-xmark fa-xl" style="color: #ffffff;"></i>
+                    </a>
+                    <ul class="list-unstyled">
+                        <li><a href="home.html" class="btn btn-transparent">Home</a></li>
+                        <li><a href="#" class="btn btn-transparent">Profile</a></li>
+                        <li><a href="#" class="btn btn-transparent">Settings</a></li>
+                        <li><a href="#" class="btn btn-transparent">Support</a></li>
+                        <li><a href="#" class="btn btn-transparent">Dashboard</a></li>
+                    </ul>
+                </div>
+                <a href="#" class="btn btn-transparent" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-user fa-xl" style="color: #ffffff;"></i> <!--user symbol-->
+                </a>
             </div>
-            <a href="#" class="btn btn-transparent" onclick="toggleSidebar()">
-                <i class="fa-solid fa-user fa-xl" style="color: #ffffff;"></i> <!--user symbol-->
-            </a>
         </div>
-      
-    </div>
-    
-</nav>
+        
+    </nav>
 <div class="container-fluid mt-5 mb-4"> 
     <div class="row gx-2"> 
         <div class="container-fluid mt-5 mb-4"> 
@@ -104,9 +112,9 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+WmZU5i4/J5oRM/Xl1p+8aO3o2z1p" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+WmZU5i4/J5oRM/Xl1p+8aO3o2z1p" crossorigin="anonymous"></script>
 <script src="./data/models/order.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="sidebar.js"></script>

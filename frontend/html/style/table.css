@@ -1,0 +1,37 @@
+.filterContainer {
+    display: flex;
+    align-items: center;
+    color: white;
+}
+.filterContainer select {
+    margin-right: 10px;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    color: white;
+}
+
+table, th, td {
+    border: 1px solid white;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+thead {
+    background-color: #EC9740;
+    font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #FCDF7B;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #FFBF6B;
+}
