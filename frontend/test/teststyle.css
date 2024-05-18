@@ -1,0 +1,7 @@
+.filterContainer {
+    display: flex;
+    align-items: center;
+}
+.filterContainer select {
+    margin-right: 10px;
+}
