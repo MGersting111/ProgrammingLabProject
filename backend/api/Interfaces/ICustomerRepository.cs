@@ -8,7 +8,7 @@ namespace api.Interfaces
 {
     public interface ICustomerRepository
     {
-            IEnumerable<Customer> GetAllCustomers();
+            IEnumerable<Customer> GetCustomers();
             Customer GetCustomerById(string customerId);
             Customer GetCustomerByLatitude(double latitude); 
             Customer GetCustomerByLongitude(double longitude); 

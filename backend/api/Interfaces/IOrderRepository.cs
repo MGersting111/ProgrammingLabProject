@@ -9,8 +9,7 @@ namespace api.Interfaces
 {
     public interface IOrderRepository
     {
-        IEnumerable<Order> GetAllOrders();
-        IEnumerable<Order> Get10Orders();
+        IEnumerable<Order> GetOrders();
         Order GetOrderById(int orderId);
         Order GetOrderByStoreId(string storeId);
         Order GetOrderByCustomerId(string customerId);
@@ -18,6 +17,9 @@ namespace api.Interfaces
         Order GetOrderByNItems(int nItems);
         Order GetOrderByTotal(double total);
 
-        IEnumerable<Order> GetOrdersByStoreId(string storeId);
+        //Task<List<OrderEntryDto>> GetAllOrderEntryDtoByFilter(FilterOrderEntryDto filterDto, int page, int pageSize, string sortColumn, string sortOrder);
+        
+
+        //IEnumerable<Order> GetOrdersByStoreId(string storeId);
     }
 }

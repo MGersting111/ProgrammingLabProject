@@ -14,9 +14,11 @@ using api.Interfaces;
 
 
 
+
+
 namespace api.Controllers
 {
-    [Route("api/Models/Customer")]
+    [Route("api/Models/Customer/")]
     [ApiController]
     public class CustomerController : ControllerBase
     {
@@ -29,51 +31,52 @@ namespace api.Controllers
             
         }
 
-        [HttpGet]
-        public IActionResult GetAll()
+   
+        [HttpGet ("Customer")]
+        public IActionResult GetCustomers()
         {
-            var customers = _customerRepository.GetAllCustomers();
+            var customers = _customerRepository.GetCustomers();
 
             return Ok(customers);
         }
 
-        [HttpGet("{CustomerID}")]
-        public IActionResult GetCustomerById(string CustomerID)
+        [HttpGet("{CustomerId}")]
+        public IActionResult GetCustomerById(string CustomerId)
         {
-            var customer = _customerRepository.GetCustomerById(CustomerID);
+            var customer = _customerRepository.GetCustomerById(CustomerId);
 
-            if(CustomerID == null)
+            if(customer == null)
             {
                 return NotFound();
             }
 
-            return Ok(CustomerID);
+            return Ok(customer);
         }
 
-        [HttpGet("{Latitude}")]
+        [HttpGet("latitude/{Latitude:double}")]
         public IActionResult GetCustomerByLatitude(double Latitude)
         {
             var customer = _customerRepository.GetCustomerByLatitude(Latitude);
 
-            if(Latitude == null)
+            if(customer == null)
             {
                 return NotFound();
             }
 
-            return Ok(Latitude);
+            return Ok(customer);
         }
 
-        [HttpGet("{Longitude}")]
+        [HttpGet("longitude/{Longitude:double}")]
         public IActionResult GetCustomerByLongitude(double Longitude)
         {
             var customer = _customerRepository.GetCustomerByLongitude(Longitude);
 
-            if(Longitude == null)
+            if(customer == null)
             {
                 return NotFound();
             }
 
-            return Ok(Longitude);
+            return Ok(customer);
         }
 
 

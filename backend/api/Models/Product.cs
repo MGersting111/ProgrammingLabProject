@@ -8,7 +8,7 @@ namespace api.Models
     public class Product
     {
 
-        public string SKU { get; set; } = string.Empty;
+        public string Sku { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public double Price { get; set; }
         public string Category { get; set; } = string.Empty;

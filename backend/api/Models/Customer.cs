@@ -7,7 +7,7 @@ namespace api.Models
 {
     public class Customer
     {
-      public string CustomerID { get; set; } = string.Empty;
+      public string CustomerId { get; set; } = string.Empty;
     
       public double Latitude { get; set; }
 
