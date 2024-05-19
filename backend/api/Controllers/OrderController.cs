@@ -10,6 +10,7 @@ using MySql.Data.MySqlClient;
 using api.Models;
 using MySql.Data.EntityFrameworkCore.Extensions;
 using api.Interfaces;
+using api.Dto;
 
 namespace api.Controllers
 {
@@ -26,97 +27,104 @@ namespace api.Controllers
             
         }
 
-        [HttpGet]
-        public IActionResult GetAll()
+  
+        [HttpGet ("Order")]
+        public IActionResult GetOrders()
         {
-            var orders = _orderRepository.GetAllOrders();
+            var orders = _orderRepository.GetOrders();
 
             return Ok(orders);
         }
 
-        [HttpGet ("Only10Order")]
-        public IActionResult Get10()
-        {
-            var orders = _orderRepository.Get10Orders();
-
-            return Ok(orders);
-        }
-
-        [HttpGet("{OrderID}")]
+        [HttpGet("by-id/{OrderId:int}")]
         public IActionResult GetOrderById(int OrderId)
         {
-            var Order = _orderRepository.GetOrderById(OrderId);
+            var order = _orderRepository.GetOrderById(OrderId);
 
-            if(OrderId == null)
+            if(order == null)
             {
                 return NotFound();
             }
 
-            return Ok(OrderId);
+            return Ok(order);
         }
 
-        [HttpGet("{CustomerID}")]
+        [HttpGet("by-customer/{CustomerId}")]
         public IActionResult GetOrderByCustomerId(string CustomerId)
         {
-            var Order = _orderRepository.GetOrderByCustomerId(CustomerId);
+            var order = _orderRepository.GetOrderByCustomerId(CustomerId);
 
-            if(CustomerId == null)
+            if(order == null)
             {
                 return NotFound();
             }
 
-            return Ok(CustomerId);
+            return Ok(order);
         }
 
-        [HttpGet("{storeID}")]
-        public IActionResult GetOrderByStoreId(string storeId)
+        [HttpGet("by-store/{StoreId}")]
+        public IActionResult GetOrderByStoreId(string StoreId)
         {
-            var Order = _orderRepository.GetOrderByStoreId(storeId);
+            var order = _orderRepository.GetOrderByStoreId(StoreId);
 
-            if(storeId == null)
+            if(order == null)
             {
                 return NotFound();
             }
 
-            return Ok(storeId);
+            return Ok(order);
         }
 
-        [HttpGet("{OrderDate}")]
+        [HttpGet("by-date/{OrderDate}")]
         public IActionResult GetOrderByOrderDate(string OrderDate)
         {
-            var Order = _orderRepository.GetOrderByOrderDate(OrderDate);
+            var order = _orderRepository.GetOrderByOrderDate(OrderDate);
 
-            if(OrderDate == null)
+            if(order == null)
             {
                 return NotFound();
             }
 
-            return Ok(OrderDate);
+            return Ok(order);
         }
 
-        [HttpGet("{NItems}")]
+        [HttpGet("by-items/{NItems:int}")]
         public IActionResult GetOrderByNItems(int NItems)
         {
-            var Order = _orderRepository.GetOrderByNItems(NItems);
+            var order = _orderRepository.GetOrderByNItems(NItems);
 
-            if(NItems == null)
+            if(order == null)
             {
                 return NotFound();
             }
 
-            return Ok(NItems);
+            return Ok(order);
         }
-        [HttpGet("{total}")]
+        [HttpGet("by-total/{total:double}")]
         public IActionResult GetOrderByTotal(double total)
         {
-            var Order = _orderRepository.GetOrderByTotal(total);
+            var order = _orderRepository.GetOrderByTotal(total);
 
-            if(total == null)
+            if(order == null)
             {
                 return NotFound();
             }
 
-            return Ok(total);
+            return Ok(order);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetByFilter([FromBody] FilterOrderEntryDto filterDto, [fromQuery] int page = 1, int pagesize=5, string sortColumn = "OrderId" , string sortOrder = "asc")
+        {
+            List<OrderEntryDto> orderEntryDtos = await _orderRepository.GetAllOrderEntryDtosByFilter(filterDto, page, pagesize, sortColumn, sortOrder);
+            if(orderEntryDtos != null)
+            {
+                int totalFilterCount = _orderEntryService.GetTotalFilterRecords(filterDto);
+                Response<List<orderEntryDtos>> pagedResponse = _pagedResponseRepository.createPagedResponse(orderEntryDtos, page, pagesize, sortColumn, sortOrder, this._baseUri, totalFilterCount);
+                return Ok(pagedResponse);
+            }
+            return NotFound();
+        }
+        
     }
 }

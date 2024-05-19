@@ -22,18 +22,18 @@ namespace api.Controllers
     {
         private readonly ApplicationDBContext _context;
         private readonly IProductRepository _productRepository;
-        private readonly IOrderItemRepository _orderItemRepository;
+        // private readonly IOrderItemRepository _orderItemRepository;
         private readonly IStoreRepository _storeRepository;
         private readonly ICustomerRepository _customerRepository;
         private readonly IOrderRepository _orderRepository;
         private readonly ITotalNumberRepository _totalNumberRepository;
 
-        public TotalNumberController(ApplicationDBContext context, ITotalNumberRepository totalNumberRepository, IProductRepository productRepository, IOrderItemRepository orderItemRepository,
+        public TotalNumberController(ApplicationDBContext context, ITotalNumberRepository totalNumberRepository, IProductRepository productRepository,
         IStoreRepository storeRepository, ICustomerRepository customerRepository, IOrderRepository orderRepository)
         {
             _context = context;
             _storeRepository = storeRepository;
-            _orderItemRepository = orderItemRepository;
+            // _orderItemRepository = orderItemRepository;
             _orderRepository = orderRepository;
             _productRepository = productRepository;
             _customerRepository = customerRepository;

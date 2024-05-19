@@ -23,9 +23,9 @@ namespace api.Repository
             return _context.Products.ToList();
         }
 
-        public Product GetProductBySKU(string SKU)
+        public Product GetProductBySku(string Sku)
         {
-            return _context.Products.Find(SKU);
+            return _context.Products.Find(Sku);
         }
 
         public Product GetProductByName(string Name)
@@ -38,7 +38,7 @@ namespace api.Repository
         }
         public Product GetProductByCategory(string Category)
         {
-            return _context.Products.FirstOrDefault(p => p.Category == Category);
+            return _context.Products.First(p => p.Category == Category);
         }
         public Product GetProductBySize(string Size)
         {

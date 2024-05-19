@@ -45,12 +45,12 @@ namespace api.Controllers
         {
             var store = _storeRepository.GetStoreByStoreId(StoreId);
 
-            if(StoreId == null)
+            if(store == null)
             {
                 return NotFound();
             }
 
-            return Ok(StoreId);
+            return Ok(store);
         }
 
         [HttpGet("Zipcode")]
@@ -58,12 +58,12 @@ namespace api.Controllers
         {
             var store = _storeRepository.GetStoreByZipcode(Zipcode);
 
-            if(Zipcode == null)
+            if(store == null)
             {
                 return NotFound();
             }
 
-            return Ok(Zipcode);
+            return Ok(store);
         }
 
         [HttpGet("State_abbr")]
@@ -71,12 +71,12 @@ namespace api.Controllers
         {
             var store = _storeRepository.GetStoreByState_abbr(State_abbr);
 
-            if(State_abbr == null)
+            if(store == null)
             {
                 return NotFound();
             }
 
-            return Ok(State_abbr);
+            return Ok(store);
         }
 
         [HttpGet("Latitude")]
@@ -84,12 +84,12 @@ namespace api.Controllers
         {
             var store = _storeRepository.GetStoreByLatitude(Latitude);
 
-            if(Latitude == null)
+            if(store == null)
             {
                 return NotFound();
             }
 
-            return Ok(Latitude);
+            return Ok(store);
         }
 
         [HttpGet("Longitude")]
@@ -97,12 +97,12 @@ namespace api.Controllers
         {
             var store = _storeRepository.GetStoreByLongitude(Longitude);
 
-            if(Longitude == null)
+            if(store == null)
             {
                 return NotFound();
             }
 
-            return Ok(Longitude);
+            return Ok(store);
         }
 
         [HttpGet("City")]
@@ -110,12 +110,12 @@ namespace api.Controllers
         {
             var store = _storeRepository.GetStoreByCity(City);
 
-            if(City == null)
+            if(store == null)
             {
                 return NotFound();
             }
 
-            return Ok(City);
+            return Ok(store);
         }
 
         [HttpGet("State")]
@@ -123,12 +123,12 @@ namespace api.Controllers
         {
             var store = _storeRepository.GetStoreByState(State);
 
-            if(State== null)
+            if(store== null)
             {
                 return NotFound();
             }
 
-            return Ok(State);
+            return Ok(store);
         }
 
         [HttpGet("Distance")]
@@ -136,12 +136,12 @@ namespace api.Controllers
         {
             var store = _storeRepository.GetStoreByDistance(Distance);
 
-            if(Distance == null)
+            if(store == null)
             {
                 return NotFound();
             }
 
-            return Ok(Distance);
+            return Ok(store);
         }
     }
 }

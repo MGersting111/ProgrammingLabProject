@@ -17,11 +17,11 @@ namespace api.Repository
         {
             _context = context;
         }
-        public IEnumerable<Customer> GetAllCustomers()
+      
+        public IEnumerable<Customer> GetCustomers()
         {
-            return _context.Customers.ToList();
+            return _context.Customers.Take(100).ToList();
         }
-        
 
     public Customer GetCustomerById(string CustomerId)
     {

@@ -27,7 +27,7 @@ namespace api.Controllers
             
         }
 
-        [HttpGet]
+        [HttpGet ("Product")]
         public IActionResult GetAll()
         {
             var products = _productRepository.GetAllProducts();
@@ -35,10 +35,10 @@ namespace api.Controllers
             return Ok(products);
         }
 
-        [HttpGet("{SKU}")]
-        public IActionResult GetProductBySKU(string SKU)
+        [HttpGet("{Sku}")]
+        public IActionResult GetProductBySku(string Sku)
         {
-            var product = _productRepository.GetProductBySKU(SKU);
+            var product = _productRepository.GetProductBySku(Sku);
 
             if(product == null)
             {
@@ -47,7 +47,7 @@ namespace api.Controllers
 
             return Ok(product);
         }
-        [HttpGet("{Name}")]
+        [HttpGet("name/{Name}")]
         public IActionResult GetProductByName(string Name)
         {
             var product = _productRepository.GetProductByName(Name);
@@ -59,7 +59,7 @@ namespace api.Controllers
 
             return Ok(product);
         }
-        [HttpGet("{Price}")]
+        [HttpGet("price/{Price:double}")]
         public IActionResult GetProductByPrice(double Price)
         {
             var product = _productRepository.GetProductByPrice(Price);
@@ -71,7 +71,7 @@ namespace api.Controllers
 
             return Ok(product);
         }
-        [HttpGet("{Category}")]
+        [HttpGet("category/{Category}")]
         public IActionResult GetProductByCategory(string Category)
         {
             var product = _productRepository.GetProductByCategory(Category);
@@ -83,7 +83,7 @@ namespace api.Controllers
 
             return Ok(product);
         }
-        [HttpGet("{Size}")]
+        [HttpGet("size/{Size}")]
         public IActionResult GetProductBySize(string Size)
         {
             var product = _productRepository.GetProductBySize(Size);
@@ -95,7 +95,7 @@ namespace api.Controllers
 
             return Ok(product);
         }
-        [HttpGet("{Ingredients}")]
+        [HttpGet("ingredients/{Ingredients}")]
         public IActionResult GetProductByIngredients(string Ingredients)
         {
             var product = _productRepository.GetProductByIngredients(Ingredients);
@@ -107,7 +107,7 @@ namespace api.Controllers
 
             return Ok(product);
         }
-        [HttpGet("{Launch}")]
+        [HttpGet("launch{Launch}")]
         public IActionResult GetProductByLaunch(string Launch)
         {
             var product = _productRepository.GetProductByLaunch(Launch);
