@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Test</title>
+</head>
+<body>
+    <script>
+        import { GoogleGenerativeAI } from "@google/generative-ai";
+
+require('dotenv').config();
+
+// Fetch your API_KEY
+const API_KEY = process.env.API_KEY;;
+
+// Access your API key (see "Set up your API key" above)
+const genAI = new GoogleGenerativeAI(API_KEY);
+
+// ...
+
+// For text-only input, use the gemini-pro model
+const model = genAI.getGenerativeModel({ model: "gemini-pro"});
+
+async function runa() {
+  console.log('Its running!');
+  const prompt = "Write a story about a magic backpack."
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  const text = response.text();
+  console.log(text);
+}
+
+
+  </script>
+    <button onclick="runa()">Generate Story</button>
+    <div id="storyOutput"></div>
+    
+    <script type="module" src="aiText.js"></script>
+</body>
+</html>
