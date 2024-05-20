@@ -24,3 +24,4 @@ node_modules/
 *.html~
 *.css.map
 *.js.map
+*.env
