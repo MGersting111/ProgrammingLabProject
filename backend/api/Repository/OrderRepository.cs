@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
@@ -55,10 +56,10 @@ namespace api.Repository
         return _context.Orders.FirstOrDefault(o => o.total == total);
     }
 
-    public async Task<List<OrderEntryDto>> GetAllOrderEntryDtoByFilter(FilterOrderEntryDto filterDto, int page, int pagesize, string sortColumn, string sortOrder)
+    public async Task<List<OrderEntryDto>> GetAllOrderEntryDtosByFilter(FilterOrderEntryDto filterDto, int page, int pageSize, string sortColumn, string sortOrder)
         {
-            List<GetAllOrderEntry> orderEntriesByFilter = await _orderRepository.GetByFilter(filterDto, page, pagesize, sortColumn, sortOrder);
-            List<GetAllOrderEntry> orderEntryDtos = ConvertToDtoList(orderEntriesByFilter);
+            List<OrderEntry> orderEntriesByFilter = await GetByFilter(filterDto, page, pagesize, sortColumn, sortOrder);
+            List<OrderEntryDto> orderEntryDtos = ConvertToDtoList(orderEntriesByFilter);
             return orderEntryDtos;
         }
 
@@ -72,17 +73,17 @@ namespace api.Repository
 
     private IQueryable<OrderEntry> createFilterQuery(FilterOrderEntryDto filterDto)
     {
-        IQueryable<GetAllOrderEntryDtoByFilter> filterQuery = _db.orders.Where(GetAllOrderEntryDtoByFilter =>
+        IQueryable<OrderEntry> filterQuery = _context.Orders.Where(entry =>
         (filterDto.OrderId == null || entry.OrderId == filterDto.OrderId) &&
-        (filterDto.NItems == null || entry.NItems == filterDto.NItems) &&
-        (filterDto.total == null || entry.total == filterDto.total) 
+        (filterDto.NItems == null || entry.NItems == filterDto.NItems)
+       
         );
         return filterQuery;
     }
     
     private IQueryable<OrderEntry> addOrderLogicToQuery(IQueryable<OrderEntry> query, int page, int pagesize, string sortColumn, string sortOrder)
     {
-        IQueryable<GetAllOrderEntryDtoByFilter> response;
+        IQueryable<OrderEntry> response;
         sortOrder = sortOrder.ToLower();
         if (sortOrder == "desc")
         {
@@ -97,7 +98,7 @@ namespace api.Repository
             throw new ArgumentException("Order Type must be 'asc' or 'desc' ", nameof(sortOrder));
 
         }
-        return response.skip((page - 1) * pagesize).Take(pagesize); ;
+        return response.Skip((page - 1) * pagesize).Take(pagesize); ;
     }
 
     }
