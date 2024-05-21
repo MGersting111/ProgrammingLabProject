@@ -11,7 +11,7 @@ using api.Dto;
 
 namespace api.Repository
 {
-    public class OrderRepository : IOrderRepository
+    public class OrderRepository : IOrderRepository 
     {
          private readonly ApplicationDBContext _context;
 
@@ -56,17 +56,11 @@ namespace api.Repository
         return _context.Orders.FirstOrDefault(o => o.total == total);
     }
 
-    public async Task<List<OrderEntryDto>> GetAllOrderEntryDtosByFilter(FilterOrderEntryDto filterDto, int page, int pageSize, string sortColumn, string sortOrder)
-        {
-            List<OrderEntry> orderEntriesByFilter = await GetByFilter(filterDto, page, pagesize, sortColumn, sortOrder);
-            List<OrderEntryDto> orderEntryDtos = ConvertToDtoList(orderEntriesByFilter);
-            return orderEntryDtos;
-        }
 
-    public async Task<List<OrderEntry>> GetByFilter(FilterOrderEntryDto filterDto, int page, int pagesize, string sortColumn, string sortOrder)
+    public async Task<List<OrderEntry>> GetByFilter(FilterOrderEntryDto filterDto, int page, int pageSize, string sortColumn, string sortOrder)
     {
         IQueryable<OrderEntry> query = createFilterQuery(filterDto);
-        query = addOrderLogicToQuery(query, page, pagesize, sortColumn, sortOrder);
+        query = addOrderLogicToQuery(query, page, pageSize, sortColumn, sortOrder);
         List<OrderEntry> orderEntries = await query.ToListAsync();
         return orderEntries;
     }
@@ -81,7 +75,7 @@ namespace api.Repository
         return filterQuery;
     }
     
-    private IQueryable<OrderEntry> addOrderLogicToQuery(IQueryable<OrderEntry> query, int page, int pagesize, string sortColumn, string sortOrder)
+    private IQueryable<OrderEntry> addOrderLogicToQuery(IQueryable<OrderEntry> query, int page, int pageSize, string sortColumn, string sortOrder)
     {
         IQueryable<OrderEntry> response;
         sortOrder = sortOrder.ToLower();
@@ -98,7 +92,7 @@ namespace api.Repository
             throw new ArgumentException("Order Type must be 'asc' or 'desc' ", nameof(sortOrder));
 
         }
-        return response.Skip((page - 1) * pagesize).Take(pagesize); ;
+        return response.Skip((page - 1) * pageSize).Take(pageSize); ;
     }
 
     }

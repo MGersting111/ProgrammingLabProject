@@ -21,7 +21,7 @@ namespace api.Interfaces
 
         //Task<List<OrderEntryDto>> GetAllOrderEntryDtoByFilter(FilterOrderEntryDto filterDto, int page, int pageSize, string sortColumn, string sortOrder);
         
-        Task<List<OrderEntryDto>> GetAllOrderEntryDtosByFilter(FilterOrderEntryDto filterDto, int page, int pagesize, string sortColumn, string sortOrder);
+        //Task<List<OrderEntryDto>> GetAllOrderEntryDtosByFilter(FilterOrderEntryDto filterDto, int page, int pagesize, string sortColumn, string sortOrder);
         
 
         
