@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using api.Models;
 using api.Data;
 using Microsoft.AspNetCore.Mvc;
+using api.Dto;
 
 namespace api.Interfaces
 {
@@ -13,6 +14,6 @@ namespace api.Interfaces
         double GetTotalStoreRevenue(string storeId);
 
 
-        Dictionary<string, double> GetFilteredStoreRevenues(FilterRevenue filter);
+        List<StoreInfo> GetFilteredStoreInfo(FilterRevenue filter);
     }
 }

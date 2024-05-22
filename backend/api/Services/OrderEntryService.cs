@@ -12,22 +12,21 @@ using api.Repository;
 
 namespace api.Services
 {
-    public class OrderEntryService 
+   // public class OrderEntryService 
 
-    {
-         private readonly ApplicationDBContext _context;
+ //   {
+     //    private readonly ApplicationDBContext _context;
 
 
-    public OrderEntryService(ApplicationDBContext context )
-    {
-        _context = context;
-    }
+   // public OrderEntryService(ApplicationDBContext context )
+   // {
+    //    _context = context;
+   // }
 
-    public async Task<List<OrderEntryDto>> GetAllOrderEntryDtosByFilter(FilterOrderEntryDto filterDto, int page, int pageSize, string sortColumn, string sortOrder)
-        {
-            List<OrderEntry> orderEntriesByFilter = await _OrderRepository.GetByFilter(filterDto, page, pagesize, sortColumn, sortOrder);
-            List<OrderEntryDto> orderEntryDtos = ConvertToDtoList(orderEntriesByFilter);
-            return orderEntryDtos;
-        }
-    }
+   // public async Task<List<OrderEntryDto>> GetAllOrderEntryDtosByFilter(FilterOrderEntryDto filterDto, int page, int pageSize, string sortColumn, string sortOrder)
+      //            List<OrderEntry> orderEntriesByFilter = await _OrderRepository.GetByFilter(filterDto, page, pagesize, sortColumn, sortOrder);
+        //    List<OrderEntryDto> orderEntryDtos = ConvertToDtoList(orderEntriesByFilter);
+         //   return orderEntryDtos;
+      //  }
+   // }
 }

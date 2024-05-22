@@ -78,7 +78,7 @@
             }
 
             [HttpGet("by-date/{OrderDate}")]
-            public IActionResult GetOrderByOrderDate(string OrderDate)
+            public IActionResult GetOrderByOrderDate(DateTime OrderDate)
             {
                 var order = _orderRepository.GetOrderByOrderDate(OrderDate);
 
@@ -115,18 +115,18 @@
                 return Ok(order);
             }
 
-            [HttpPost]
-            public async Task<IActionResult> GetByFilter([FromBody] FilterOrderEntryDto filterDto, [FromQuery] int page = 1, int pageSize=5, string sortColumn = "OrderId" , string sortOrder = "asc")
-            {
-                List<OrderEntryDto> orderEntryDtos = await _orderEntryService.GetAllOrderEntryDtosByFilter(filterDto, page, pageSize, sortColumn, sortOrder);
-                if(orderEntryDtos != null)
-                {
-                    int totalFilterCount = _orderEntryService.GetTotalFilterRecords(filterDto);
-                    Response<List<orderEntryDto>> pagedResponse = _pagedResponseRepository.createPagedResponse(orderEntryDtos, page, pageSize, sortColumn, sortOrder, this._baseUri, totalFilterCount );
-                    return Ok(pagedResponse);
-                }
-                return NotFound();
-            }
+           // [HttpPost]
+          //  public async Task<IActionResult> GetByFilter([FromBody] FilterOrderEntryDto filterDto, [FromQuery] int page = 1, int pageSize=5, string sortColumn = "OrderId" , string sortOrder = "asc")
+           // {
+               // List<OrderEntryDto> orderEntryDtos = await _orderEntryService.GetAllOrderEntryDtosByFilter(filterDto, page, pageSize, sortColumn, sortOrder);
+              //  if(orderEntryDtos != null)
+               // {
+                //    int totalFilterCount = _orderEntryService.GetTotalFilterRecords(filterDto);
+                //    Response<List<orderEntryDto>> pagedResponse = _pagedResponseRepository.createPagedResponse(orderEntryDtos, page, pageSize, sortColumn, sortOrder, this._baseUri, totalFilterCount );
+                //    return Ok(pagedResponse);
+              //  }
+//                return NotFound();
+          //  }
             
         }
     }

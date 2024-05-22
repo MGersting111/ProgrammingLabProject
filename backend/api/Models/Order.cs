@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace api.Models
 {
@@ -10,7 +11,7 @@ namespace api.Models
        public int OrderId { get; set; }
        public string CustomerId { get; set; } = string.Empty;
        public string StoreId { get; set; } = string.Empty;
-       public string OrderDate { get; set; }
+       public DateTime OrderDate { get; set; }
        public int NItems { get; set; }
        public double total { get; set; }
 
@@ -20,6 +21,6 @@ namespace api.Models
        //public string CustomerID { get; set; } = string.Empty;
        public Customer? customer { get; set; }
 
-       //public List<OrderItem> OrderItems = new List<OrderItem>();
+       public List<OrderItem> OrderItems = new List<OrderItem>();
     }
 }

@@ -8,7 +8,7 @@ namespace api.Models
     public class Product
     {
 
-        public string Sku { get; set; } = string.Empty;
+        public string SKU { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public double Price { get; set; }
         public string Category { get; set; } = string.Empty;
@@ -16,7 +16,9 @@ namespace api.Models
         public string Ingredients { get; set; } = string.Empty;
         public string Launch { get; set; } = string.Empty;
 
-        //public List<OrderItem> OrderItems { get; set;} = new List<OrderItem>();
+        //public OrderItem? OrderItem { get; set;}
+
+        public List<OrderItem> OrderItems { get; set;} = new List<OrderItem>();
 
 
     }

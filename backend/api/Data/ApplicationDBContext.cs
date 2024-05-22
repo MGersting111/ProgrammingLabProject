@@ -12,14 +12,14 @@ namespace api.Data
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options)
             : base(options)
         {
-            
+
         }
 
         public DbSet<Store> Stores { get; set; }
-        public DbSet<Customer> Customers {get; set; }
-        // public DbSet<OrderItem> OrderItems {get; set;}
-        public DbSet<Product> Products {get; set;}
-        public DbSet<Order> Orders {get; set;}
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Order> Orders { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -28,12 +28,16 @@ namespace api.Data
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Product>().HasKey(p => p.Sku); 
-            // modelBuilder.Entity<OrderItem>().HasKey(oi => oi.OrderId);
-            //modelBuilder.Entity<Customer>().HasKey(c => c.CustomerId); 
-            modelBuilder.Entity<Order>().HasKey(o => o.OrderId); 
+            modelBuilder.Entity<Product>().HasKey(p => p.SKU);
+            modelBuilder.Entity<OrderItem>().HasNoKey();
+            modelBuilder.Entity<OrderItem>()
+             .HasOne(orderItem => orderItem.Product)
+            .WithMany(product => product.OrderItems)
+            .HasForeignKey(orderItem => orderItem.SKU);
             modelBuilder.Entity<Customer>().HasKey(c => c.CustomerId);
-            
+            modelBuilder.Entity<Order>().HasKey(o => o.OrderId);
+            modelBuilder.Entity<Customer>().HasKey(c => c.CustomerId);
+
         }
     }
 }

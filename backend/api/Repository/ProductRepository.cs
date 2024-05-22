@@ -23,9 +23,9 @@ namespace api.Repository
             return _context.Products.ToList();
         }
 
-        public Product GetProductBySku(string Sku)
+        public Product GetProductBySKU(string SKU)
         {
-            return _context.Products.Find(Sku);
+            return _context.Products.Find(SKU);
         }
 
         public Product GetProductByName(string Name)

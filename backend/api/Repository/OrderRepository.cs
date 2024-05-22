@@ -43,7 +43,7 @@ namespace api.Repository
     {
         return _context.Orders.FirstOrDefault(o => o.CustomerId == CustomerId);
     }
-    public Order GetOrderByOrderDate(string OrderDate)
+    public Order GetOrderByOrderDate(DateTime OrderDate)
     {
         return _context.Orders.FirstOrDefault(o => o.OrderDate == OrderDate);
     }
@@ -57,43 +57,43 @@ namespace api.Repository
     }
 
 
-    public async Task<List<OrderEntry>> GetByFilter(FilterOrderEntryDto filterDto, int page, int pageSize, string sortColumn, string sortOrder)
-    {
-        IQueryable<OrderEntry> query = createFilterQuery(filterDto);
-        query = addOrderLogicToQuery(query, page, pageSize, sortColumn, sortOrder);
-        List<OrderEntry> orderEntries = await query.ToListAsync();
-        return orderEntries;
-    }
+   // public async Task<List<OrderEntry>> GetByFilter(FilterOrderEntryDto filterDto, int page, int pageSize, string sortColumn, string sortOrder)
+  //  {
+//        IQueryable<OrderEntry> query = createFilterQuery(filterDto);
+ //       query = addOrderLogicToQuery(query, page, pageSize, sortColumn, sortOrder);
+//        List<OrderEntry> orderEntries = await query.ToListAsync();
+  //      return orderEntries;
+//    }
 
-    private IQueryable<OrderEntry> createFilterQuery(FilterOrderEntryDto filterDto)
-    {
-        IQueryable<OrderEntry> filterQuery = _context.Orders.Where(entry =>
-        (filterDto.OrderId == null || entry.OrderId == filterDto.OrderId) &&
-        (filterDto.NItems == null || entry.NItems == filterDto.NItems)
+ //   private IQueryable<OrderEntry> createFilterQuery(FilterOrderEntryDto filterDto)
+   // {
+     //   IQueryable<OrderEntry> filterQuery = _context.Orders.Where(entry =>
+      //  (filterDto.OrderId == null || entry.OrderId == filterDto.OrderId) &&
+      //  (filterDto.NItems == null || entry.NItems == filterDto.NItems)
        
-        );
-        return filterQuery;
-    }
+       // );
+       // return filterQuery;
+  //  }
     
-    private IQueryable<OrderEntry> addOrderLogicToQuery(IQueryable<OrderEntry> query, int page, int pageSize, string sortColumn, string sortOrder)
-    {
-        IQueryable<OrderEntry> response;
-        sortOrder = sortOrder.ToLower();
-        if (sortOrder == "desc")
-        {
-            response = query.OrderBy(sortColumn + "desc");
-        }
-        else if ( sortOrder == "asc" || sortOrder == null || sortOrder == "")
-        {
-            response = query.OrderBy(sortColumn + "asc");
-        }
-        else
-        {
-            throw new ArgumentException("Order Type must be 'asc' or 'desc' ", nameof(sortOrder));
+  //  private IQueryable<OrderEntry> addOrderLogicToQuery(IQueryable<OrderEntry> query, int page, int pageSize, string sortColumn, string sortOrder)
+  //  {
+    //    IQueryable<OrderEntry> response;
+    //    sortOrder = sortOrder.ToLower();
+    //    if (sortOrder == "desc")
+    //    {
+     //       response = query.OrderBy(sortColumn + "desc");
+     //   }
+     //   else if ( sortOrder == "asc" || sortOrder == null || sortOrder == "")
+     //   {
+      //      response = query.OrderBy(sortColumn + "asc");
+      //  }
+      //  else
+      //  {
+      //      throw new ArgumentException("Order Type must be 'asc' or 'desc' ", nameof(sortOrder));
 
-        }
-        return response.Skip((page - 1) * pageSize).Take(pageSize); ;
-    }
+       // }
+      //  return response.Skip((page - 1) * pageSize).Take(pageSize); ;
+   // }
 
     }
 }

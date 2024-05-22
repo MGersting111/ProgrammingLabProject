@@ -15,7 +15,7 @@ namespace api.Interfaces
         Order GetOrderById(int orderId);
         Order GetOrderByStoreId(string storeId);
         Order GetOrderByCustomerId(string customerId);
-        Order GetOrderByOrderDate(string orderDate);
+        Order GetOrderByOrderDate(DateTime orderDate);
         Order GetOrderByNItems(int nItems);
         Order GetOrderByTotal(double total);
 

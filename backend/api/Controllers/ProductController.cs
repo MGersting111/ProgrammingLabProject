@@ -35,10 +35,10 @@ namespace api.Controllers
             return Ok(products);
         }
 
-        [HttpGet("{Sku}")]
-        public IActionResult GetProductBySku(string Sku)
+        [HttpGet("{SKU}")]
+        public IActionResult GetProductBySKU(string SKU)
         {
-            var product = _productRepository.GetProductBySku(Sku);
+            var product = _productRepository.GetProductBySKU(SKU);
 
             if(product == null)
             {

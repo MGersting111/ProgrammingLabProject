@@ -9,7 +9,7 @@ namespace api.Interfaces
     public interface IProductRepository
     {
         List<Product> GetAllProducts();
-        Product GetProductBySku(string Sku);
+        Product GetProductBySKU(string SKU);
         Product GetProductByName(string Name);
         Product GetProductByPrice(double Price);
         Product GetProductByCategory(string Category);
