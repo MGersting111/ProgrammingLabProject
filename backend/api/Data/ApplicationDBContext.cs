@@ -30,10 +30,6 @@ namespace api.Data
         {
             modelBuilder.Entity<Product>().HasKey(p => p.SKU);
             modelBuilder.Entity<OrderItem>().HasNoKey();
-            modelBuilder.Entity<OrderItem>()
-             .HasOne(orderItem => orderItem.Product)
-            .WithMany(product => product.OrderItems)
-            .HasForeignKey(orderItem => orderItem.SKU);
             modelBuilder.Entity<Customer>().HasKey(c => c.CustomerId);
             modelBuilder.Entity<Order>().HasKey(o => o.OrderId);
             modelBuilder.Entity<Customer>().HasKey(c => c.CustomerId);

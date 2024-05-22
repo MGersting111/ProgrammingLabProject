@@ -16,11 +16,11 @@ namespace api.Models
        public double total { get; set; }
 
        //public string StoreId { get; set;} = string.Empty;
-       public Store? Store { get; set;}
+       //public Store? Store { get; set;}
 
        //public string CustomerID { get; set; } = string.Empty;
-       public Customer? customer { get; set; }
+       //public Customer? customer { get; set; }
 
-       public List<OrderItem> OrderItems = new List<OrderItem>();
+       //public List<OrderItem> OrderItems = new List<OrderItem>();
     }
 }
