@@ -1,0 +1,37 @@
+/* Styling for the dropdowns */
+.select-dropdown {
+    position: relative; /* Required for absolute positioning of the arrow */
+    background-color: #77b0aa; /* Custom color */
+    color: white; /* Text color */
+    border: 2px solid #77b0aa; /* Border color matches background */
+    border-radius: 15px; /* Rounded corners */
+    padding: 5px 30px 5px 10px; /* Adjust padding to make room for the arrow */
+    width: auto; /* Adjusted to content width, you can set a specific width if necessary */
+    font-size: 14px; /* Text size */
+    -webkit-appearance: none; /* Removes default styles for WebKit browsers */
+    -moz-appearance: none; /* Removes default styles for Firefox */
+    appearance: none; /* Standard way to remove default styles */
+    cursor: pointer; /* Changes the cursor to a pointer on hover */
+}
+
+/* Adding a custom arrow to the dropdown */
+.select-dropdown::after {
+    content: '\25BC'; /* Unicode for a downward arrow */
+    position: absolute; /* Absolute position inside the select element */
+    top: 50%; /* Center vertically */
+    right: 10px; /* Space from the right */
+    transform: translateY(-50%); /* Adjust vertical alignment */
+    color: white; /* Arrow color */
+    pointer-events: none; /* Prevents interaction with the arrow */
+}
+
+/* Focus state for the dropdown */
+.select-dropdown:focus {
+    outline: none; /* Removes outline on focus */
+    border-color: #555; /* Darker border for visibility on focus */
+}
+
+/* Apply the custom styles to all select elements within containers marked as .col-auto for specificity */
+.col-auto .select-dropdown {
+    /* Inherits styles from .select-dropdown */
+}
