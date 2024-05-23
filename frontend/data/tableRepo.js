@@ -40,9 +40,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 function getData(){
-    var model = document.getElementById("model").value;
-    var orderBy = document.getElementById("orderBy").value;
-    var sortBy = document.getElementById("sortBy").value;
+    var model = document.getElementById("categorySelect").value;
+    var orderBy = document.getElementById("orderSelect").value;
+    var sortBy = document.getElementById("sortSelect").value;
     var data = {
         orderBy: orderBy,
         sortBy: sortBy
