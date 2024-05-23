@@ -1,0 +1,17 @@
+.box {
+    width: 30%; /* Set width of each box */
+    height: 300px; /* Set height of each box */
+    padding: 20px; /* Set padding inside each box */
+    background-color: rgb(119, 176, 170); /* Set background color of each box */
+    border-radius: 20px; /* Set border radius for rounded corners */
+    position: relative; /* Add relative positioning to ensure canvas fits */
+    display: flex; /* Flexbox to center align the canvas */
+    align-items: center; /* Center align items vertically */
+    justify-content: center; /* Center align items horizontally */
+}
+
+#myChart {
+    width: 10px !important; /* Explicitly set width of the canvas */
+    height: 50px !important; /* Explicitly set height of the canvas */
+    object-fit: contain; /* Ensure the canvas content scales correctly */
+}

@@ -50,7 +50,7 @@
             </div>
         </div>
     </nav>
- <div class="container-fluid mt-5 mb-4">
+    <div class="container-fluid mt-5 mb-4">
         <div class="row gx-2">
             <div class="container-fluid mt-5 mb-4">
                 <div class="filterContainer">
@@ -82,13 +82,16 @@
                     </div>
                     <button onclick="getData()" class="btn btn-primary">Send Data</button>
                 </div>
-                <div class="tableContainer" style="display: none;">
-                    <table id="data-table" border="1">
+                <table class="custom-table">
                         <thead>
-                            <tr id="header-row"></tr>
+                            <tr>
+                                <th>Store Id</th>
+                                <th>City</th>
+                                <th>State</th>
+                            </tr>
                         </thead>
-                        <tbody>
-                            <!-- Data rows will be inserted here -->
+                        <tbody id="table-body">
+                            
                         </tbody>
                     </table>
                 </div>
