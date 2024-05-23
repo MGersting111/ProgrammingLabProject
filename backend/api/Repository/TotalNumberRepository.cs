@@ -41,16 +41,16 @@ namespace api.Repository
             foreach (var store in stores)
             {
 
-                var orders = _context.Orders.Where(order => order.StoreId == store.StoreId);
-                //.Include(order => order.OrderItems) // Stellen Sie sicher, dass die OrderItems der Bestellungen geladen werden
-                //.ThenInclude(orderItem => orderItem.Product) // Stellen Sie sicher, dass die Produkte der OrderItems geladen werden
-                //.Where(order => order.StoreId == store.StoreId);
+                var orders = _context.Orders//.Where(order => order.StoreId == store.StoreId);
+                .Include(order => order.OrderItems) // Stellen Sie sicher, dass die OrderItems der Bestellungen geladen werden
+                .ThenInclude(orderItem => orderItem.Product) // Stellen Sie sicher, dass die Produkte der OrderItems geladen werden
+                .Where(order => order.StoreId == store.StoreId);
 
-                //if (!string.IsNullOrEmpty(filter.Category))
-               // {
+                if (!string.IsNullOrEmpty(filter.Category))
+                {
                     
-                 //   orders = orders.Where(order => order.OrderItems.Any(orderItem => orderItem.Product.Category.Equals(filter.Category, StringComparison.OrdinalIgnoreCase)));
-               // }
+                  orders = orders.Where(order => order.OrderItems.Any(orderItem => orderItem.Product.Category.Equals(filter.Category, StringComparison.OrdinalIgnoreCase)));
+                }
 
                 if (filter.OrderDateFrom.HasValue)
                 {

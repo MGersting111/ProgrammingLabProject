@@ -15,10 +15,7 @@ namespace api.Models
         public string Size { get; set; } = string.Empty;
         public string Ingredients { get; set; } = string.Empty;
         public string Launch { get; set; } = string.Empty;
-
-        //public OrderItem? OrderItem { get; set;}
-
-       // public List<OrderItem> OrderItems { get; set;} = new List<OrderItem>();
+        public List<OrderItem> OrderItems { get; set;} = new List<OrderItem>();
 
 
     }

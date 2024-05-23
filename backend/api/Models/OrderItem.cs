@@ -10,10 +10,10 @@ namespace api.Models
    {
        public int OrderId { get; set; }
        public string SKU { get; set; } = string.Empty;
-      // public Product? Product { get; set;}
-       //public Order? Order { get; set; }
+       public Product? Product { get; set;}
+       public Order? Order { get; set; }
 
-      //public List<Product> Products { get; set; } = new List<Product>();
+      
 
 
     }

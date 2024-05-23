@@ -15,12 +15,13 @@ namespace api.Models
        public int NItems { get; set; }
        public double total { get; set; }
 
+       public OrderItem? orderItem { get; set; }
+
        //public string StoreId { get; set;} = string.Empty;
        //public Store? Store { get; set;}
 
-       //public string CustomerID { get; set; } = string.Empty;
-       //public Customer? customer { get; set; }
+       public Customer? customer { get; set; }
 
-       //public List<OrderItem> OrderItems = new List<OrderItem>();
+      public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

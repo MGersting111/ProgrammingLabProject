@@ -29,10 +29,21 @@ namespace api.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Product>().HasKey(p => p.SKU);
-            modelBuilder.Entity<OrderItem>().HasNoKey();
+            modelBuilder.Entity<OrderItem>().HasKey(oi => new { oi.OrderId, oi.SKU }); // Composite key
             modelBuilder.Entity<Customer>().HasKey(c => c.CustomerId);
-            modelBuilder.Entity<Order>().HasKey(o => o.OrderId);
-            modelBuilder.Entity<Customer>().HasKey(c => c.CustomerId);
+            modelBuilder.Entity<Store>().HasKey(s => s.StoreId);
+
+            modelBuilder.Entity<Order>()
+                .HasMany(o => o.OrderItems)
+                .WithOne(oi => oi.Order)
+                .HasForeignKey(oi => oi.OrderId)
+                .IsRequired();
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Product)
+                .WithMany(p => p.OrderItems)
+                .HasForeignKey(oi => oi.SKU)
+                .IsRequired();
 
         }
     }
