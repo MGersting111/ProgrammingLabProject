@@ -60,6 +60,15 @@ body {
     padding: 20px; /* Set padding inside each box */
     background-color: rgb(119, 176, 170); /* Set background color of each box */
     border-radius: 20px; /* Set border radius for rounded corners */
+    position: relative; /* Add relative positioning to ensure canvas fits */
+    display: flex; /* Flexbox to center align the canvas */
+    align-items: center; /* Center align items vertically */
+    justify-content: center; /* Center align items horizontally */
+}
+
+#myChart {
+    width: 100px !important; /* Explicitly set width of the canvas */
+    height: 100px !important; /* Explicitly set height of the canvas */
 }
 .dropdown .btn-primary {
     background-color: rgb(119, 176, 170); /* Set the background color of the dropdown button */
