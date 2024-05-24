@@ -54,7 +54,12 @@ namespace api.Controllers
             return Ok(storeInfos);
         }
 
-
+        //  [HttpGet("SortedPagedOrders")]
+        // public async Task<IActionResult> GetSortedPagedOrders([FromQuery] int page = 1, int pageSize = 5, string sortColumn = "OrderId", string sortOrder = "asc")
+        // {
+        //     var pagedOrders = await _totalNumberRepository.GetSortedPagedOrders(page, pageSize, sortColumn, sortOrder);
+        //     return Ok(pagedOrders);
+        // }
 
     }
 }

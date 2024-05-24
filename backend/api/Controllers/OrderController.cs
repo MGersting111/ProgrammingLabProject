@@ -11,7 +11,6 @@
     using MySql.Data.EntityFrameworkCore.Extensions;
     using api.Interfaces;
     using api.Dto;
-    using api.Services;
 
 
     namespace api.Controllers
@@ -26,10 +25,10 @@
             {
                 _context = context;
                 _orderRepository = orderRepository;
-                
+
             }
 
-    
+
             [HttpGet ("Order")]
             public IActionResult GetOrders()
             {
@@ -115,18 +114,7 @@
                 return Ok(order);
             }
 
-           // [HttpPost]
-          //  public async Task<IActionResult> GetByFilter([FromBody] FilterOrderEntryDto filterDto, [FromQuery] int page = 1, int pageSize=5, string sortColumn = "OrderId" , string sortOrder = "asc")
-           // {
-               // List<OrderEntryDto> orderEntryDtos = await _orderEntryService.GetAllOrderEntryDtosByFilter(filterDto, page, pageSize, sortColumn, sortOrder);
-              //  if(orderEntryDtos != null)
-               // {
-                //    int totalFilterCount = _orderEntryService.GetTotalFilterRecords(filterDto);
-                //    Response<List<orderEntryDto>> pagedResponse = _pagedResponseRepository.createPagedResponse(orderEntryDtos, page, pageSize, sortColumn, sortOrder, this._baseUri, totalFilterCount );
-                //    return Ok(pagedResponse);
-              //  }
-//                return NotFound();
-          //  }
-            
+           
+
         }
     }

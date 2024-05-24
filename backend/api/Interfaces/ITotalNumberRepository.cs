@@ -15,5 +15,8 @@ namespace api.Interfaces
 
 
         List<StoreInfo> GetFilteredStoreInfo(FilterRevenue filter);
+
+
+
     }
 }
