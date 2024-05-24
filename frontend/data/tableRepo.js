@@ -9,8 +9,8 @@ var urlTotalNumbers = 'http://localhost:3000/';
 
 // Funktion zum Aktualisieren der sortBy-Optionen
 function updateSortByOptions() {
-    const modelSelect = document.getElementById("model");
-    const sortBySelect = document.getElementById("sortBy");
+    const modelSelect = document.getElementById("modelSelect");
+    const sortBySelect = document.getElementById("sortSelect");
     const selectedModel = modelSelect.value;
 
     // Lösche alle aktuellen Optionen im sortBy-Select
@@ -28,6 +28,14 @@ function updateSortByOptions() {
     });
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    const modelSelect = document.getElementById("modelSelect");
+    modelSelect.addEventListener("change", updateSortByOptions);
+
+    // Initial load of options
+    updateSortByOptions();
+});
+
 // Event Listener für die Änderung des Model-Dropdowns
 document.addEventListener("DOMContentLoaded", () => {
     const modelSelect = document.getElementById("model");
@@ -40,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 function getData(){
-    var model = document.getElementById("categorySelect").value;
+    var model = document.getElementById("modelSelect").value;
     var orderBy = document.getElementById("orderSelect").value;
     var sortBy = document.getElementById("sortSelect").value;
     var data = {
