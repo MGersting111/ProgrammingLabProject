@@ -96,5 +96,28 @@ namespace api.Repository
             return storeInfos;
         }
 
+
+        //  public async Task<List<Order>> GetSortedPagedOrders(int page, int pageSize, string sortColumn, string sortOrder)
+        // {
+        //     IQueryable<Order> query = _context.Orders;
+
+        //     // Sortierung anwenden
+        //     if (sortOrder.ToLower() == "asc")
+        //     {
+        //         query = query.OrderBy(o => EF.Property<object>(o, sortColumn));
+        //     }
+        //     else
+        //     {
+        //         query = query.OrderByDescending(o => EF.Property<object>(o, sortColumn));
+        //     }
+
+        //     // Paginierung anwenden
+        //     query = query.Skip((page - 1) * pageSize).Take(pageSize);
+
+        //     return await query.ToListAsync();
+        // }
+
+
+      
     }
 }
