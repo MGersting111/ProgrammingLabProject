@@ -46,6 +46,10 @@ namespace api.Data
                 .HasForeignKey(oi => oi.SKU)
                 .IsRequired();
 
+            modelBuilder.Entity<Order>().HasIndex(o => o.StoreId);
+            modelBuilder.Entity<OrderItem>().HasIndex(oi => oi.OrderId);
+            modelBuilder.Entity<OrderItem>().HasIndex(oi => oi.SKU);
+
         }
     }
 }
