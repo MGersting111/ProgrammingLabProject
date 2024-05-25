@@ -1,4 +1,12 @@
-var urlTotalNumbers = 'http://localhost:3000/';
+const baseUrl = 'http://localhost:5004/api/Models/';
+
+const endpoint = 'SortedPagedProducts';
+const page = 1;
+const pageSize = 5;
+const sortColumn = 'Category';
+const sortOrder = 'desc';
+
+const url = `${baseUrl}${endpoint}?page=${page}&pageSize=${pageSize}&sortColumn=${sortColumn}&sortOrder=${sortOrder}`;
 
   const modelAttributes = {
     customers: ["customerID", "latitude", "longitude"],
@@ -51,18 +59,21 @@ function getData(){
     var model = document.getElementById("modelSelect").value;
     var orderBy = document.getElementById("orderSelect").value;
     var sortBy = document.getElementById("sortSelect").value;
-    var data = {
-        orderBy: orderBy,
-        sortBy: sortBy
+    const queryParams = {
+        page: 1,
+        pageSize: 5,
+        sortColumn: orderBy,
+        sortOrder: sortBy
+    };
+    if(model=='products'){
+        urlTotalNumbers += "SortedPagedProducts"
     }
 
-    console.log(data);
-    fetch(urlTotalNumbers+model, {
-        method: 'POST',
+    fetch(url, {
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+        }
     })
     .then(response => {
         if (!response.ok) {
