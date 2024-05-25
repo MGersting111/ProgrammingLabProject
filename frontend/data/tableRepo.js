@@ -1,18 +1,16 @@
 const baseUrl = 'http://localhost:5004/api/Models/';
 
-const endpoint = 'SortedPagedProducts';
-const page = 1;
-const pageSize = 5;
-const sortColumn = 'Category';
-const sortOrder = 'desc';
-
-const url = `${baseUrl}${endpoint}?page=${page}&pageSize=${pageSize}&sortColumn=${sortColumn}&sortOrder=${sortOrder}`;
+var endpoint = 'SortedPagedProducts';
+var page = 1;
+var pageSize = 5;
+var sortColumn = 'Category';
+var sortOrder = 'desc';
 
   const modelAttributes = {
-    customers: ["customerID", "latitude", "longitude"],
-    stores: ["city", "state", "zipcode", "distance"],
+    customers: ["CustomerID", "Latitude", "Longitude"],
+    stores: ["City", "State", "Zipcode", "Distance"],
     products: ["SKU", "Name", "Price", "Category", "Size", "Launch"],
-    orders: ["orderId", "customerId", "storeId", "orderDate", "nItems", "total"]
+    orders: ["OrderId", "CustomerId", "StoreId", "OrderDate", "NItems", "total"]
 };
 
 // Funktion zum Aktualisieren der sortBy-Optionen
@@ -30,7 +28,6 @@ function updateSortByOptions() {
     // Erstelle neue Optionen für jedes Attribut
     attributes.forEach(attribute => {
         const option = document.createElement("option");
-        option.value = attribute.toLowerCase();
         option.textContent = attribute;
         sortBySelect.appendChild(option);
     });
@@ -59,16 +56,21 @@ function getData(){
     var model = document.getElementById("modelSelect").value;
     var orderBy = document.getElementById("orderSelect").value;
     var sortBy = document.getElementById("sortSelect").value;
-    const queryParams = {
-        page: 1,
-        pageSize: 5,
-        sortColumn: orderBy,
-        sortOrder: sortBy
-    };
+
     if(model=='products'){
-        urlTotalNumbers += "SortedPagedProducts"
+        endpoint = "SortedPagedProducts"
+    }
+    if(model=='customers'){
+        endpoint = "SortedPagedCustomers"
+    }
+    if(model=='stores'){
+        endpoint = "SortedPagedStores"
+    }
+    if(model=='orders'){
+        endpoint = "SortedPagedOrders"
     }
 
+    const url = `${baseUrl}${endpoint}?page=${page}&pageSize=${pageSize}&sortColumn=${sortBy}&sortOrder=${orderBy}`;
     fetch(url, {
         method: 'GET',
         headers: {
