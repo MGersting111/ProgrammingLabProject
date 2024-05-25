@@ -77,19 +77,20 @@ namespace api.Repository
                 int totalOrderCountAllStores = storeInfos.Sum(info => info.OrderCount);
                 int totalCustomerCountAllStores = storeInfos.Sum(info => info.CustomerCount);
                 double totalRevenuePerCustomerAllStores = totalCustomerCountAllStores > 0 ? totalRevenueAllStores / totalCustomerCountAllStores : 0;
-                return new List<StoreInfo> { new StoreInfo {StoreId = "All Stores", TotalRevenue = totalRevenueAllStores, OrderCount = totalOrderCountAllStores, CustomerCount = totalCustomerCountAllStores, RevenuePerCustomer = totalRevenuePerCustomerAllStores } };
+                return new List<StoreInfo> { new StoreInfo { StoreId = "All Stores", TotalRevenue = totalRevenueAllStores, OrderCount = totalOrderCountAllStores, CustomerCount = totalCustomerCountAllStores, RevenuePerCustomer = totalRevenuePerCustomerAllStores } };
             }
-            
+
             else
             {
                 // Wenn ein Filter angewendet wurde, wenden Sie die Filter an und geben Sie die gefilterten Daten zurück
 
                 if (!string.IsNullOrEmpty(filter.StoreId))
                 {
-                    storeInfos = storeInfos.Where(info => info.StoreId == filter.StoreId).ToList();
+                    var storeIdList = filter.StoreId.Split(',').ToList(); // Teilen Sie die StoreIds in eine Liste auf
+                    storeInfos = storeInfos.Where(info => storeIdList.Contains(info.StoreId)).ToList();
                 }
 
-                
+
 
                 if (filter.StoreRevenues.HasValue)
                 {
@@ -116,28 +117,28 @@ namespace api.Repository
         }
 
 
-            //  public async Task<List<Order>> GetSortedPagedOrders(int page, int pageSize, string sortColumn, string sortOrder)
-            // {
-            //     IQueryable<Order> query = _context.Orders;
+        //  public async Task<List<Order>> GetSortedPagedOrders(int page, int pageSize, string sortColumn, string sortOrder)
+        // {
+        //     IQueryable<Order> query = _context.Orders;
 
-            //     // Sortierung anwenden
-            //     if (sortOrder.ToLower() == "asc")
-            //     {
-            //         query = query.OrderBy(o => EF.Property<object>(o, sortColumn));
-            //     }
-            //     else
-            //     {
-            //         query = query.OrderByDescending(o => EF.Property<object>(o, sortColumn));
-            //     }
+        //     // Sortierung anwenden
+        //     if (sortOrder.ToLower() == "asc")
+        //     {
+        //         query = query.OrderBy(o => EF.Property<object>(o, sortColumn));
+        //     }
+        //     else
+        //     {
+        //         query = query.OrderByDescending(o => EF.Property<object>(o, sortColumn));
+        //     }
 
-            //     // Paginierung anwenden
-            //     query = query.Skip((page - 1) * pageSize).Take(pageSize);
+        //     // Paginierung anwenden
+        //     query = query.Skip((page - 1) * pageSize).Take(pageSize);
 
-            //     return await query.ToListAsync();
-            // }
+        //     return await query.ToListAsync();
+        // }
 
 
 
-        }
     }
+}
 
