@@ -14,7 +14,7 @@ namespace api.Interfaces
         double GetTotalStoreRevenue(string storeId);
 
 
-        List<StoreInfo> GetFilteredStoreInfo(FilterRevenue filter);
+        Task<List<StoreInfo>> GetFilteredStoreInfoAsync(FilterRevenue filter);
 
 
 

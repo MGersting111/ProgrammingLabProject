@@ -11,6 +11,7 @@ using api.Models;
 using MySql.Data.EntityFrameworkCore.Extensions;
 using api.Interfaces;
 using api.Repository;
+using api.Dto;
 
 namespace api.Controllers
 {
@@ -22,7 +23,7 @@ namespace api.Controllers
     {
         private readonly ApplicationDBContext _context;
         private readonly IProductRepository _productRepository;
-         private readonly IOrderItemRepository _orderItemRepository;
+        private readonly IOrderItemRepository _orderItemRepository;
         private readonly IStoreRepository _storeRepository;
         private readonly ICustomerRepository _customerRepository;
         private readonly IOrderRepository _orderRepository;
@@ -33,7 +34,7 @@ namespace api.Controllers
         {
             _context = context;
             _storeRepository = storeRepository;
-         _orderItemRepository = orderItemRepository;
+            _orderItemRepository = orderItemRepository;
             _orderRepository = orderRepository;
             _productRepository = productRepository;
             _customerRepository = customerRepository;
@@ -48,9 +49,9 @@ namespace api.Controllers
         }
 
         [HttpGet("FilteredStoreInfo")]
-        public IActionResult GetFilteredStoreInfo([FromQuery] FilterRevenue filter)
+        public async Task<ActionResult<List<StoreInfo>>> GetFilteredStoreInfo([FromQuery] FilterRevenue filter)
         {
-            var storeInfos = _totalNumberRepository.GetFilteredStoreInfo(filter);
+            var storeInfos = await _totalNumberRepository.GetFilteredStoreInfoAsync(filter);
             return Ok(storeInfos);
         }
 
