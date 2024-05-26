@@ -48,8 +48,8 @@ namespace api.Controllers
         [HttpGet("SortedPagedStores")]
         public async Task<IActionResult> GetSortedPagedStores([FromQuery] int page = 1, int pageSize = 5, string sortColumn = "StoreId", string sortOrder = "asc")
         {
-            var pagedStores = await _sortedPagedModelsRepository.GetSortedPagedStores(page, pageSize, sortColumn, sortOrder);
-            return Ok(pagedStores);
+        var pagedStoresWithRevenue = await _sortedPagedModelsRepository.GetSortedPagedStoresWithRevenue(page, pageSize, sortColumn, sortOrder);
+        return Ok(pagedStoresWithRevenue);
         }
 
         [HttpGet("SortedPagedCustomers")]
@@ -65,8 +65,5 @@ namespace api.Controllers
             var pagedProducts = await _sortedPagedModelsRepository.GetSortedPagedProducts(page, pageSize, sortColumn, sortOrder);
             return Ok(pagedProducts);
         }
-        
-
-        
     }
 }
