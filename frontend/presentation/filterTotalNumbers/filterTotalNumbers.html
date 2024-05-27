@@ -80,10 +80,14 @@
     // Dropdown-Menü für Stores
     var storesDropdown = $('#stores');
     // Optionen in das Dropdown-Menü einfügen
-    storeData.forEach(function(item) {
-        var option = $('<option></option>').text(item);
-        storesDropdown.append(option);
-    });
+    for (const stateCode in storeData) {
+    // Create option element with state code (key)
+    var option = $('<option></option>').text(stateCode);
+
+    // Append the option to the dropdown menu
+    storesDropdown.append(option);
+    }
+
 
     // Initialize select2
     storesDropdown.select2();

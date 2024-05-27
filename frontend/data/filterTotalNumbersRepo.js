@@ -1,25 +1,37 @@
-const urlTotalNumbers = 'http://localhost:3000/totalnumbers';
-const totalNumbersDiv = document.querySelector('.totalNumbers')
+const baseUrl = 'http://localhost:5004/api/TotalNumber/FilteredStoreInfo';
+const totalNumbersDiv = document.querySelector('.totalNumbers');
+var storeData = new StoreData().storeData;
+var StoreId;
+var OrderDateFrom;
+var OrderDateTo;
 
 function getData(){
-    var store = document.getElementById("stores").value;
-    var time = document.getElementById("fromDate").value;
-    var time = document.getElementById("toDate").value;
+    var stores = document.getElementById("stores").value;
+    OrderDateFrom = document.getElementById("fromDate").value;
+    OrderDateTo = document.getElementById("toDate").value;
     var category = document.getElementById("category").value;
-    var data = {
-        store: store,
-      time: time,
-      category: category,
+    StoreId = getKeysByValues(storeData, stores);
+    const storeValues = [];
+    console.log($('#stores').select2('data'));
+    // Iterate through the selected stores
+    for (const selectedStore of selectedStores) {
+      // Check if the selected store exists in the storeData
+      if (storeData.hasOwnProperty(selectedStore)) {
+        // Retrieve the value (state-city pair) from storeData
+        const storeValue = storeData[selectedStore];
+  
+        // Add the value to the storeValues list
+        storeValues.push(storeValue);
+      }
     }
+    console.log(storeValues);
+    const url = `${baseUrl}?StoreId=${StoreId}&OrderDateFrom=${OrderDateFrom}&OrderDateTo=${OrderDateTo}`;
 
-    console.log(data);
-
-    fetch(urlTotalNumbers, {
-        method: 'POST',
+    fetch(url, {
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
     })
     .then(response => {
         if (!response.ok) {
@@ -42,8 +54,27 @@ function getData(){
     arpc.textContent = data.RevenuePerCustomer;
 
 
-    })
+    })    
+}
 
-    
+function getKeysByValues(obj, values) {
+    let keys = [];
+    for (const value of values) {
+      // Use Object.entries to iterate over key-value pairs
+      for (const [key, objValue] of Object.entries(obj)) {
+        if (objValue === value) {
+          keys.push(key);
+        }
+      }
+    }
+    return keys;
+  }
 
+function getKeyByValue(obj, searchValue) {
+    for (let [key, value] of Object.entries(obj)) {
+        if (value === searchValue) {
+            return key;
+        }
+    }
+    return null; // Wenn der Wert nicht gefunden wurde
 }
