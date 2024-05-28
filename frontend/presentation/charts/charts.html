@@ -1,155 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="../general/style.css">
-    <link rel="stylesheet" href="../general/dropdowns.css">
-    <link rel="stylesheet" href="../filterTotalNumbers/filterTotalNumbers.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="../general/style.css" />
+    <link rel="stylesheet" href="../general/dropdowns.css" />
+    <link
+      rel="stylesheet"
+      href="../filterTotalNumbers/filterTotalNumbers.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="charts.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
     <script src="../../data/stores.js"></script>
-</head>
-<body>
-    
+  </head>
+  <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
-        <div class="container-fluid">
-            <a class="navbar-brand"></a>
-            <div class="navbar-text rotate">
-                <img src="https://images.vexels.com/media/users/3/185266/isolated/preview/815ded7afc1c54dfb5a60f81f68f928b-pizza-slice-icon-by-vexels.png" alt="Your Image" style="max-height: 40px;">
-            </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="navbar-text">
-                <a href="../home/home.html" class="btn btn-transparent">
-                    <i class="fa-solid fa-chart-pie" style="color: #ffffff;"></i>
-                </a>
-                <a href="../charts/charts.html" class="btn btn-transparent">
-                    <i class="fa-solid fa-chart-line fa-xl" style="color: #ffffff;"></i>
-                </a>
-                <a href="../table/table.html" class="btn btn-transparent">
-                    <i class="fa-solid fa-table" style="color: #ffffff;"></i>
-                </a>
-                <a href="../filterTotalNumbers/filterTotalNumbers.html" class="btn btn-transparent">
-                    <i class="fa-solid fa-filter" style="color: #ffffff;"></i>
-                </a>
-                <div id="sidebar" class="sidebar">
-                    <a href="#" class="btn btn-transparent" onclick="toggleSidebar()">
-                        <i class="fa-solid fa-xmark fa-xl" style="color: #ffffff;"></i>
-                    </a>
-                    <ul class="list-unstyled">
-                        <li><a href="../home/home.html" class="btn btn-transparent">Home</a></li>
-                        <li><a href="#" class="btn btn-transparent">Profile</a></li>
-                        <li><a href="#" class="btn btn-transparent">Settings</a></li>
-                        <li><a href="#" class="btn btn-transparent">Support</a></li>
-                        <li><a href="#" class="btn btn-transparent">Dashboard</a></li>
-                    </ul>
-                </div>
-                <a href="#" class="btn btn-transparent" onclick="toggleSidebar()">
-                    <i class="fa-solid fa-user fa-xl" style="color: #ffffff;"></i>
-                </a>
-            </div>
+      <div class="container-fluid">
+        <a class="navbar-brand"></a>
+        <div class="navbar-text rotate">
+          <img
+            src="https://images.vexels.com/media/users/3/185266/isolated/preview/815ded7afc1c54dfb5a60f81f68f928b-pizza-slice-icon-by-vexels.png"
+            alt="Your Image"
+            style="max-height: 40px"
+          />
         </div>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-text">
+          <a href="../home/home.html" class="btn btn-transparent">
+            <i class="fa-solid fa-chart-pie" style="color: #ffffff"></i>
+          </a>
+          <a href="../charts/charts.html" class="btn btn-transparent">
+            <i class="fa-solid fa-chart-line fa-xl" style="color: #ffffff"></i>
+          </a>
+          <a href="../table/table.html" class="btn btn-transparent">
+            <i class="fa-solid fa-table" style="color: #ffffff"></i>
+          </a>
+          <a
+            href="../filterTotalNumbers/filterTotalNumbers.html"
+            class="btn btn-transparent"
+          >
+            <i class="fa-solid fa-filter" style="color: #ffffff"></i>
+          </a>
+          <div id="sidebar" class="sidebar">
+            <a href="#" class="btn btn-transparent" onclick="toggleSidebar()">
+              <i class="fa-solid fa-xmark fa-xl" style="color: #ffffff"></i>
+            </a>
+            <ul class="list-unstyled">
+              <li>
+                <a href="../home/home.html" class="btn btn-transparent">Home</a>
+              </li>
+              <li><a href="#" class="btn btn-transparent">Profile</a></li>
+              <li><a href="#" class="btn btn-transparent">Settings</a></li>
+              <li><a href="#" class="btn btn-transparent">Support</a></li>
+              <li><a href="#" class="btn btn-transparent">Dashboard</a></li>
+            </ul>
+          </div>
+          <a href="#" class="btn btn-transparent" onclick="toggleSidebar()">
+            <i class="fa-solid fa-user fa-xl" style="color: #ffffff"></i>
+          </a>
+        </div>
+      </div>
     </nav>
-    
-    <div class="container-fluid mt-5 mb-4"> 
-        <div class="row gx-2 align-items-center">
-            <div class="col-auto">
-                <select id="stores" multiple class="form-control">
-                    <option value="nothing"></option>
-                      <!-- Optionen werden hier dynamisch eingefügt -->
-                  </select><br>
-                  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-                  <!-- select2 JS -->
-                  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-                  <!-- Bootstrap JS (optional) -->
-                  <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+WmZU5i4/J5oRM/Xl1p+8aO3o2z1p" crossorigin="anonymous"></script>
-                  
-                  <script>
-                  // Liste der States und Cities
-                  var storeData = new StoreData().storeData;
-                  // Dropdown-Menü für Stores
-                  var storesDropdown = $('#stores');
-                  // Optionen in das Dropdown-Menü einfügen
-                  storeData.forEach(function(item) {
-                      var option = $('<option></option>').text(item);
-                      storesDropdown.append(option);
-                  });
-              
-                  // Initialize select2
-                  storesDropdown.select2();
-                  </script>
-            </div>
-            <div class="col-auto">
-                <select id="periodSelect" class="select-dropdown">
-                    <option value="" disabled selected>Period</option>
-                    <option value="1">Period 1</option>
-                    <option value="2">Period 2</option>
-                    <option value="3">Period 3</option>
-                    <option value="4">Period 4</option>
-                    <option value="5">All</option>
-                </select>
-            </div>
-            <div class="col-auto">
-                <select id="categorySelect" class="select-dropdown">
-                    <option value="" disabled selected>Category</option>
-                    <option value="1">Revenue</option>
-                    <option value="2">Sales</option>
-                    <option value="3">customers</option>
-                </select>
-            </div>
-            <div class="setDate">
-                <form>
-                  <input type="date" id="fromDate" name="fromDate">
-                  <br>
-                  <input type="date" id="toDate" name="toDate">
-                </form>
-                </div>
-            <div class="col-auto">
-                <select id="orderSelect" class="select-dropdown">
-                    <option value="" disabled selected>Order By</option>
-                    <option value="1">Asc</option>
-                    <option value="2">Desc</option>
-                    <option value="3">Alphabet</option>
-                </select>
-            </div>
-            <div class="col-auto">
-                <select id="sortSelect" class="select-dropdown">
-                    <option value="" disabled selected>Sort By</option>
-                    <option value="1">All</option>
-                    <option value="2">Pizza 1</option>
-                    <option value="3">Pizza 2</option>
-                    <option value="4">Pizza 3</option>
-                </select>
-            </div>
-            <div class="col-auto">
-                <button onclick="getData()" class="btn btn-primary">Send Data</button>
-            </div>
+    <div class="container-fluid mt-5 mb-4">
+      <div class="filterContainer">
+        <div class="col-auto">
+          <select id="modelSelect" class="select-dropdown">
+            <option value="" disabled selected>Model</option>
+            <option value="Category">Category</option>
+            <option value="Store">Store</option>
+            <option value="Product">Product</option>
+          </select>
         </div>
+        <div class="col-auto">
+          <select id="attributeSelect" class="select-dropdown">
+            <option value="" disabled selected>Attribute</option>
+            <option value="revenue">Revenue</option>
+            <option value="sales">Sales</option>
+            <option value="customer">Customer</option>
+          </select>
+        </div>
+
+        <div class="col-auto">
+          <div
+            class="setDate"
+            style="display: flex; flex-direction: column; margin-right: 10px"
+          >
+            <form>
+              <input type="date" id="fromDate" name="fromDate" />
+              <br />
+              <input type="date" id="toDate" name="toDate" />
+            </form>
+          </div>
+        </div>
+        <div class="col-auto">
+          <select id="limitSelect" class="select-dropdown">
+            <option value="" disabled selected>Limit</option>
+            <option value="1">1</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="30">30</option>
+          </select>
+        </div>
+        <button onclick="getData()" class="btn btn-primary">Send Data</button>
+      </div>
     </div>
-    
     <div class="container mt-5">
-        <canvas id="barChart"></canvas>
+      <canvas id="barChart"></canvas>
     </div>
     <div class="container mt-5">
-        <canvas id="lineChart"></canvas>
+      <canvas id="lineChart"></canvas>
     </div>
     <div class="container mt-5">
-        <canvas id="scatterChart"></canvas>
+      <canvas id="scatterChart"></canvas>
     </div>
     <div class="container mt-5">
-        <canvas id="mapChart"></canvas>
+      <canvas id="mapChart"></canvas>
     </div>
 
-
-    <script src="../../data/tableRepo.js"></script>
+    <script src="../../data/chartsRepo.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+WmZU5i4/J5oRM/Xl1p+8aO3o2z1p" crossorigin="anonymous"></script>
-    <script src="charts.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+WmZU5i4/J5oRM/Xl1p+8aO3o2z1p"
+      crossorigin="anonymous"
+    ></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js"></script>
     <script src="./data/models/order.js"></script>
@@ -157,5 +156,272 @@
     <script src="../../data/filterTotalNumbersRepo.js"></script>
     <script src="../general/sidebar.js"></script>
     <script src="../../data/cities.js"></script>
-</body>
+
+    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/data.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/accessibility.js"></script>
+
+    <div id="container"></div>
+    <div id="table-div">
+      <table id="data">
+        <tr>
+          <td>1</td>
+          <td>HAWAII</td>
+          <td>2.0</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>NEW HAMPSHIRE</td>
+          <td>2.6</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>NORTH DAKOTA</td>
+          <td>10</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>NEBRASKA</td>
+          <td>2.7</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>IOWA</td>
+          <td>2.8</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>VERMONT</td>
+          <td>2.8</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>IDAHO</td>
+          <td>2.9</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>MAINE</td>
+          <td>3.0</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>WISCONSIN</td>
+          <td>3.0</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>COLORADO</td>
+          <td>3.1</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>MINNESOTA</td>
+          <td>3.1</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>UTAH</td>
+          <td>3.1</td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>TENNESSEE</td>
+          <td>3.2</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>INDIANA</td>
+          <td>3.4</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>KANSAS</td>
+          <td>3.4</td>
+        </tr>
+        <tr>
+          <td>16</td>
+          <td>ALABAMA</td>
+          <td>3.5</td>
+        </tr>
+        <tr>
+          <td>16</td>
+          <td>MASSACHUSETTS</td>
+          <td>3.5</td>
+        </tr>
+        <tr>
+          <td>16</td>
+          <td>MISSOURI</td>
+          <td>3.5</td>
+        </tr>
+        <tr>
+          <td>16</td>
+          <td>SOUTH DAKOTA</td>
+          <td>3.5</td>
+        </tr>
+        <tr>
+          <td>20</td>
+          <td>ARKANSAS</td>
+          <td>3.7</td>
+        </tr>
+        <tr>
+          <td>20</td>
+          <td>FLORIDA</td>
+          <td>3.7</td>
+        </tr>
+        <tr>
+          <td>20</td>
+          <td>VIRGINIA</td>
+          <td>3.7</td>
+        </tr>
+        <tr>
+          <td>23</td>
+          <td>TEXAS</td>
+          <td>3.9</td>
+        </tr>
+        <tr>
+          <td>24</td>
+          <td>MARYLAND</td>
+          <td>4.0</td>
+        </tr>
+        <tr>
+          <td>25</td>
+          <td>MONTANA</td>
+          <td>4.1</td>
+        </tr>
+        <tr>
+          <td>25</td>
+          <td>OKLAHOMA</td>
+          <td>4.1</td>
+        </tr>
+        <tr>
+          <td>25</td>
+          <td>OREGON</td>
+          <td>4.1</td>
+        </tr>
+        <tr>
+          <td>25</td>
+          <td>SOUTH CAROLINA</td>
+          <td>4.1</td>
+        </tr>
+        <tr>
+          <td>29</td>
+          <td>WYOMING</td>
+          <td>4.2</td>
+        </tr>
+        <tr>
+          <td>30</td>
+          <td>CALIFORNIA</td>
+          <td>4.3</td>
+        </tr>
+        <tr>
+          <td>31</td>
+          <td>GEORGIA</td>
+          <td>4.4</td>
+        </tr>
+        <tr>
+          <td>31</td>
+          <td>KENTUCKY</td>
+          <td>4.4</td>
+        </tr>
+        <tr>
+          <td>31</td>
+          <td>RHODE ISLAND</td>
+          <td>4.4</td>
+        </tr>
+        <tr>
+          <td>34</td>
+          <td>ARIZONA</td>
+          <td>4.5</td>
+        </tr>
+        <tr>
+          <td>34</td>
+          <td>NORTH CAROLINA</td>
+          <td>4.5</td>
+        </tr>
+        <tr>
+          <td>34</td>
+          <td>WASHINGTON</td>
+          <td>4.5</td>
+        </tr>
+        <tr>
+          <td>37</td>
+          <td>CONNECTICUT</td>
+          <td>4.6</td>
+        </tr>
+        <tr>
+          <td>37</td>
+          <td>DELAWARE</td>
+          <td>4.6</td>
+        </tr>
+        <tr>
+          <td>37</td>
+          <td>LOUISIANA</td>
+          <td>4.6</td>
+        </tr>
+        <tr>
+          <td>37</td>
+          <td>MISSISSIPPI</td>
+          <td>4.6</td>
+        </tr>
+        <tr>
+          <td>37</td>
+          <td>NEW YORK</td>
+          <td>4.6</td>
+        </tr>
+        <tr>
+          <td>42</td>
+          <td>MICHIGAN</td>
+          <td>4.7</td>
+        </tr>
+        <tr>
+          <td>42</td>
+          <td>OHIO</td>
+          <td>4.7</td>
+        </tr>
+        <tr>
+          <td>42</td>
+          <td>PENNSYLVANIA</td>
+          <td>4.7</td>
+        </tr>
+        <tr>
+          <td>45</td>
+          <td>ILLINOIS</td>
+          <td>4.8</td>
+        </tr>
+        <tr>
+          <td>46</td>
+          <td>NEVADA</td>
+          <td>5.0</td>
+        </tr>
+        <tr>
+          <td>46</td>
+          <td>NEW JERSEY</td>
+          <td>5.0</td>
+        </tr>
+        <tr>
+          <td>48</td>
+          <td>WEST VIRGINIA</td>
+          <td>5.5</td>
+        </tr>
+        <tr>
+          <td>49</td>
+          <td>DISTRICT OF COLUMBIA</td>
+          <td>6.0</td>
+        </tr>
+        <tr>
+          <td>49</td>
+          <td>NEW MEXICO</td>
+          <td>6.0</td>
+        </tr>
+        <tr>
+          <td>51</td>
+          <td>ALASKA</td>
+          <td>2.0</td>
+        </tr>
+      </table>
+    </div>
+  </body>
 </html>

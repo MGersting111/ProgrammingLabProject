@@ -1,0 +1,16 @@
+.filterContainer {
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+#container {
+    max-width: 800px;
+    height: 800px;
+    margin: 0 auto;
+}
+
+#table-div {
+    max-width: 400px;
+    margin: 3em auto;
+}
