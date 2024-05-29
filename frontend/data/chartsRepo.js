@@ -146,7 +146,9 @@ function handleBarClick(storeName, storeDataMap) {
   // Extract months and their corresponding revenues
   const months = Object.keys(storeObject).filter((key) => key !== "totalSum");
   const revenues = months.map((month) => storeObject[month]);
-
+  if (window.lineChart) {
+    window.lineChart.destroy(); // Destroy existing chart
+  }
   // Create the line chart
   window.lineChart = new Chart(ctx, {
     type: "line",
