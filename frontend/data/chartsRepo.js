@@ -58,6 +58,18 @@ function processData(data) {
 }
 
 function createBarChart(storeDataMap) {
+  var barChartDiv = document.getElementById("barChartDiv");
+  //barChartDiv.innerHTML = " ";
+  barChartDiv.style.display = "block";
+  var lineChartDiv = document.getElementById("lineChartDiv");
+  //lineChartDiv.innerHTML = " ";
+  lineChartDiv.style.display = "block";
+  var mapChartDiv = document.getElementById("mapChartDiv");
+  //mapChartDiv.innerHTML = " ";
+  mapChartDiv.style.display = "none";
+  var scatterChartDiv = document.getElementById("scatterChartDiv");
+  //scatterChartDiv.innerHTML = " ";
+  scatterChartDiv.style.display = "none";
   const storeNames = [];
   const storeSums = [];
 
@@ -76,20 +88,30 @@ function createBarChart(storeDataMap) {
           label: "# revenue",
           data: storeSums,
           backgroundColor: [
-            "rgba(255, 99, 132, 0.2)",
-            "rgba(54, 162, 235, 0.2)",
-            "rgba(255, 206, 86, 0.2)",
-            "rgba(75, 192, 192, 0.2)",
-            "rgba(153, 102, 255, 0.2)",
-            "rgba(255, 159, 64, 0.2)",
+            "#EC9740",
+            "#FFB347",
+            "#FFC966",
+            "#EFA94A",
+            "#FFD700",
+            "#8FBC8F",
+            "#4682B4",
+            "#6A5ACD",
+            "#DAA520",
+            "#CD5C5C",
+            "#F08080",
           ],
           borderColor: [
-            "rgba(255, 99, 132, 1)",
-            "rgba(54, 162, 235, 1)",
-            "rgba(255, 206, 86, 1)",
-            "rgba(75, 192, 192, 1)",
-            "rgba(153, 102, 255, 1)",
-            "rgba(255, 159, 64, 1)",
+            "#EC9740",
+            "#FFB347",
+            "#FFC966",
+            "#EFA94A",
+            "#FFD700",
+            "#8FBC8F",
+            "#4682B4",
+            "#6A5ACD",
+            "#DAA520",
+            "#CD5C5C",
+            "#F08080",
           ],
           borderWidth: 1,
         },
@@ -97,25 +119,30 @@ function createBarChart(storeDataMap) {
     },
     options: {
       scales: {
+        x: {
+          ticks: { color: "white" },
+        },
         y: {
+          ticks: { color: "white" },
           beginAtZero: true,
         },
       },
       onClick: (event, elements) => {
+        console.log(elements);
         if (elements.length > 0) {
           const elementIndex = elements[0].index;
           const storeName = storeNames[elementIndex];
           const storeSum = storeSums[elementIndex];
-          handleBarClick(storeName, storeSums);
+          handleBarClick(storeName, storeDataMap);
         }
       },
     },
   });
 }
 
-function handleBarClick(storeName, storeObject) {
+function handleBarClick(storeName, storeDataMap) {
   const ctx = document.getElementById("lineChart").getContext("2d");
-  console.log(storeObject);
+  const storeObject = storeDataMap.get(storeName);
   // Extract months and their corresponding revenues
   const months = Object.keys(storeObject).filter((key) => key !== "totalSum");
   const revenues = months.map((month) => storeObject[month]);
@@ -129,8 +156,32 @@ function handleBarClick(storeName, storeObject) {
         {
           label: `Revenue for ${storeName}`,
           data: revenues,
-          borderColor: "rgba(75, 192, 192, 1)",
-          backgroundColor: "rgba(75, 192, 192, 0.2)",
+          backgroundColor: [
+            "#EC9740",
+            "#FFB347",
+            "#FFC966",
+            "#EFA94A",
+            "#FFD700",
+            "#8FBC8F",
+            "#4682B4",
+            "#6A5ACD",
+            "#DAA520",
+            "#CD5C5C",
+            "#F08080",
+          ],
+          borderColor: [
+            "#EC9740",
+            "#FFB347",
+            "#FFC966",
+            "#EFA94A",
+            "#FFD700",
+            "#8FBC8F",
+            "#4682B4",
+            "#6A5ACD",
+            "#DAA520",
+            "#CD5C5C",
+            "#F08080",
+          ],
           fill: true,
           borderWidth: 2,
         },
@@ -139,7 +190,13 @@ function handleBarClick(storeName, storeObject) {
     options: {
       responsive: true,
       scales: {
+        x: {
+          ticks: { color: "white" },
+
+          beginAtZero: true,
+        },
         y: {
+          ticks: { color: "white" },
           beginAtZero: true,
         },
       },
@@ -147,98 +204,113 @@ function handleBarClick(storeName, storeObject) {
   });
 }
 
-(async () => {
-  const topology = await fetch(
-    "https://code.highcharts.com/mapdata/countries/us/custom/us-small.topo.json"
-  ).then((response) => response.json());
+function createMapChart() {
+  var barChartDiv = document.getElementById("barChartDiv");
+  //barChartDiv.innerHTML = " ";
+  barChartDiv.style.display = "none";
+  var lineChartDiv = document.getElementById("lineChartDiv");
+  //lineChartDiv.innerHTML = " ";
+  lineChartDiv.style.display = "none";
+  var scatterChartDiv = document.getElementById("scatterChartDiv");
+  //scatterChartDiv.innerHTML = " ";
+  scatterChartDiv.style.display = "none";
 
-  // Load the data from the HTML table and tag it with an upper case name used
-  // for joining
-  const data = [];
+  var mapChartDiv = document.getElementById("mapChartDiv");
+  mapChartDiv.style.display = "block";
 
-  Highcharts.data({
-    table: document.getElementById("data"),
-    startColumn: 1,
-    firstRowAsNames: false,
-    complete: function (options) {
-      options.series[0].data.forEach(function (p) {
-        data.push({
-          ucName: p[0],
-          value: p[1],
+  (async () => {
+    const topology = await fetch(
+      "https://code.highcharts.com/mapdata/countries/us/custom/us-small.topo.json"
+    ).then((response) => response.json());
+
+    // Load the data from the HTML table and tag it with an upper case name used
+    // for joining
+    const data = [];
+
+    Highcharts.data({
+      table: document.getElementById("data"),
+      startColumn: 1,
+      firstRowAsNames: false,
+      complete: function (options) {
+        options.series[0].data.forEach(function (p) {
+          data.push({
+            ucName: p[0],
+            value: p[1],
+          });
         });
-      });
-    },
-  });
-
-  // Prepare map data for joining
-  topology.objects.default.geometries.forEach(function (g) {
-    if (g.properties && g.properties.name) {
-      g.properties.ucName = g.properties.name.toUpperCase();
-    }
-  });
-
-  // Initialize the chart
-  Highcharts.mapChart("container", {
-    title: {
-      text: "US unemployment rate in Dec. 2017",
-      align: "left",
-    },
-
-    subtitle: {
-      text: "Small US map with data labels",
-      align: "left",
-    },
-
-    mapNavigation: {
-      enabled: true,
-      enableButtons: false,
-    },
-
-    xAxis: {
-      labels: {
-        enabled: false,
       },
-    },
+    });
 
-    colorAxis: {
-      labels: {
-        format: "{value}%",
-      },
-      stops: [
-        [0.2, "#188e2a"], // Green
-        [0.5, "#fee401"], // Yellow
-        [1, "#df1309"], // Red
-      ],
-      min: 0,
-      max: 8,
-    },
+    // Prepare map data for joining
+    topology.objects.default.geometries.forEach(function (g) {
+      if (g.properties && g.properties.name) {
+        g.properties.ucName = g.properties.name.toUpperCase();
+      }
+    });
 
-    series: [
-      {
-        mapData: topology,
-        data,
-        joinBy: "ucName",
-        name: "Unemployment rate per 2017",
-        dataLabels: {
-          enabled: true,
-          format: "{point.properties.hc-a2}",
-          style: {
-            fontSize: "10px",
-          },
-        },
-        tooltip: {
-          valueSuffix: "%",
-        },
+    // Initialize the chart
+    Highcharts.mapChart("container", {
+      title: {
+        text: "Stores and their Revenue",
+        align: "left",
       },
-      {
-        // The connector lines
-        type: "mapline",
-        data: Highcharts.geojson(topology, "mapline"),
-        color: "silver",
-        accessibility: {
+
+      subtitle: {
+        text: "",
+        align: "left",
+      },
+
+      mapNavigation: {
+        enabled: true,
+        enableButtons: false,
+      },
+
+      xAxis: {
+        labels: {
           enabled: false,
         },
       },
-    ],
-  });
-})();
+
+      colorAxis: {
+        labels: {
+          format: "{value}%",
+        },
+        stops: [
+          [0.2, "#188e2a"], // Green
+          [0.5, "#fee401"], // Yellow
+          [1, "#df1309"], // Red
+        ],
+        min: 0,
+        max: 8,
+      },
+
+      series: [
+        {
+          mapData: topology,
+          data,
+          joinBy: "ucName",
+          name: "Unemployment rate per 2017",
+          dataLabels: {
+            enabled: true,
+            format: "{point.properties.hc-a2}",
+            style: {
+              fontSize: "10px",
+            },
+          },
+          tooltip: {
+            valueSuffix: "%",
+          },
+        },
+        {
+          // The connector lines
+          type: "mapline",
+          data: Highcharts.geojson(topology, "mapline"),
+          color: "silver",
+          accessibility: {
+            enabled: false,
+          },
+        },
+      ],
+    });
+  })();
+}
