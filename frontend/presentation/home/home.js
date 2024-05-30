@@ -1,61 +1,29 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Function to initialize Chart.js chart
-    function initializeChart() {
-        const canvas = document.getElementById('myChart');
-        const ctx = canvas.getContext('2d');
+    const openModalBtn = document.getElementById('openModal');
+    const closeModalBtn = document.querySelector('.icon-close');
+    const wrapper = document.querySelector('.wrapper');
 
-        const data = {
-            datasets: [{
-                data: [59, 41], // Example data to represent 59% progress
-                backgroundColor: ['#FFA726', '#E0E0E0'], // Colors for the chart
-                borderWidth: 0 // No border
-            }]
-        };
+    openModalBtn.addEventListener('click', () => {
+        wrapper.style.display = 'flex';
+        setTimeout(() => {
+            wrapper.classList.add('active');
+        }, 10);
+    });
 
-        const options = {
-            rotation: -0.5 * Math.PI, // Start angle for the circular chart
-            circumference: 2 * Math.PI, // Full circle
-            cutout: '80%', // Creates the thickness of the ring
-            responsive: true, // Make the chart responsive
-            maintainAspectRatio: false, // Don't maintain aspect ratio
-            plugins: {
-                tooltip: {
-                    enabled: false // Disable tooltips
-                },
-                legend: {
-                    display: false // Hide the legend
-                }
-            }
-        };
+    closeModalBtn.addEventListener('click', () => {
+        wrapper.classList.remove('active');
+        setTimeout(() => {
+            wrapper.style.display = 'none';
+        }, 300); // Wait for the transition to finish
+    });
 
-        const myChart = new Chart(ctx, {
-            type: 'doughnut', // Specify chart type
-            data: data,
-            options: options
-        });
-
-        // Adding the percentage text in the center
-        Chart.pluginService.register({
-            beforeDraw: function(chart) {
-                const width = chart.chart.width,
-                    height = chart.chart.height,
-                    ctx = chart.chart.ctx;
-
-                ctx.restore();
-                const fontSize = (height / 114).toFixed(2);
-                ctx.font = fontSize + "em Arial";
-                ctx.textBaseline = "middle";
-
-                const text = "59%",
-                    textX = Math.round((width - ctx.measureText(text).width) / 2),
-                    textY = height / 2;
-
-                ctx.fillText(text, textX, textY);
-                ctx.save();
-            }
-        });
-    }
-
-    // Initialize the chart
-    initializeChart();
+    document.getElementById('goalForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Implement goal addition logic here
+        console.log('Goal added!');
+        wrapper.classList.remove('active');
+        setTimeout(() => {
+            wrapper.style.display = 'none';
+        }, 300);
+    });
 });
