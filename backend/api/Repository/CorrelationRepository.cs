@@ -11,7 +11,7 @@ namespace api.Repository
 {
     public class CorrelationRepository : ICorrelationRepository
     {
-         private readonly ApplicationDBContext _context;
+        private readonly ApplicationDBContext _context;
 
         public CorrelationRepository(ApplicationDBContext context)
         {
@@ -20,36 +20,79 @@ namespace api.Repository
 
         public async Task<bool> IsModelSupported(string model)
         {
-            // Überprüfen, ob das angegebene Modell in der Datenbank vorhanden ist
-            return await _context.Set<Store>().AnyAsync(s => s.StoreId == model);
+            return model.ToLower() == "store" || model.ToLower() == "order";
         }
 
         public async Task<bool> AreAttributesValid(string model, string xAttribute, string yAttribute)
         {
-            // Überprüfen, ob die angegebenen Attribute im angegebenen Modell vorhanden sind
-            if (model == "Store")
+            if (model.ToLower() == "order")
             {
-                return await _context.Set<Store>().AnyAsync(s => EF.Property<double>(s, xAttribute) != null && EF.Property<double>(s, yAttribute) != null);
+                var orderProps = typeof(Order).GetProperties().Select(p => p.Name.ToLower()).ToList();
+                return orderProps.Contains(xAttribute.ToLower()) && orderProps.Contains(yAttribute.ToLower());
             }
-            else if (model == "Customer")
+            else if (model.ToLower() == "store")
             {
-                return await _context.Set<Customer>().AnyAsync(c => EF.Property<double>(c, xAttribute) != null && EF.Property<double>(c, yAttribute) != null);
+                var validAttributes = new List<string> { "totalrevenue", "ordercount" };
+                return validAttributes.Contains(xAttribute.ToLower()) && validAttributes.Contains(yAttribute.ToLower());
             }
-            else if (model == "Order")
-            {
-                return await _context.Set<Order>().AnyAsync(o => EF.Property<double>(o, xAttribute) != null && EF.Property<double>(o, yAttribute) != null);
-            }
-            // Weitere Modelle können entsprechend hinzugefügt werden
-
-            return false; // Modell nicht gefunden oder Attribute nicht vorhanden
+            return false;
         }
 
-        public async Task<double> CalculateCorrelation(string model, string xAttribute, string yAttribute)
+       public async Task<(double[] XValues, double[] YValues)> FetchData(string model, DateTime startTime, DateTime endTime, string xAttribute, string yAttribute)
+{
+    if (model.ToLower() == "store")
+    {
+        var storeIds = await _context.Orders
+            .Where(o => o.OrderDate >= startTime && o.OrderDate <= endTime)
+            .Select(o => o.StoreId)
+            .Distinct()
+            .ToListAsync();
+
+        var xValuesTask = GetAttributeValues(storeIds, startTime, endTime, xAttribute);
+        var yValuesTask = GetAttributeValues(storeIds, startTime, endTime, yAttribute);
+
+        var xValues = await xValuesTask;
+        var yValues = await yValuesTask;
+
+        return (xValues, yValues);
+    }
+
+    throw new ArgumentException("Invalid model specified.");
+}
+
+private async Task<double[]> GetAttributeValues(List<string> storeIds, DateTime startTime, DateTime endTime, string attribute)
+{
+    switch (attribute.ToLower())
+    {
+        case "totalrevenue":
+            var totalRevenues = await _context.Orders
+                .Where(o => storeIds.Contains(o.StoreId) && o.OrderDate >= startTime && o.OrderDate <= endTime)
+                .GroupBy(o => o.StoreId)
+                .Select(g => g.Sum(o => o.total))
+                .ToListAsync();
+            return totalRevenues.Select(tr => (double)tr).ToArray();
+            
+        case "ordercount":
+            var orderCounts = await _context.Orders
+                .Where(o => storeIds.Contains(o.StoreId) && o.OrderDate >= startTime && o.OrderDate <= endTime)
+                .GroupBy(o => o.StoreId)
+                .Select(g => g.Count())
+                .ToListAsync();
+            return orderCounts.Select(oc => (double)oc).ToArray();
+            
+        default:
+            throw new ArgumentException($"Invalid attribute specified: {attribute}");
+    }
+}
+
+        public double CalculateCorrelation(double[] xValues, double[] yValues)
         {
-            // Hier müsste die eigentliche Logik zur Berechnung der Korrelation implementiert werden
-            // Beispiel: Pearson-Korrelation, Spearman-Korrelation oder eine andere Methode
-            // Für dieses Beispiel wird einfach 0 zurückgegeben
-            return 0;
+            throw new NotImplementedException();
+        }
+
+        public async Task<double> CalculateCorrelation(string model, string xAttribute, string yAttribute, DateTime startTime, DateTime endTime)
+        {
+            throw new NotImplementedException();
         }
     }
 }

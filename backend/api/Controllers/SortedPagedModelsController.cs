@@ -20,7 +20,7 @@ namespace api.Controllers
     {
         private readonly ApplicationDBContext _context;
         private readonly IProductRepository _productRepository;
-         private readonly IOrderItemRepository _orderItemRepository;
+        private readonly IOrderItemRepository _orderItemRepository;
         private readonly IStoreRepository _storeRepository;
         private readonly ICustomerRepository _customerRepository;
         private readonly IOrderRepository _orderRepository;
