@@ -1,61 +1,37 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Function to initialize Chart.js chart
-    function initializeChart() {
-        const canvas = document.getElementById('myChart');
-        const ctx = canvas.getContext('2d');
-
-        const data = {
-            datasets: [{
-                data: [59, 41], // Example data to represent 59% progress
-                backgroundColor: ['#FFA726', '#E0E0E0'], // Colors for the chart
-                borderWidth: 0 // No border
-            }]
-        };
-
-        const options = {
-            rotation: -0.5 * Math.PI, // Start angle for the circular chart
-            circumference: 2 * Math.PI, // Full circle
-            cutout: '80%', // Creates the thickness of the ring
-            responsive: true, // Make the chart responsive
-            maintainAspectRatio: false, // Don't maintain aspect ratio
-            plugins: {
-                tooltip: {
-                    enabled: false // Disable tooltips
-                },
-                legend: {
-                    display: false // Hide the legend
-                }
-            }
-        };
-
-        const myChart = new Chart(ctx, {
-            type: 'doughnut', // Specify chart type
-            data: data,
-            options: options
-        });
-
-        // Adding the percentage text in the center
-        Chart.pluginService.register({
-            beforeDraw: function(chart) {
-                const width = chart.chart.width,
-                    height = chart.chart.height,
-                    ctx = chart.chart.ctx;
-
-                ctx.restore();
-                const fontSize = (height / 114).toFixed(2);
-                ctx.font = fontSize + "em Arial";
-                ctx.textBaseline = "middle";
-
-                const text = "59%",
-                    textX = Math.round((width - ctx.measureText(text).width) / 2),
-                    textY = height / 2;
-
-                ctx.fillText(text, textX, textY);
-                ctx.save();
-            }
-        });
-    }
-
-    // Initialize the chart
-    initializeChart();
+document.getElementById('openModal').addEventListener('click', function() {
+    document.getElementById('inputWrapper').style.display = 'flex'; // Show the wrapper
 });
+
+function closeWrapper() {
+    document.getElementById('inputWrapper').style.display = 'none'; // Hide the wrapper
+}
+
+// Optional: Close when clicking outside the form box
+window.addEventListener('click', function(event) {
+    let formBox = document.querySelector('.form-box');
+    if (event.target == document.getElementById('inputWrapper') && !formBox.contains(event.target)) {
+        closeWrapper();
+    }
+});
+document.getElementById('dataForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from submitting traditionally
+
+    // Get the values from the form
+    var topicSelect = document.getElementById('topicSelect').value;
+    var periodSelect = document.getElementById('periodSelect').value;
+    var dataInput = document.getElementById('dataInput').value;
+
+    // Create a new list item
+    var newGoal = document.createElement('li');
+    newGoal.textContent = `Topic: ${topicSelect}, Period: ${periodSelect}, Number: ${dataInput}`;
+
+    // Append the new goal to the goals list
+    document.getElementById('goals-list').appendChild(newGoal);
+
+    // Optionally clear the form fields
+    document.getElementById('dataForm').reset();
+
+    // Hide the wrapper
+    closeWrapper();
+});
+
