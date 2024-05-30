@@ -85,14 +85,46 @@ private async Task<double[]> GetAttributeValues(List<string> storeIds, DateTime 
     }
 }
 
-        public double CalculateCorrelation(double[] xValues, double[] yValues)
+
+
+public async Task<double> CalculateCorrelation(string model, string xAttribute, string yAttribute, DateTime startTime, DateTime endTime)
         {
-            throw new NotImplementedException();
+            var data = await FetchData(model, startTime, endTime, xAttribute, yAttribute);
+
+            // Prüfe, ob Daten zum Berechnen der Korrelation vorhanden sind
+            if (data.XValues.Length == 0 || data.YValues.Length == 0 || data.XValues.Length != data.YValues.Length)
+            {
+                throw new ArgumentException("Insufficient or mismatched data for correlation calculation.");
+            }
+
+            // Berechne die Korrelation
+            double correlation = CalculatePearsonCorrelation(data.XValues, data.YValues);
+
+            return correlation;
         }
 
-        public async Task<double> CalculateCorrelation(string model, string xAttribute, string yAttribute, DateTime startTime, DateTime endTime)
+        // Eine Beispielimplementierung der Pearson-Korrelationskoeffizientenberechnung
+        public double CalculatePearsonCorrelation(double[] xValues, double[] yValues)
         {
-            throw new NotImplementedException();
+            double sumX = xValues.Sum();
+            double sumY = yValues.Sum();
+            double sumXY = xValues.Zip(yValues, (x, y) => x * y).Sum();
+            double sumXSquare = xValues.Sum(x => x * x);
+            double sumYSquare = yValues.Sum(y => y * y);
+            int n = xValues.Length;
+
+            double numerator = n * sumXY - sumX * sumY;
+            double denominator = Math.Sqrt((n * sumXSquare - sumX * sumX) * (n * sumYSquare - sumY * sumY));
+
+            if (denominator == 0)
+            {
+                // Wenn der Nenner 0 ist, gibt es keine Korrelation.
+                return 0;
+            }
+
+            double correlation = numerator / denominator;
+
+            return correlation;
         }
     }
 }
