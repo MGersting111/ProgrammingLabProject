@@ -26,6 +26,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 builder.Services.AddScoped<ITotalNumberRepository, TotalNumberRepository>();
 builder.Services.AddScoped<ISortedPagedModelsRepository, SortedPagedModelsRepository>();
+builder.Services.AddScoped<ICompareChartsRepository, CompareChartsRepository>();
 
 
 
