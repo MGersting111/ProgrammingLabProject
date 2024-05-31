@@ -2,6 +2,7 @@ const baseUrl = "http://localhost:3000/chart";
 const mapUrl = "http://localhost:3000/map";
 const barChartContainer = document.querySelector("#barChart");
 const lineChartContainer = document.querySelector("#lineChart");
+const scatterChartContainer = document.querySelector("#scatterChart");
 var barChart;
 var lineChart;
 
@@ -364,5 +365,86 @@ async function fetchAndDisplayMapData() {
     });
   } catch (error) {
     console.error("Error fetching the data:", error);
+  }
+}
+
+async function createCorrelationChart() {
+  const dateFrom = document.getElementById("fromDate").value;
+  const dateTo = document.getElementById("toDate").value;
+  var barChartDiv = document.getElementById("barChartDiv");
+  //barChartDiv.innerHTML = " ";
+  barChartDiv.style.display = "none";
+  var lineChartDiv = document.getElementById("lineChartDiv");
+  //lineChartDiv.innerHTML = " ";
+  lineChartDiv.style.display = "none";
+  var scatterChartDiv = document.getElementById("scatterChartDiv");
+  //scatterChartDiv.innerHTML = " ";
+  scatterChartDiv.style.display = "block";
+
+  var mapChartDiv = document.getElementById("mapChartDiv");
+  mapChartDiv.style.display = "none";
+  var corUrl = `http://localhost:5004/api/Correlation/Calculate?StartTime=${dateFrom}&EndTime=${dateTo}&FirstModel=Store&XAttribute=TotalRevenue&YAttribute=OrderCount`;
+
+  try {
+    const response = await fetch(corUrl);
+    const data = await response.json();
+
+    const xValues = data.xValues;
+    const yValues = data.yValues;
+    const correlation = data.correlation;
+
+    // Display correlation above the chart
+    document.getElementById(
+      "correlation"
+    ).innerText = `Correlation: ${correlation}`;
+
+    // Prepare data for Chart.js
+    const scatterData = xValues.map((x, index) => ({ x, y: yValues[index] }));
+
+    // Create Scatter Chart
+    const ctx = document.getElementById("scatterChart").getContext("2d");
+    new Chart(ctx, {
+      type: "scatter",
+      data: {
+        datasets: [
+          {
+            label: "Total Revenue vs Order Count",
+            data: scatterData,
+            backgroundColor: "#EC9740",
+            borderColor: "#EC9740",
+            pointBackgroundColor: "#EC9740",
+            pointBorderColor: "#fff",
+            pointHoverBackgroundColor: "#fff",
+            pointHoverBorderColor: "#EC9740",
+          },
+        ],
+      },
+      options: {
+        scales: {
+          x: {
+            type: "linear",
+            position: "bottom",
+            title: {
+              display: true,
+              text: "Total Revenue",
+            },
+            ticks: {
+              color: "white",
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: "Order Count",
+            },
+            ticks: {
+              color: "white",
+            },
+          },
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching data:", error);
   }
 }

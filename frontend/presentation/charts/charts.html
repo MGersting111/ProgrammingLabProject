@@ -133,6 +133,10 @@
         <button onclick="createMapChart()" class="btn btn-primary">
           Show Map
         </button>
+        <div style="width: 20px"></div>
+        <button onclick="createCorrelationChart()" class="btn btn-primary">
+          Show correlation
+        </button>
       </div>
     </div>
     <div id="charts">
@@ -143,6 +147,7 @@
         <canvas id="lineChart"></canvas>
       </div>
       <div class="container mt-5" id="scatterChartDiv">
+        <p id="correlation" style="color: white"></p>
         <canvas id="scatterChart"></canvas>
       </div>
     </div>
