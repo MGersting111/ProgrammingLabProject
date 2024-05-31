@@ -13,9 +13,9 @@ namespace api.Data
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options)
             : base(options)
         {
-
+            Options = options;
         }
-
+        public DbContextOptions<ApplicationDBContext> Options { get; }
         public DbSet<Store> Stores { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
