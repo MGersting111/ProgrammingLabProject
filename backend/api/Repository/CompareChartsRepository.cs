@@ -7,6 +7,7 @@ using api.Data;
 using api.Models;
 using api.Dto;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 
 namespace api.Repository
@@ -25,6 +26,7 @@ namespace api.Repository
 
         }
 
+
        
 public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter)
 {
@@ -41,10 +43,18 @@ public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter)
         // Berechnen Sie die Metriken für jeden Monat im angegebenen Zeitraum
         for (var date = filter.StartTime; date <= filter.EndTime; date = date.AddMonths(1))
         {
+            var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(date.Month);
+
             var orders = _context.Orders
                 .Where(order => order.StoreId == store.StoreId && order.OrderDate.Month == date.Month && order.OrderDate.Year == date.Year);
 
-            var chartsInfo = new ChartsInfo { StoreId = store.StoreId, Month = date.Month, Year = date.Year };
+            var chartsInfo = new ChartsInfo 
+            { 
+                StoreId = store.StoreId, 
+                Month = monthName,  // Hier setzen Sie den Monatsnamen
+                Year = date.Year,
+               
+            };
 
             if (filter.Metrics.Contains("totalRevenue"))
             {
@@ -70,7 +80,6 @@ public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter)
     return chartsInfos;
 }
 
-        
 
 
 
