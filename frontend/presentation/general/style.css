@@ -82,15 +82,3 @@ body {
     padding-right: 5px !important; /* Adjust right padding for columns */
     padding-left: 5px !important; /* Adjust left padding for columns */
 }
-.arrow-container {
-    display: flex;
-    align-items: center;
-    width: 120px; /* Adjust width as needed */
-    height: 40px; /* Adjust height as needed */
-    background-color: rgb(119, 176, 170); /* Example background color */
-    border: 0px solid #fff; /* Example border */
-    
-}
-.arrow-icon {
-    margin: 100px; 
-}
