@@ -32,15 +32,19 @@ public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter)
 {
     var chartsInfos = new List<ChartsInfo>();
 
-    // Filtern Sie die Stores nach dem angegebenen Zeitraum und begrenzen Sie die Anzahl der Stores, wenn ein Limit angegeben wurde
     var stores = await _context.Stores
         .Where(store => store.Orders.Any(order => order.OrderDate >= filter.StartTime && order.OrderDate <= filter.EndTime))
         .Take(filter.Limit ?? int.MaxValue)
         .ToListAsync();
 
-    foreach (var store in stores)
+   foreach (var store in stores)
     {
-        // Berechnen Sie die Metriken für jeden Monat im angegebenen Zeitraum
+        var chartsInfo = new ChartsInfo 
+        { 
+            StoreId = store.StoreId, 
+            Metrics = new Dictionary<string, double>()
+        };
+
         for (var date = filter.StartTime; date <= filter.EndTime; date = date.AddMonths(1))
         {
             var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(date.Month);
@@ -48,33 +52,30 @@ public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter)
             var orders = _context.Orders
                 .Where(order => order.StoreId == store.StoreId && order.OrderDate.Month == date.Month && order.OrderDate.Year == date.Year);
 
-            var chartsInfo = new ChartsInfo 
-            { 
-                StoreId = store.StoreId, 
-                Month = monthName,  // Hier setzen Sie den Monatsnamen
-                Year = date.Year,
-               
-            };
-
             if (filter.Metrics.Contains("totalRevenue"))
             {
-                chartsInfo.TotalRevenue = await orders.SumAsync(order => order.total);
+                var totalRevenue = await orders.SumAsync(order => order.total);
+                chartsInfo.Metrics.Add(monthName + " Total Revenue", totalRevenue);
             }
             if (filter.Metrics.Contains("customer"))
             {
-                chartsInfo.CustomerCount = await orders.Select(order => order.CustomerId).Distinct().CountAsync();
+                var customerCount = await orders.Select(order => order.CustomerId).Distinct().CountAsync();
+                chartsInfo.Metrics.Add(monthName + " Customer Count", customerCount);
             }
             if (filter.Metrics.Contains("revenuePerCustomer"))
             {
-                chartsInfo.RevenuePerCustomer = chartsInfo.CustomerCount > 0 ? chartsInfo.TotalRevenue / chartsInfo.CustomerCount : 0;
+                var customerCount = await orders.Select(order => order.CustomerId).Distinct().CountAsync();
+                var revenuePerCustomer = customerCount > 0 ? await orders.SumAsync(order => order.total) / customerCount : 0;
+                chartsInfo.Metrics.Add(monthName + " Revenue Per Customer", revenuePerCustomer);
             }
             if (filter.Metrics.Contains("sales"))
             {
-                chartsInfo.OrderCount = await orders.CountAsync();
+                var orderCount = await orders.CountAsync();
+                chartsInfo.Metrics.Add(monthName + " Order Count", orderCount);
             }
-
-            chartsInfos.Add(chartsInfo);
         }
+
+        chartsInfos.Add(chartsInfo);
     }
 
     return chartsInfos;

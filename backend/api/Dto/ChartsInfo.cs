@@ -9,12 +9,9 @@ namespace api.Dto
     {
 
         public string? StoreId { get; set; }
+
+        public Dictionary<string, double> Metrics { get; set; }
         //public List<DateTime> OrderDates { get; set; }
-        public string Month { get; set; }
-        public int Year { get; set; }
-        public double TotalRevenue { get; set; }
-        public int CustomerCount { get; set; }
-        public double RevenuePerCustomer { get; set; }
-        public int OrderCount { get; set; }
+        
     }
 }
