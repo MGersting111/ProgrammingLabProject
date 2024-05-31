@@ -7,7 +7,7 @@ var sortColumn = "Category";
 var sortOrder = "desc";
 
 const modelAttributes = {
-  customers: ["CustomerID", "Latitude", "Longitude"],
+  customers: ["CustomerId", "Latitude", "Longitude"],
   stores: [
     "City",
     "State",

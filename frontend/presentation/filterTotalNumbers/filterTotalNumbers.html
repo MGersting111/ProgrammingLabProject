@@ -68,29 +68,25 @@
       <option value="nothing"></option>
         <!-- Optionen werden hier dynamisch eingefügt -->
     </select><br>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- select2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <!-- Bootstrap JS (optional) -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+WmZU5i4/J5oRM/Xl1p+8aO3o2z1p" crossorigin="anonymous"></script>
-    
     <script>
-    // Liste der States und Cities
-    var storeData = new StoreData().storeData;
-    // Dropdown-Menü für Stores
-    var storesDropdown = $('#stores');
-    // Optionen in das Dropdown-Menü einfügen
-    for (const stateCode in storeData) {
-    // Create option element with state code (key)
-    var option = $('<option></option>').text(stateCode);
+    document.addEventListener('DOMContentLoaded', () => {
+            const storeDataInstance = new StoreData();
+            const selectElement = document.getElementById('stores');
 
-    // Append the option to the dropdown menu
-    storesDropdown.append(option);
-    }
+            // Set to keep track of unique keys
+            const uniqueKeys = new Set();
 
+            for (const [key, value] of Object.entries(storeDataInstance.storeData)) {
+                // Skip duplicate keys
+                if (uniqueKeys.has(key)) continue;
+                uniqueKeys.add(key);
 
-    // Initialize select2
-    storesDropdown.select2();
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = key;
+                selectElement.appendChild(option);
+            }
+        });
     </script>
     
     <div class="setDate" style="display: flex; flex-direction: column; margin-right: 10px;">
@@ -112,13 +108,20 @@
     <!-- Button -->
     <button onclick="getData()" class="btn btn-primary">Daten senden</button>
     </div>
-
-    <div class="totalNumbers" style="display: none;">
-        <table>
-            <tr><td>Sales:</td><td class="sales"></td></tr>
-            <tr><td>Revenue:</td><td class="revenue"></td></tr>
-            <tr><td>Customers:</td><td class="customers"></td></tr>
-            <tr><td>Average revenue per customer:</td><td class="arpc"></td></tr>
+    <div style="height: 20;"></div>
+    <div class="totalNumbers" style="margin-left: 20;">
+        <table id="totalNumbersTable" border="1">
+            <thead>
+                <tr>
+                    <th>Store ID</th>
+                    <th>Order Count</th>
+                    <th>Total Revenue</th>
+                    <th>Customer Count</th>
+                    <th>Revenue Per Customer</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
         </table>
     </div>
 

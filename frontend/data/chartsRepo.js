@@ -1,6 +1,9 @@
 const baseUrl = "http://localhost:3000/chart";
+const mapUrl = "http://localhost:3000/map";
 const barChartContainer = document.querySelector("#barChart");
 const lineChartContainer = document.querySelector("#lineChart");
+var barChart;
+var lineChart;
 
 function getData() {
   const model = document.getElementById("modelSelect").value;
@@ -77,9 +80,12 @@ function createBarChart(storeDataMap) {
     storeNames.push(storeName);
     storeSums.push(storeObject.totalSum);
   });
+  if (barChart != null) {
+    barChart.destroy();
+  }
   console.log(storeSums);
   const ctx = document.getElementById("barChart").getContext("2d");
-  const barChart = new Chart(ctx, {
+  barChart = new Chart(ctx, {
     type: "bar",
     data: {
       labels: storeNames,
@@ -146,8 +152,8 @@ function handleBarClick(storeName, storeDataMap) {
   // Extract months and their corresponding revenues
   const months = Object.keys(storeObject).filter((key) => key !== "totalSum");
   const revenues = months.map((month) => storeObject[month]);
-  if (window.lineChart) {
-    window.lineChart.destroy(); // Destroy existing chart
+  if (window.lineChart != null) {
+    window.lineChart.destroy();
   }
   // Create the line chart
   window.lineChart = new Chart(ctx, {
@@ -219,100 +225,144 @@ function createMapChart() {
 
   var mapChartDiv = document.getElementById("mapChartDiv");
   mapChartDiv.style.display = "block";
+  fetchAndDisplayMapData();
+  setTimeout(function () {
+    // Code, der erst nach 2 Sekunden ausgeführt wird
 
-  (async () => {
-    const topology = await fetch(
-      "https://code.highcharts.com/mapdata/countries/us/custom/us-small.topo.json"
-    ).then((response) => response.json());
+    (async () => {
+      const topology = await fetch(
+        "https://code.highcharts.com/mapdata/countries/us/custom/us-small.topo.json"
+      ).then((response) => response.json());
 
-    // Load the data from the HTML table and tag it with an upper case name used
-    // for joining
-    const data = [];
-
-    Highcharts.data({
-      table: document.getElementById("data"),
-      startColumn: 1,
-      firstRowAsNames: false,
-      complete: function (options) {
-        options.series[0].data.forEach(function (p) {
-          data.push({
-            ucName: p[0],
-            value: p[1],
+      // Load the data from the HTML table and tag it with an upper case name used
+      // for joining
+      const data = [];
+      Highcharts.data({
+        table: document.getElementById("data"),
+        startColumn: 1,
+        firstRowAsNames: false,
+        complete: function (options) {
+          options.series[0].data.forEach(function (p) {
+            data.push({
+              ucName: p[0],
+              value: p[1],
+            });
           });
-        });
-      },
-    });
-
-    // Prepare map data for joining
-    topology.objects.default.geometries.forEach(function (g) {
-      if (g.properties && g.properties.name) {
-        g.properties.ucName = g.properties.name.toUpperCase();
-      }
-    });
-
-    // Initialize the chart
-    Highcharts.mapChart("container", {
-      title: {
-        text: "Stores and their Revenue",
-        align: "left",
-      },
-
-      subtitle: {
-        text: "",
-        align: "left",
-      },
-
-      mapNavigation: {
-        enabled: true,
-        enableButtons: false,
-      },
-
-      xAxis: {
-        labels: {
-          enabled: false,
         },
-      },
+      });
 
-      colorAxis: {
-        labels: {
-          format: "{value}%",
-        },
-        stops: [
-          [0.2, "#188e2a"], // Green
-          [0.5, "#fee401"], // Yellow
-          [1, "#df1309"], // Red
-        ],
-        min: 0,
-        max: 8,
-      },
+      // Prepare map data for joining
+      topology.objects.default.geometries.forEach(function (g) {
+        if (g.properties && g.properties.name) {
+          g.properties.ucName = g.properties.name.toUpperCase();
+        }
+      });
 
-      series: [
-        {
-          mapData: topology,
-          data,
-          joinBy: "ucName",
-          name: "Unemployment rate per 2017",
-          dataLabels: {
-            enabled: true,
-            format: "{point.properties.hc-a2}",
-            style: {
-              fontSize: "10px",
-            },
-          },
-          tooltip: {
-            valueSuffix: "%",
-          },
+      // Initialize the chart
+      Highcharts.mapChart("container", {
+        title: {
+          text: "Stores and their Revenue",
+          align: "left",
         },
-        {
-          // The connector lines
-          type: "mapline",
-          data: Highcharts.geojson(topology, "mapline"),
-          color: "silver",
-          accessibility: {
+
+        subtitle: {
+          text: "",
+          align: "left",
+        },
+
+        mapNavigation: {
+          enabled: true,
+          enableButtons: false,
+        },
+
+        xAxis: {
+          labels: {
             enabled: false,
           },
         },
-      ],
+
+        colorAxis: {
+          labels: {
+            format: "{value}%",
+          },
+          stops: [
+            [0.2, "#808080"], // Grau
+            [0.5, "#FFA500"], // Orange
+            [1, "#00FF00"], // Strahlendes Grün
+          ],
+          min: 0,
+          max: 8,
+        },
+
+        series: [
+          {
+            mapData: topology,
+            data,
+            joinBy: "ucName",
+            name: "Unemployment rate per 2017",
+            dataLabels: {
+              enabled: true,
+              format: "{point.properties.hc-a2}",
+              style: {
+                fontSize: "10px",
+              },
+            },
+            tooltip: {
+              valueSuffix: "%",
+            },
+          },
+          {
+            // The connector lines
+            type: "mapline",
+            data: Highcharts.geojson(topology, "mapline"),
+            color: "silver",
+            accessibility: {
+              enabled: false,
+            },
+          },
+        ],
+      });
+    })();
+  }, 500);
+}
+
+async function fetchAndDisplayMapData() {
+  try {
+    const response = await fetch(mapUrl);
+    const jsonData = await response.json();
+
+    const table = document.getElementById("data");
+    if (table.innerHTML != "") {
+      table.innerHTML = "";
+    }
+
+    jsonData.forEach((item) => {
+      const row = document.createElement("tr");
+
+      const rankCell = document.createElement("td");
+      rankCell.textContent = item.rank;
+      row.appendChild(rankCell);
+
+      const stateCell = document.createElement("td");
+      stateCell.textContent = item.state;
+      row.appendChild(stateCell);
+
+      const valueCell = document.createElement("td");
+      valueCell.textContent = item.value;
+      row.appendChild(valueCell);
+
+      // Apply background color based on value
+      if (item.value <= 0.2) {
+        valueCell.style.backgroundColor = "#808080"; // grey
+      } else if (item.value <= 0.5) {
+        valueCell.style.backgroundColor = "#FFA500"; //orange
+      } else {
+        valueCell.style.backgroundColor = "#7FFF00"; //green
+      }
+
+      table.appendChild(row);
     });
-  })();
+  } catch (error) {
+    console.error("Error fetching the data:", error);
+  }
 }
