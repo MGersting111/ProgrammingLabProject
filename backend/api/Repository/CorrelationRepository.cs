@@ -46,13 +46,11 @@ namespace api.Repository
             .Where(o => o.OrderDate >= startTime && o.OrderDate <= endTime)
             .Select(o => o.StoreId)
             .Distinct()
-            .ToListAsync();
+            .ToListAsync()
+            .ConfigureAwait(false);
 
-        var xValuesTask = GetAttributeValues(storeIds, startTime, endTime, xAttribute);
-        var yValuesTask = GetAttributeValues(storeIds, startTime, endTime, yAttribute);
-
-        var xValues = await xValuesTask;
-        var yValues = await yValuesTask;
+        var xValues = await GetAttributeValues(storeIds, startTime, endTime, xAttribute).ConfigureAwait(false);
+        var yValues = await GetAttributeValues(storeIds, startTime, endTime, yAttribute).ConfigureAwait(false);
 
         return (xValues, yValues);
     }
@@ -69,7 +67,8 @@ private async Task<double[]> GetAttributeValues(List<string> storeIds, DateTime 
                 .Where(o => storeIds.Contains(o.StoreId) && o.OrderDate >= startTime && o.OrderDate <= endTime)
                 .GroupBy(o => o.StoreId)
                 .Select(g => g.Sum(o => o.total))
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
             return totalRevenues.Select(tr => (double)tr).ToArray();
             
         case "ordercount":
@@ -77,33 +76,28 @@ private async Task<double[]> GetAttributeValues(List<string> storeIds, DateTime 
                 .Where(o => storeIds.Contains(o.StoreId) && o.OrderDate >= startTime && o.OrderDate <= endTime)
                 .GroupBy(o => o.StoreId)
                 .Select(g => g.Count())
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
             return orderCounts.Select(oc => (double)oc).ToArray();
             
         default:
             throw new ArgumentException($"Invalid attribute specified: {attribute}");
     }
 }
-
-
-
 public async Task<double> CalculateCorrelation(string model, string xAttribute, string yAttribute, DateTime startTime, DateTime endTime)
         {
-            var data = await FetchData(model, startTime, endTime, xAttribute, yAttribute);
+            var data = await FetchData(model, startTime, endTime, xAttribute, yAttribute).ConfigureAwait(false);
 
-            // Prüfe, ob Daten zum Berechnen der Korrelation vorhanden sind
             if (data.XValues.Length == 0 || data.YValues.Length == 0 || data.XValues.Length != data.YValues.Length)
             {
                 throw new ArgumentException("Insufficient or mismatched data for correlation calculation.");
             }
 
-            // Berechne die Korrelation
             double correlation = CalculatePearsonCorrelation(data.XValues, data.YValues);
 
             return correlation;
         }
 
-        // Eine Beispielimplementierung der Pearson-Korrelationskoeffizientenberechnung
         public double CalculatePearsonCorrelation(double[] xValues, double[] yValues)
         {
             double sumX = xValues.Sum();
@@ -118,7 +112,6 @@ public async Task<double> CalculateCorrelation(string model, string xAttribute, 
 
             if (denominator == 0)
             {
-                // Wenn der Nenner 0 ist, gibt es keine Korrelation.
                 return 0;
             }
 
@@ -128,3 +121,5 @@ public async Task<double> CalculateCorrelation(string model, string xAttribute, 
         }
     }
 }
+
+    
