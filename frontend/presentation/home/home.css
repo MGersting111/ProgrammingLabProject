@@ -1,7 +1,18 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
 .box-container {
     display: flex;
     justify-content: space-between;
     padding: 20px;
+    margin-top: 0; /* Remove any margin-top */
 }
 
 .box {
@@ -15,7 +26,7 @@
     display: flex;
     flex-direction: column;
     width: 45%; /* Adjust box size */
-    height: 320px; /* Adjust height of the box */
+    height: 450px; /* Adjust height of the box */
 }
 
 .box:last-child {
@@ -147,15 +158,35 @@
     font-size: 24px;
 }
 
-.chart-box canvas {
-    width: 250px !important;
-    height: 250px !important; /* Adjust height to fit the box */
-}
 .chart-box {
     display: flex;
-    justify-content: center; /* Horizontally center */
-    align-items: center; /* Vertically center */
+    justify-content: center;
+    align-items: center;
     flex-direction: column;
     width: 45%; /* Adjust box size */
-    height: 360px; /* Adjust height of the box */
+    height: 450px; /* Adjust height of the box */
+}
+
+.chart-box canvas {
+    width: 100% !important;
+    height: 250px !important; /* Adjust height to fit the box */
+}
+
+.zoom-icon {
+    background: rgb(0, 60, 68);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.zoom-icon:hover {
+    background: #0056b3;
+}
+
+.zoom-icon i {
+    font-size: 18px;
 }
