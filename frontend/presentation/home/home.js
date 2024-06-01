@@ -4,6 +4,9 @@ const chartContainer = document.getElementById('chart-slides');
 const leftArrow = document.getElementById('left-arrow');
 const rightArrow = document.getElementById('right-arrow');
 
+const goalsByPeriod = {};
+const chartInstances = {}; // To store chart instances
+
 document.getElementById('openModal').addEventListener('click', function() {
     document.getElementById('inputWrapper').classList.add('show'); // Show the wrapper
 });
@@ -24,28 +27,21 @@ document.getElementById('dataForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the form from submitting traditionally
 
     // Get the values from the form
-    var topicSelect = document.getElementById('topicSelect').value;
-    var periodSelect = document.getElementById('periodSelect').value;
-    var dataInput = document.getElementById('dataInput').value;
+    const topicSelect = document.getElementById('topicSelect').value;
+    const periodSelect = document.getElementById('periodSelect').value;
+    const dataInput = document.getElementById('dataInput').value;
 
-    // Create a new slide for the goal
-    var newSlide = document.createElement('div');
-    newSlide.classList.add('slide');
-    newSlide.innerHTML = `
-        <h3>Topic: ${topicSelect}</h3>
-        <p>Period: ${periodSelect}</p>
-        <p>Number: ${dataInput}</p>
-        <button class="delete-button">Delete</button>
-    `;
-    slidesContainer.appendChild(newSlide);
+    if (!goalsByPeriod[periodSelect]) {
+        goalsByPeriod[periodSelect] = [];
+    }
 
-    // Create a new slide for the chart
-    var newChartSlide = document.createElement('div');
-    newChartSlide.classList.add('slide');
-    var chartCanvas = document.createElement('canvas');
-    newChartSlide.appendChild(chartCanvas);
-    chartContainer.appendChild(newChartSlide);
-    createChart(chartCanvas, topicSelect, dataInput);
+    goalsByPeriod[periodSelect].push({
+        topic: topicSelect,
+        target: parseInt(dataInput)
+    });
+
+    // Create or update the slide for the period
+    updatePeriodSlides(periodSelect);
 
     // Reset form and close wrapper
     document.getElementById('dataForm').reset();
@@ -54,18 +50,150 @@ document.getElementById('dataForm').addEventListener('submit', function(event) {
     // Update slides to show the new one
     currentIndex = slidesContainer.children.length - 1;
     updateSlidePosition();
+});
 
-    // Add event listener for delete button
-    newSlide.querySelector('.delete-button').addEventListener('click', function() {
-        if (confirm('Are you sure you want to delete the goal?')) {
-            newSlide.remove();
-            newChartSlide.remove();
+function updatePeriodSlides(period) {
+    // Create or update the goal slide
+    let goalSlide = document.querySelector(`.slide[data-period='${period}']`);
+    if (!goalSlide) {
+        goalSlide = document.createElement('div');
+        goalSlide.classList.add('slide');
+        goalSlide.setAttribute('data-period', period);
+        goalSlide.innerHTML = `<h3>Period: ${period}</h3><ul></ul><button class="delete-button">Delete Period</button>`;
+        slidesContainer.appendChild(goalSlide);
+    }
+
+    const goalList = goalSlide.querySelector('ul');
+    goalList.innerHTML = ''; // Clear previous list
+    goalsByPeriod[period].forEach((goal, index) => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `Topic: ${goal.topic}, Number: ${goal.target} <br> <button class="zoom-icon" onclick="zoomGoal('${period}', ${index})"><i class="fas fa-search-plus"></i></button>`;
+        goalList.appendChild(listItem);
+    });
+
+    // Create or update the chart slide
+    let chartSlide = document.querySelector(`.chart-slide[data-period='${period}']`);
+    if (!chartSlide) {
+        chartSlide = document.createElement('div');
+        chartSlide.classList.add('slide', 'chart-slide');
+        chartSlide.setAttribute('data-period', period);
+        const chartCanvas = document.createElement('canvas');
+        chartCanvas.style.width = '100%';
+        chartCanvas.style.height = '250px'; // Adjust height to fit the box
+        chartSlide.appendChild(chartCanvas);
+        chartContainer.appendChild(chartSlide);
+
+        // Create new chart instance
+        chartInstances[period] = new Chart(chartCanvas, getChartConfig(period));
+    } else {
+        // Update existing chart instance
+        const chartCanvas = chartSlide.querySelector('canvas');
+        updateChart(chartCanvas, period);
+    }
+
+    // Add delete event listener for the period
+    goalSlide.querySelector('.delete-button').addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete all goals for this period?')) {
+            delete goalsByPeriod[period];
+            goalSlide.remove();
+            chartSlide.remove();
             if (currentIndex >= slidesContainer.children.length) {
                 currentIndex = slidesContainer.children.length - 1;
             }
             updateSlidePosition();
         }
     });
+}
+
+function zoomGoal(period, index) {
+    const chart = chartInstances[period];
+    const labels = chart.data.labels.slice(); // Copy labels
+    const datasets = chart.data.datasets.map(dataset => {
+        return {
+            ...dataset,
+            data: dataset.data.slice() // Copy data
+        };
+    });
+
+    chart.data.labels = [labels[index]];
+    chart.data.datasets.forEach((dataset, i) => {
+        dataset.data = [datasets[i].data[index]];
+    });
+
+    chart.update();
+}
+
+function getChartConfig(period) {
+    const periodGoals = goalsByPeriod[period];
+    const labels = periodGoals.map(goal => goal.topic);
+    const targetData = periodGoals.map(goal => goal.target);
+    const actualData = periodGoals.map(goal => Math.floor(Math.random() * goal.target)); // Hardcoded actual value for demonstration
+
+    return {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Goal',
+                    data: targetData,
+                    backgroundColor: '#007bff'
+                },
+                {
+                    label: 'Actual',
+                    data: actualData,
+                    backgroundColor: '#ffc107'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                zoom: {
+                    zoom: {
+                        wheel: {
+                            enabled: false // Disable zooming with mouse wheel
+                        },
+                        pinch: {
+                            enabled: true // Enable zooming with pinch gesture
+                        },
+                        mode: 'xy' // Allow zooming in both x and y directions
+                    },
+                    pan: {
+                        enabled: true,
+                        mode: 'xy', // Allow panning in both x and y directions
+                        threshold: 10
+                    }
+                }
+            }
+        }
+    };
+}
+
+function updateChart(canvas, period) {
+    const chart = chartInstances[period];
+    const periodGoals = goalsByPeriod[period];
+    const labels = periodGoals.map(goal => goal.topic);
+    const targetData = periodGoals.map(goal => goal.target);
+    const actualData = periodGoals.map(goal => Math.floor(Math.random() * goal.target)); // Hardcoded actual value for demonstration
+
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = targetData;
+    chart.data.datasets[1].data = actualData;
+    chart.update();
+}
+
+document.getElementById('resetZoomButton').addEventListener('click', function() {
+    const period = Object.keys(chartInstances)[currentIndex];
+    if (period) {
+        const chart = chartInstances[period];
+        updateChart(chart.canvas, period); // Reset zoom by updating chart with original data
+    }
 });
 
 leftArrow.addEventListener('click', function() {
@@ -85,38 +213,4 @@ rightArrow.addEventListener('click', function() {
 function updateSlidePosition() {
     slidesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
     chartContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
-}
-
-function createChart(canvas, topic, target) {
-    const actual = Math.floor(Math.random() * target); // Hardcoded actual value for demonstration
-    new Chart(canvas, {
-        type: 'pie',
-        data: {
-            labels: ['Target', 'Actual'],
-            datasets: [{
-                data: [target, actual],
-                backgroundColor: ['#007bff', '#ffc107']
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            label += context.raw;
-                            return label;
-                        }
-                    }
-                }
-            }
-        }
-    });
 }
