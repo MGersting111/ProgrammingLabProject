@@ -32,7 +32,7 @@ namespace api.Repository
             }
             else if (model.ToLower() == "store")
             {
-                var validAttributes = new List<string> { "totalrevenue", "ordercount" };
+                var validAttributes = new List<string> { "totalrevenue", "ordercount","averageordervalueperstore","averageordervalue", "storeId" };
                 return validAttributes.Contains(xAttribute.ToLower()) && validAttributes.Contains(yAttribute.ToLower());
             }
             return false;
@@ -79,6 +79,38 @@ private async Task<double[]> GetAttributeValues(List<string> storeIds, DateTime 
                 .ToListAsync()
                 .ConfigureAwait(false);
             return orderCounts.Select(oc => (double)oc).ToArray();
+
+        case "averageordervalue":
+            var averageOrderValues = await _context.OrderItems
+                .Where(oi => storeIds.Contains(oi.Order.StoreId) && oi.Order.OrderDate >= startTime && oi.Order.OrderDate <= endTime)
+                .GroupBy(oi => oi.Product.SKU)
+                .Select(g => new
+                {
+                    ProductSKU = g.Key,
+                    TotalRevenue = g.Sum(oi => oi.Order.total),
+                    OrderCount = g.Count()
+                })
+                .ToListAsync()
+                .ConfigureAwait(false);
+            return averageOrderValues.Select(aov => aov.TotalRevenue / aov.OrderCount).ToArray();
+            
+
+
+            case "averageordervalueperstore":
+            var averageOrderValuesPerStore = await _context.Orders
+                .Where(o => storeIds.Contains(o.StoreId) && o.OrderDate >= startTime && o.OrderDate <= endTime)
+                .GroupBy(o => o.StoreId)
+                .Select(g => new
+                {
+                    StoreId = g.Key,
+                    TotalRevenue = g.Sum(o => o.total),
+                    OrderCount = g.Count()
+                })
+                .ToListAsync()
+                .ConfigureAwait(false);
+            return averageOrderValuesPerStore.Select(aov => aov.TotalRevenue / aov.OrderCount).ToArray();
+            
+
             
         default:
             throw new ArgumentException($"Invalid attribute specified: {attribute}");
