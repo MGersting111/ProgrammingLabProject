@@ -32,7 +32,7 @@ namespace api.Repository
             }
             else if (model.ToLower() == "store")
             {
-                var validAttributes = new List<string> { "totalrevenue", "ordercount","averageordervalueperstore","averageordervalue", "storeId" };
+                var validAttributes = new List<string> { "totalrevenue", "ordercount","averageordervalueperstore","averageordervalue", "averageordervaluepercustomer", "ordercountperproductperstore", "totalrevenuepercustomerperstore" };
                 return validAttributes.Contains(xAttribute.ToLower()) && validAttributes.Contains(yAttribute.ToLower());
             }
             return false;
@@ -80,6 +80,7 @@ private async Task<double[]> GetAttributeValues(List<string> storeIds, DateTime 
                 .ConfigureAwait(false);
             return orderCounts.Select(oc => (double)oc).ToArray();
 
+        //durchschnittliche bestellwert pro produkt
         case "averageordervalue":
             var averageOrderValues = await _context.OrderItems
                 .Where(oi => storeIds.Contains(oi.Order.StoreId) && oi.Order.OrderDate >= startTime && oi.Order.OrderDate <= endTime)
@@ -95,7 +96,7 @@ private async Task<double[]> GetAttributeValues(List<string> storeIds, DateTime 
             return averageOrderValues.Select(aov => aov.TotalRevenue / aov.OrderCount).ToArray();
             
 
-
+            //durchschnittliche bestellwert pro store
             case "averageordervalueperstore":
             var averageOrderValuesPerStore = await _context.Orders
                 .Where(o => storeIds.Contains(o.StoreId) && o.OrderDate >= startTime && o.OrderDate <= endTime)
@@ -109,6 +110,54 @@ private async Task<double[]> GetAttributeValues(List<string> storeIds, DateTime 
                 .ToListAsync()
                 .ConfigureAwait(false);
             return averageOrderValuesPerStore.Select(aov => aov.TotalRevenue / aov.OrderCount).ToArray();
+            
+
+            //durchschnittliche bestellwert pro customer
+            case "averageordervaluepercustomer":
+            var averageOrderValuesPerCustomer = await _context.Orders
+                .Where(o => o.OrderDate >= startTime && o.OrderDate <= endTime)
+                .GroupBy(o => o.CustomerId)
+                .Select(g => new
+                {
+                    CustomerId = g.Key,
+                    TotalRevenue = g.Sum(o => o.total),
+                    OrderCount = g.Count()
+                })
+                .ToListAsync()
+                .ConfigureAwait(false);
+            return averageOrderValuesPerCustomer.Select(aov => aov.TotalRevenue / aov.OrderCount).ToArray();
+
+            //total revenue von BESTELLWERT pro customer pro store
+            case "totalrevenuepercustomerperstore":
+            var totalRevenuePerCustomerPerStore = await _context.Orders
+                .Where(o => storeIds.Contains(o.StoreId) && o.OrderDate >= startTime && o.OrderDate <= endTime)
+                .GroupBy(o => new { o.StoreId, o.CustomerId })
+                .Select(g => new
+                {
+                    StoreId = g.Key.StoreId,
+                    CustomerId = g.Key.CustomerId,
+                    TotalRevenue = g.Sum(o => o.total)
+                })
+                .ToListAsync()
+                .ConfigureAwait(false);
+            return totalRevenuePerCustomerPerStore.Select(tr => (double)tr.TotalRevenue).ToArray();
+
+            
+            //ordercount pro produkt pro store
+            case "ordercountperproductperstore":
+            var orderCountPerProductPerStore = await _context.OrderItems
+                .Where(oi => storeIds.Contains(oi.Order.StoreId) && oi.Order.OrderDate >= startTime && oi.Order.OrderDate <= endTime)
+                .GroupBy(oi => new { oi.Order.StoreId, oi.SKU })
+                .Select(g => new
+                {
+                    StoreId = g.Key.StoreId,
+                    ProductSKU = g.Key.SKU,
+                    OrderCount = g.Count()
+                })
+                .ToListAsync()
+                .ConfigureAwait(false);
+            return orderCountPerProductPerStore.Select(oc => (double)oc.OrderCount).ToArray();
+
             
 
             
