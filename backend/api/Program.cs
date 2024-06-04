@@ -27,7 +27,8 @@ builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 builder.Services.AddScoped<ITotalNumberRepository, TotalNumberRepository>();
 builder.Services.AddScoped<ISortedPagedModelsRepository, SortedPagedModelsRepository>();
 builder.Services.AddScoped<ICorrelationRepository, CorrelationRepository>();
-builder.Services.AddScoped<ICompareChartsRepository, CompareChartsRepository>();
+builder.Services.AddScoped<IMapChartsRepository, MapChartsRepository>();
+
 
 
 
@@ -57,6 +58,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
