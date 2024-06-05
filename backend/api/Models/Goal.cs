@@ -16,6 +16,7 @@ namespace api.Models
         public int CustomerGoal { get; set; }
         public double RevenueGoal { get; set; }
         public int SalesGoal { get; set; }
+        public int ProductGoal { get; set; }
 
     }
 }
