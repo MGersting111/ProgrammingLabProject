@@ -41,15 +41,17 @@ public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter, Com
 
     switch (comparisonType)
     {
-        case ComparisonType.Store:
-         
+      case ComparisonType.Store:
+    // Erhöhung des Command Timeout
+    _context.Database.SetCommandTimeout(300);  // Setzt den Timeout auf 300 Sekunden
 
+    // Berechnung der Metriken direkt in der Datenbank
     var stores = await _context.Stores.AsNoTracking()
         .Where(store => store.Orders.Any(order => order.OrderDate >= filter.StartTime && order.OrderDate <= filter.EndTime))
         .Take(filter.Limit ?? int.MaxValue)
         .ToListAsync();
 
-   foreach (var store in stores)
+    foreach (var store in stores)
     {
         var chartsInfo = new ChartsInfo 
         { 
@@ -57,74 +59,43 @@ public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter, Com
             Metrics = new Dictionary<string, double>()
         };
 
-        for (var date = filter.StartTime; date <= filter.EndTime; date = date.AddMonths(1))
+        var orderMetrics = await _context.Orders
+            .AsNoTracking()
+            .Where(order => order.StoreId == store.StoreId && order.OrderDate >= filter.StartTime && order.OrderDate <= filter.EndTime)
+            .GroupBy(order => new { order.OrderDate.Year, order.OrderDate.Month })
+            .Select(group => new 
+            {
+                Year = group.Key.Year,
+                Month = group.Key.Month,
+                TotalRevenue = group.Sum(order => order.total),
+                CustomerCount = group.Select(order => order.CustomerId).Distinct().Count(),
+                OrderCount = group.Count()
+            })
+            .ToListAsync();
+
+        foreach (var orderMetric in orderMetrics)
         {
-            var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(date.Month);
-
-            var orders = _context.Orders
-                .Where(order => order.StoreId == store.StoreId && order.OrderDate.Month == date.Month && order.OrderDate.Year == date.Year);
-
+            var monthNameMetric = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(orderMetric.Month);
             if (filter.Metrics.Contains("totalRevenue"))
             {
-                var totalRevenue = await orders.SumAsync(order => order.total);
-                chartsInfo.Metrics.Add(monthName + " Total Revenue", totalRevenue);
+                chartsInfo.Metrics.Add(monthNameMetric + " Total Revenue", orderMetric.TotalRevenue);
             }
             if (filter.Metrics.Contains("customer"))
             {
-                var customerCount = await orders.Select(order => order.CustomerId).Distinct().CountAsync();
-                chartsInfo.Metrics.Add(monthName + " Customer Count", customerCount);
+                chartsInfo.Metrics.Add(monthNameMetric + " Customer Count", orderMetric.CustomerCount);
             }
             if (filter.Metrics.Contains("revenuePerCustomer"))
             {
-                var customerCount = await orders.Select(order => order.CustomerId).Distinct().CountAsync();
-                var revenuePerCustomer = customerCount > 0 ? await orders.SumAsync(order => order.total) / customerCount : 0;
-                chartsInfo.Metrics.Add(monthName + " Revenue Per Customer", revenuePerCustomer);
+                var revenuePerCustomer = orderMetric.CustomerCount > 0 ? orderMetric.TotalRevenue / orderMetric.CustomerCount : 0;
+                chartsInfo.Metrics.Add(monthNameMetric + " Revenue Per Customer", revenuePerCustomer);
             }
             if (filter.Metrics.Contains("sales"))
             {
-                var orderCount = await orders.CountAsync();
-                chartsInfo.Metrics.Add(monthName + " Order Count", orderCount);
+                chartsInfo.Metrics.Add(monthNameMetric + " Order Count", orderMetric.OrderCount);
             }
         }
 
-        chartsInfos.Add(chartsInfo);
-    }
-            break;
-   case ComparisonType.Product:
-    // Neuer Code zur Vergleichung von Produkten
-    var productGroups = await _context.Products
-        .Where(product => product.OrderItems.Any(orderItem => orderItem.Order.OrderDate >= filter.StartTime && orderItem.Order.OrderDate <= filter.EndTime))
-        .GroupBy(product => product.Name)
-        .ToListAsync();
-
-    foreach (var productGroup in productGroups)
-    {
-        var chartsInfo = new ChartsInfo 
-        { 
-            StoreId = productGroup.Key,  // Verwenden Sie den Produktnamen als Schlüssel
-            Metrics = new Dictionary<string, double>()
-        };
-
-        for (var date = filter.StartTime; date <= filter.EndTime; date = date.AddMonths(1))
-        {
-            var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(date.Month);
-
-            var totalOrderCount = 0;
-            foreach (var product in productGroup)
-            {
-                var orderItems = _context.OrderItems
-                    .Where(orderItem => orderItem.SKU == product.SKU && orderItem.Order.OrderDate.Month == date.Month && orderItem.Order.OrderDate.Year == date.Year);
-
-                if (filter.Metrics.Contains("sales"))
-                {
-                    var orderCount = await orderItems.CountAsync();
-                    totalOrderCount += orderCount;
-                }
-            }
-            chartsInfo.Metrics.Add(monthName, totalOrderCount);  // Verwenden Sie nur den Monatsnamen als Schlüssel
-        }
-
-        // Berechnen Sie das Gesamttotal für das Produkt
+        // Berechnen Sie das Gesamttotal für den Store
         chartsInfo.Total = (int)chartsInfo.Metrics.Values.Sum();
 
         chartsInfos.Add(chartsInfo);
@@ -132,8 +103,77 @@ public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter, Com
     break;
 
 
-  case ComparisonType.Category:
-    // Neuer Code zur Vergleichung von Kategorien
+  case ComparisonType.Product:
+    // Erhöhung des Command Timeout
+    _context.Database.SetCommandTimeout(300);  // Setzt den Timeout auf 300 Sekunden
+
+    // Berechnung der Metriken direkt in der Datenbank
+    var productMetrics = await _context.OrderItems
+        .AsNoTracking()
+        .Include(orderItem => orderItem.Product)
+        .Include(orderItem => orderItem.Order)
+        .Where(orderItem => orderItem.Order.OrderDate >= filter.StartTime && orderItem.Order.OrderDate <= filter.EndTime)
+        .GroupBy(orderItem => new { orderItem.Product.Name, Year = orderItem.Order.OrderDate.Year, Month = orderItem.Order.OrderDate.Month })
+        .Select(group => new 
+        {
+            ProductName = group.Key.Name,
+            Year = group.Key.Year,
+            Month = group.Key.Month,
+            TotalOrders = group.Count()
+        })
+        .ToListAsync();
+
+    // Dictionary zum Speichern der konsolidierten Metriken
+    var consolidatedMetrics = new Dictionary<string, Dictionary<string, double>>();
+
+    foreach (var productMetric in productMetrics)
+    {
+        if (!consolidatedMetrics.ContainsKey(productMetric.ProductName))
+        {
+            consolidatedMetrics[productMetric.ProductName] = new Dictionary<string, double>();
+        }
+
+        var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(productMetric.Month);
+        consolidatedMetrics[productMetric.ProductName][monthName] = productMetric.TotalOrders;
+    }
+
+    // Erstellen der ChartsInfo-Objekte
+    foreach (var item in consolidatedMetrics)
+    {
+        var metrics = new Dictionary<string, double>();
+        for (int month = 1; month <= 12; month++)
+        {
+            var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(month);
+            if (item.Value.ContainsKey(monthName))
+            {
+                metrics[monthName] = item.Value[monthName];
+            }
+            else
+            {
+                metrics[monthName] = 0;
+            }
+        }
+
+        var sortedMetrics = metrics.OrderBy(m => DateTime.ParseExact(m.Key, "MMM", CultureInfo.CurrentCulture)).ToDictionary(m => m.Key, m => m.Value);
+
+        var chartsInfo = new ChartsInfo
+        {
+            StoreId = item.Key,
+            Metrics = sortedMetrics,
+            Total = (int)sortedMetrics.Values.Sum()
+        };
+
+        chartsInfos.Add(chartsInfo);
+    }
+    break;
+
+
+
+ case ComparisonType.Category:
+    // Erhöhung des Command Timeout
+    _context.Database.SetCommandTimeout(300);  // Setzt den Timeout auf 300 Sekunden
+
+    // Berechnung der Metriken direkt in der Datenbank
     var categories = new List<string> { "Classic", "Vegetarian", "Specialty" };
     foreach (var category in categories)
     {
@@ -147,13 +187,24 @@ public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter, Com
         {
             var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(date.Month);
 
-            var orderItems = _context.OrderItems
-                .Where(orderItem => orderItem.Product.Category == category && orderItem.Order.OrderDate.Month == date.Month && orderItem.Order.OrderDate.Year == date.Year);
+            var orderItemsMetrics = await _context.OrderItems
+                .AsNoTracking()
+                .Include(orderItem => orderItem.Product)
+                .Include(orderItem => orderItem.Order)
+                .Where(orderItem => orderItem.Product.Category == category && orderItem.Order.OrderDate.Month == date.Month && orderItem.Order.OrderDate.Year == date.Year)
+                .GroupBy(orderItem => new { orderItem.Order.OrderDate.Year, orderItem.Order.OrderDate.Month })
+                .Select(group => new 
+                {
+                    Year = group.Key.Year,
+                    Month = group.Key.Month,
+                    TotalOrders = group.Count()
+                })
+                .ToListAsync();
 
-            if (filter.Metrics.Contains("sales"))
+            foreach (var orderItemsMetric in orderItemsMetrics)
             {
-                var orderCount = await orderItems.CountAsync();
-                chartsInfo.Metrics.Add(monthName, orderCount);  // Verwenden Sie nur den Monatsnamen als Schlüssel
+                var monthNameMetric = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(orderItemsMetric.Month);
+                chartsInfo.Metrics[monthNameMetric] = orderItemsMetric.TotalOrders;
             }
         }
 
@@ -163,6 +214,7 @@ public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter, Com
         chartsInfos.Add(chartsInfo);
     }
     break;
+
 
     }
 
