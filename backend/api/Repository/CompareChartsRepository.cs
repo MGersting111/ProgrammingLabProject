@@ -12,6 +12,13 @@ using System.Globalization;
 
 namespace api.Repository
 {
+
+    public enum ComparisonType
+{
+    Store,
+    Product,
+    Category
+}
     public class CompareChartsRepository : ICompareChartsRepository
     {
         private readonly ApplicationDBContext _context;
@@ -27,10 +34,15 @@ namespace api.Repository
         }
 
 
-       
-public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter)
+
+public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter, ComparisonType comparisonType)
 {
     var chartsInfos = new List<ChartsInfo>();
+
+    switch (comparisonType)
+    {
+        case ComparisonType.Store:
+         
 
     var stores = await _context.Stores
         .Where(store => store.Orders.Any(order => order.OrderDate >= filter.StartTime && order.OrderDate <= filter.EndTime))
@@ -77,11 +89,85 @@ public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter)
 
         chartsInfos.Add(chartsInfo);
     }
+            break;
+   case ComparisonType.Product:
+    // Neuer Code zur Vergleichung von Produkten
+    var productGroups = await _context.Products
+        .Where(product => product.OrderItems.Any(orderItem => orderItem.Order.OrderDate >= filter.StartTime && orderItem.Order.OrderDate <= filter.EndTime))
+        .GroupBy(product => product.Name)
+        .ToListAsync();
+
+    foreach (var productGroup in productGroups)
+    {
+        var chartsInfo = new ChartsInfo 
+        { 
+            StoreId = productGroup.Key,  // Verwenden Sie den Produktnamen als Schlüssel
+            Metrics = new Dictionary<string, double>()
+        };
+
+        for (var date = filter.StartTime; date <= filter.EndTime; date = date.AddMonths(1))
+        {
+            var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(date.Month);
+
+            var totalOrderCount = 0;
+            foreach (var product in productGroup)
+            {
+                var orderItems = _context.OrderItems
+                    .Where(orderItem => orderItem.SKU == product.SKU && orderItem.Order.OrderDate.Month == date.Month && orderItem.Order.OrderDate.Year == date.Year);
+
+                if (filter.Metrics.Contains("sales"))
+                {
+                    var orderCount = await orderItems.CountAsync();
+                    totalOrderCount += orderCount;
+                }
+            }
+            chartsInfo.Metrics.Add(monthName, totalOrderCount);  // Verwenden Sie nur den Monatsnamen als Schlüssel
+        }
+
+        // Berechnen Sie das Gesamttotal für das Produkt
+        chartsInfo.Total = (int)chartsInfo.Metrics.Values.Sum();
+
+        chartsInfos.Add(chartsInfo);
+    }
+    break;
+
+
+  case ComparisonType.Category:
+    // Neuer Code zur Vergleichung von Kategorien
+    var categories = new List<string> { "Classic", "Vegetarian", "Specialty" };
+    foreach (var category in categories)
+    {
+        var chartsInfo = new ChartsInfo 
+        { 
+            StoreId = category, 
+            Metrics = new Dictionary<string, double>()
+        };
+
+        for (var date = filter.StartTime; date <= filter.EndTime; date = date.AddMonths(1))
+        {
+            var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(date.Month);
+
+            var orderItems = _context.OrderItems
+                .Where(orderItem => orderItem.Product.Category == category && orderItem.Order.OrderDate.Month == date.Month && orderItem.Order.OrderDate.Year == date.Year);
+
+            if (filter.Metrics.Contains("sales"))
+            {
+                var orderCount = await orderItems.CountAsync();
+                chartsInfo.Metrics.Add(monthName, orderCount);  // Verwenden Sie nur den Monatsnamen als Schlüssel
+            }
+        }
+
+        // Berechnen Sie das Gesamttotal für die Kategorie
+        chartsInfo.Total = (int)chartsInfo.Metrics.Values.Sum();
+
+        chartsInfos.Add(chartsInfo);
+    }
+    break;
+
+    }
 
     return chartsInfos;
 }
-
-
 
 
 

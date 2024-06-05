@@ -12,6 +12,7 @@ namespace api.Dto
 
         public Dictionary<string, double> Metrics { get; set; }
         //public List<DateTime> OrderDates { get; set; }
+        public int Total { get; set; }
         
     }
 }

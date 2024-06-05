@@ -6,11 +6,12 @@ using api.Models;
 using api.Data;
 using Microsoft.AspNetCore.Mvc;
 using api.Dto;
+using api.Repository;
 
 namespace api.Interfaces
 {
     public interface ICompareChartsRepository
     {
-        Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter);
+        Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter, ComparisonType comparisonType);
     }
 }

@@ -45,9 +45,9 @@ namespace api.Controllers
         }
 
        [HttpGet("ChartsInfos")]
-        public async Task<ActionResult<List<ChartsInfo>>> GetDiagramDataAsync([FromQuery] FilterCharts filter)
+        public async Task<ActionResult<List<ChartsInfo>>> GetDiagramDataAsync([FromQuery] FilterCharts filter, ComparisonType comparisonType)
         {
-            var storeInfos = await _compareChartsRepository.GetDiagramDataAsync(filter);
+            var storeInfos = await _compareChartsRepository.GetDiagramDataAsync(filter, comparisonType);
             return Ok(storeInfos);
         }
 
