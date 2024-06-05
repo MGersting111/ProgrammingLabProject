@@ -44,7 +44,7 @@ public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter, Com
         case ComparisonType.Store:
          
 
-    var stores = await _context.Stores
+    var stores = await _context.Stores.AsNoTracking()
         .Where(store => store.Orders.Any(order => order.OrderDate >= filter.StartTime && order.OrderDate <= filter.EndTime))
         .Take(filter.Limit ?? int.MaxValue)
         .ToListAsync();
