@@ -28,6 +28,7 @@ builder.Services.AddScoped<ITotalNumberRepository, TotalNumberRepository>();
 builder.Services.AddScoped<ISortedPagedModelsRepository, SortedPagedModelsRepository>();
 builder.Services.AddScoped<ICorrelationRepository, CorrelationRepository>();
 builder.Services.AddScoped<IMapChartsRepository, MapChartsRepository>();
+builder.Services.AddScoped<IGoalRepository, GoalRepository>();
 
 
 

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using api.Dto;
 
 namespace api.Data
-{
+{ 
     public class ApplicationDBContext : DbContext
     {
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options)
@@ -21,6 +21,7 @@ namespace api.Data
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<Goal> Goals { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -29,7 +30,15 @@ namespace api.Data
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<Customer>().ToTable("Customers", t => t.ExcludeFromMigrations());
+            modelBuilder.Entity<Store>().ToTable("Stores", t => t.ExcludeFromMigrations());
+            modelBuilder.Entity<Product>().ToTable("Products", t => t.ExcludeFromMigrations());
+            modelBuilder.Entity<OrderItem>().ToTable("OrderItems", t => t.ExcludeFromMigrations());
+            modelBuilder.Entity<Order>().ToTable("Orders", t => t.ExcludeFromMigrations());
+            
             modelBuilder.Entity<Product>().HasKey(p => p.SKU);
+            modelBuilder.Entity<Goal>().HasKey(g => g.Id);
             modelBuilder.Entity<OrderItem>().HasKey(oi => new { oi.OrderId, oi.SKU }); // Composite key
             modelBuilder.Entity<Customer>().HasKey(c => c.CustomerId);
             modelBuilder.Entity<Store>().HasKey(s => s.StoreId);
