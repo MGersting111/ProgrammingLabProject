@@ -23,7 +23,7 @@ window.addEventListener('click', function(event) {
     }
 });
 
-document.getElementById('dataForm').addEventListener('submit', function(event) {
+document.getElementById('dataForm').addEventListener('submit', async function(event) {
     event.preventDefault(); // Prevent the form from submitting traditionally
 
     // Get the values from the form
@@ -31,14 +31,37 @@ document.getElementById('dataForm').addEventListener('submit', function(event) {
     const periodSelect = document.getElementById('periodSelect').value;
     const dataInput = document.getElementById('dataInput').value;
 
+    const newGoal = {
+        topic: topicSelect,
+        period: parseInt(periodSelect),
+        target: parseInt(dataInput)
+    };
+
+    // Send the data to the backend
+    try {
+        const response = await fetch('/api/Goal', { // Adjust the URL as needed
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newGoal)
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const result = await response.json();
+        console.log('Goal added:', result);
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+    }
+
     if (!goalsByPeriod[periodSelect]) {
         goalsByPeriod[periodSelect] = [];
     }
 
-    goalsByPeriod[periodSelect].push({
-        topic: topicSelect,
-        target: parseInt(dataInput)
-    });
+    goalsByPeriod[periodSelect].push(newGoal);
 
     // Create or update the slide for the period
     updatePeriodSlides(periodSelect);
