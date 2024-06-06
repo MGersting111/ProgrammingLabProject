@@ -7,6 +7,7 @@ using api.Data;
 using api.Models;
 using api.Dto;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 
 namespace api.Repository
@@ -35,110 +36,65 @@ namespace api.Repository
 
         public async Task<List<StoreInfo>> GetFilteredStoreInfoAsync(FilterRevenue filter)
         {
-            var storeInfos = new List<StoreInfo>();
+            var query = _context.Orders.AsNoTracking();
 
-            var stores = await _context.Stores.AsNoTracking().ToListAsync();
-            foreach (var store in stores)
+            if (!string.IsNullOrEmpty(filter.Category))
             {
-                var orders = _context.Orders
-                    .AsNoTracking()
-                    .Include(order => order.OrderItems)
-                    .ThenInclude(orderItem => orderItem.Product)
-                    .Where(order => order.StoreId == store.StoreId);
-
-                if (!string.IsNullOrEmpty(filter.Category))
-                {
-                    orders = orders.Where(order => order.OrderItems.Any(orderItem => orderItem.Product.Category == filter.Category));
-                }
-
-                if (filter.OrderDateFrom.HasValue)
-                {
-                    orders = orders.Where(order => order.OrderDate >= filter.OrderDateFrom.Value);
-                }
-                if (filter.OrderDateTo.HasValue)
-                {
-                    orders = orders.Where(order => order.OrderDate <= filter.OrderDateTo.Value);
-                }
-
-                int orderCount = await orders.CountAsync();
-                double totalRevenue = await orders.SumAsync(order => order.total);
-                int customerCount = await orders.Select(order => order.CustomerId).Distinct().CountAsync();
-                double revenuePerCustomer = customerCount > 0 ? totalRevenue / customerCount : 0;
-                storeInfos.Add(new StoreInfo { StoreId = store.StoreId, OrderCount = orderCount, TotalRevenue = totalRevenue, CustomerCount = customerCount, RevenuePerCustomer = revenuePerCustomer });
+                query = query.Where(order => order.OrderItems.Any(orderItem => orderItem.Product.Category == filter.Category));
             }
 
-
-            bool isFilterApplied = !string.IsNullOrEmpty(filter.StoreId) || filter.StoreRevenues.HasValue || filter.StoreOrderCounts.HasValue || filter.StoreCustomerCounts.HasValue || filter.RevenuePerCustomer.HasValue || !string.IsNullOrEmpty(filter.Category) || filter.OrderDateFrom.HasValue || filter.OrderDateTo.HasValue;
-
-            if (!isFilterApplied)
+            if (filter.OrderDateFrom.HasValue)
             {
-                // Wenn kein Filter angewendet wurde, berechnen Sie den Gesamtumsatz aller Geschäfte und geben Sie ihn zurück
-                double totalRevenueAllStores = storeInfos.Sum(info => info.TotalRevenue);
-                int totalOrderCountAllStores = storeInfos.Sum(info => info.OrderCount);
-                int totalCustomerCountAllStores = storeInfos.Sum(info => info.CustomerCount);
-                double totalRevenuePerCustomerAllStores = totalCustomerCountAllStores > 0 ? totalRevenueAllStores / totalCustomerCountAllStores : 0;
-                return new List<StoreInfo> { new StoreInfo { StoreId = "All Stores", TotalRevenue = totalRevenueAllStores, OrderCount = totalOrderCountAllStores, CustomerCount = totalCustomerCountAllStores, RevenuePerCustomer = totalRevenuePerCustomerAllStores } };
+                query = query.Where(order => order.OrderDate >= filter.OrderDateFrom.Value);
+            }
+            if (filter.OrderDateTo.HasValue)
+            {
+                query = query.Where(order => order.OrderDate <= filter.OrderDateTo.Value);
             }
 
-            else
-            {
-                // Wenn ein Filter angewendet wurde, wenden Sie die Filter an und geben Sie die gefilterten Daten zurück
+            query = query.Include(order => order.OrderItems).ThenInclude(orderItem => orderItem.Product);
 
-                if (!string.IsNullOrEmpty(filter.StoreId))
+
+            var storeInfos = await query
+                .GroupBy(order => order.StoreId)
+                .Select(group => new StoreInfo
                 {
-                    var storeIdList = filter.StoreId.Split(',').ToList(); // Teilen Sie die StoreIds in eine Liste auf
-                    storeInfos = storeInfos.Where(info => storeIdList.Contains(info.StoreId)).ToList();
-                }
+                    StoreId = group.Key,
+                    OrderCount = group.Count(),
+                    TotalRevenue = group.Sum(order => order.total),
+                    CustomerCount = group.Select(order => order.CustomerId).Distinct().Count(),
+                    RevenuePerCustomer = group.Sum(order => order.total) / (double)group.Select(order => order.CustomerId).Distinct().Count()
+                })
+                .ToListAsync();
 
-
-
-                if (filter.StoreRevenues.HasValue)
-                {
-                    storeInfos = storeInfos.Where(info => info.TotalRevenue >= filter.StoreRevenues.Value).ToList();
-                }
-
-                if (filter.StoreOrderCounts.HasValue)
-                {
-                    storeInfos = storeInfos.Where(info => info.OrderCount >= filter.StoreOrderCounts.Value).ToList();
-                }
-                if (filter.StoreCustomerCounts.HasValue)
-                {
-                    storeInfos = storeInfos.Where(info => info.CustomerCount >= filter.StoreCustomerCounts.Value).ToList();
-                }
-                if (filter.RevenuePerCustomer.HasValue)
-                {
-                    storeInfos = storeInfos.Where(info => info.RevenuePerCustomer >= filter.RevenuePerCustomer.Value).ToList();
-                }
-
-
-
-                return storeInfos;
-            }
+            return storeInfos;
         }
 
-
-        //  public async Task<List<Order>> GetSortedPagedOrders(int page, int pageSize, string sortColumn, string sortOrder)
-        // {
-        //     IQueryable<Order> query = _context.Orders;
-
-        //     // Sortierung anwenden
-        //     if (sortOrder.ToLower() == "asc")
-        //     {
-        //         query = query.OrderBy(o => EF.Property<object>(o, sortColumn));
-        //     }
-        //     else
-        //     {
-        //         query = query.OrderByDescending(o => EF.Property<object>(o, sortColumn));
-        //     }
-
-        //     // Paginierung anwenden
-        //     query = query.Skip((page - 1) * pageSize).Take(pageSize);
-
-        //     return await query.ToListAsync();
-        // }
-
-
-
     }
+
+
+    //  public async Task<List<Order>> GetSortedPagedOrders(int page, int pageSize, string sortColumn, string sortOrder)
+    // {
+    //     IQueryable<Order> query = _context.Orders;
+
+    //     // Sortierung anwenden
+    //     if (sortOrder.ToLower() == "asc")
+    //     {
+    //         query = query.OrderBy(o => EF.Property<object>(o, sortColumn));
+    //     }
+    //     else
+    //     {
+    //         query = query.OrderByDescending(o => EF.Property<object>(o, sortColumn));
+    //     }
+
+    //     // Paginierung anwenden
+    //     query = query.Skip((page - 1) * pageSize).Take(pageSize);
+
+    //     return await query.ToListAsync();
+    // }
+
+
+
 }
+
 
