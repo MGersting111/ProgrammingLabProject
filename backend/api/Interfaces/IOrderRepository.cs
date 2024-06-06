@@ -11,8 +11,8 @@ namespace api.Interfaces
 {
     public interface IOrderRepository
     {
-        IEnumerable<Order> GetOrders();
-        Order GetOrderById(int orderId);
+        Task<IEnumerable<Order>> GetOrdersAsync();
+        Task<Order> GetOrderByIdAsync(int OrderId);
         Order GetOrderByStoreId(string storeId);
         Order GetOrderByCustomerId(string customerId);
         Order GetOrderByOrderDate(DateTime orderDate);
@@ -20,11 +20,11 @@ namespace api.Interfaces
         Order GetOrderByTotal(double total);
 
         //Task<List<OrderEntryDto>> GetAllOrderEntryDtoByFilter(FilterOrderEntryDto filterDto, int page, int pageSize, string sortColumn, string sortOrder);
-        
-        //Task<List<OrderEntryDto>> GetAllOrderEntryDtosByFilter(FilterOrderEntryDto filterDto, int page, int pagesize, string sortColumn, string sortOrder);
-        
 
-        
+        //Task<List<OrderEntryDto>> GetAllOrderEntryDtosByFilter(FilterOrderEntryDto filterDto, int page, int pagesize, string sortColumn, string sortOrder);
+
+
+
 
         //int GetTotalFilterRecords(FilterOrderEntryDto filterDto);
         //IEnumerable<Order> GetOrdersByStoreId(string storeId);

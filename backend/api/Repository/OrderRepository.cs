@@ -11,50 +11,48 @@ using api.Dto;
 
 namespace api.Repository
 {
-    public class OrderRepository : IOrderRepository 
+    public class OrderRepository : IOrderRepository
     {
-         private readonly ApplicationDBContext _context;
+        private readonly ApplicationDBContext _context;
 
 
-    public OrderRepository(ApplicationDBContext context )
-    {
-        _context = context;
-    }
-    
-    public IEnumerable<Order> GetOrders()
+        public OrderRepository(ApplicationDBContext context)
         {
-            return _context.Orders.Take(100).ToList();
+            _context = context;
         }
-        public Order GetOrderById(int OrderId)
-    {
-        return _context.Orders.Find(OrderId);
-    }
-    // public IEnumerable<Order> GetOrdersByStoreId(string storeId)
-    // {
-    // return _context.Orders.Where(order => order.StoreId == storeId).ToList();
-    // }
 
-    public Order GetOrderByStoreId(string StoreId)
-    {
-        return _context.Orders.FirstOrDefault(o => o.StoreId == StoreId);
-    }
+        public async Task<IEnumerable<Order>> GetOrdersAsync()
+        {
+            return await _context.Orders.AsNoTracking().ToListAsync();
+        }
 
-    public Order GetOrderByCustomerId(string CustomerId)
-    {
-        return _context.Orders.FirstOrDefault(o => o.CustomerId == CustomerId);
-    }
-    public Order GetOrderByOrderDate(DateTime OrderDate)
-    {
-        return _context.Orders.FirstOrDefault(o => o.OrderDate == OrderDate);
-    }
-    public Order GetOrderByNItems(int NItems)
-    {
-        return _context.Orders.FirstOrDefault(o => o.NItems == NItems);
-    }
-    public Order GetOrderByTotal(double total)
-    {
-        return _context.Orders.FirstOrDefault(o => o.total == total);
-    }
+        public async Task<Order> GetOrderByIdAsync(int OrderId)
+        {
+            return await _context.Orders.AsNoTracking().FirstOrDefaultAsync(order => order.OrderId == OrderId);
+        }
+
+
+        public Order GetOrderByStoreId(string StoreId)
+        {
+            return _context.Orders.FirstOrDefault(o => o.StoreId == StoreId);
+        }
+
+        public Order GetOrderByCustomerId(string CustomerId)
+        {
+            return _context.Orders.FirstOrDefault(o => o.CustomerId == CustomerId);
+        }
+        public Order GetOrderByOrderDate(DateTime OrderDate)
+        {
+            return _context.Orders.FirstOrDefault(o => o.OrderDate == OrderDate);
+        }
+        public Order GetOrderByNItems(int NItems)
+        {
+            return _context.Orders.FirstOrDefault(o => o.NItems == NItems);
+        }
+        public Order GetOrderByTotal(double total)
+        {
+            return _context.Orders.FirstOrDefault(o => o.total == total);
+        }
 
 
     }
