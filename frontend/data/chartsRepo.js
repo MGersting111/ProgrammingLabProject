@@ -213,7 +213,7 @@ function handleBarClick(storeName, storeDataMap) {
   });
 }
 
-function createMapChart() {
+function createMapChart2() {
   var barChartDiv = document.getElementById("barChartDiv");
   //barChartDiv.innerHTML = " ";
   barChartDiv.style.display = "none";
