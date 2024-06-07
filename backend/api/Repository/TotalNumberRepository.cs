@@ -38,9 +38,10 @@ namespace api.Repository
         {
             var query = _context.Orders.AsNoTracking();
 
-            if (!string.IsNullOrEmpty(filter.Category))
+            if (!string.IsNullOrEmpty(filter.StoreId))
             {
-                query = query.Where(order => order.OrderItems.Any(orderItem => orderItem.Product.Category == filter.Category));
+                var storeIdList = filter.StoreId.Split(',').ToList(); // Teilen Sie die StoreIds in eine Liste auf
+                query = query.Where(order => storeIdList.Contains(order.StoreId));
             }
 
             if (filter.OrderDateFrom.HasValue)
