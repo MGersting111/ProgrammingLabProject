@@ -15,7 +15,7 @@ using api.Dto;
 
 namespace api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Goal")]
     [ApiController]
     public class GoalController : ControllerBase
     {
