@@ -41,12 +41,12 @@ namespace api.Controllers
             _totalNumberRepository = totalNumberRepository;
         }
 
-        [HttpGet("TotalStoreRevenue/{storeId}")]
-        public IActionResult GetTotalStoreRevenue(string storeId)
-        {
-            double totalStoreRevenue = _totalNumberRepository.GetTotalStoreRevenue(storeId);
-            return Ok(new { Revenue = totalStoreRevenue });
-        }
+       // [HttpGet("TotalStoreRevenue/{storeId}")]
+       // public IActionResult GetTotalStoreRevenue(string storeId)
+      //  {
+//            double totalStoreRevenue = _totalNumberRepository.GetTotalStoreRevenue(storeId);
+        //    return Ok(new { Revenue = totalStoreRevenue });
+      //  }
 
         [HttpGet("FilteredStoreInfo")]
         public async Task<ActionResult<List<StoreInfo>>> GetFilteredStoreInfo([FromQuery] FilterRevenue filter)

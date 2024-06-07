@@ -26,11 +26,11 @@ namespace api.Repository
 
         }
 
-        public double GetTotalStoreRevenue(string storeId)
-        {
-            var orders = _context.Orders.Where(order => order.StoreId == storeId);
-            return orders.Sum(order => order.total);
-        }
+      //  public double GetTotalStoreRevenue(string storeId)
+       // {
+        //    var orders = _context.Orders.Where(order => order.StoreId == storeId);
+         //   return orders.Sum(order => order.total);
+      //  }
 
 
 

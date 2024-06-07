@@ -11,7 +11,7 @@ namespace api.Interfaces
 {
     public interface ITotalNumberRepository
     {
-        double GetTotalStoreRevenue(string storeId);
+      //  double GetTotalStoreRevenue(string storeId);
 
 
         Task<List<StoreInfo>> GetFilteredStoreInfoAsync(FilterRevenue filter);
