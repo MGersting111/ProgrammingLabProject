@@ -1,5 +1,5 @@
 const mapUrl = "http://localhost:3000/map";
-function createMapChart() {
+function createOldMapChart() {
   var barChartDiv = document.getElementById("barChartDiv");
   //barChartDiv.innerHTML = " ";
   barChartDiv.style.display = "none";

@@ -37,7 +37,7 @@ function getData() {
         const row = document.createElement("tr");
 
         const storeIdCell = document.createElement("td");
-        storeIdCell.textContent = item.storeId;
+        storeIdCell.textContent = getKeysOfValues(item.storeId);
         row.appendChild(storeIdCell);
 
         const orderCountCell = document.createElement("td");
@@ -59,4 +59,10 @@ function getData() {
         tableBody.appendChild(row);
       });
     });
+}
+
+function getKeysOfValues(value) {
+  const storeData = new StoreData().storeData;
+  const keys = Object.keys(storeData);
+  return keys.filter((key) => storeData[key] === value);
 }

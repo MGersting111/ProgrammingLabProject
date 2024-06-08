@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="../../data/chartsRepo.js"></script>
+
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -20,15 +22,10 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
     <link rel="stylesheet" href="charts.css" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
-      rel="stylesheet"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="../../data/stores.js"></script>
-    <script src="../../data/mapChart.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <script src="../../data/mapChart.js"></script>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
@@ -89,7 +86,14 @@
       </div>
     </nav>
     <div class="container-fluid mt-5 mb-4">
-      <div class="filterContainer">
+      <div class="chartSelection">
+        <select id="chartType" onchange="toggleChartOptions()">
+          <option value="barLine">Bar- and Line-Chart</option>
+          <option value="correlation">Correlation Chart</option>
+          <option value="map">Map Chart</option>
+        </select>
+      </div>
+      <div id="barLineOptions" class="filterContainer">
         <div class="col-auto">
           <select id="modelSelect" class="select-dropdown">
             <option value="" disabled selected>Model</option>
@@ -101,9 +105,10 @@
         <div class="col-auto">
           <select id="attributeSelect" class="select-dropdown">
             <option value="" disabled selected>Attribute</option>
-            <option value="revenue">Revenue</option>
+            <option value="totalRevenue">Revenue</option>
             <option value="sales">Sales</option>
             <option value="customer">Customer</option>
+            <option value="revenuerPerCustomer">Revenue per Customer</option>
           </select>
         </div>
 
@@ -129,19 +134,115 @@
             <option value="30">30</option>
           </select>
         </div>
-        <button onclick="getData()" class="btn btn-primary">
-          Show Bar-Chart
+        <button onclick="createBarLineChart()" class="btn btn-primary">
+          Show Bar- and Line-Chart
         </button>
         <div style="width: 20px"></div>
         <button onclick="createMapChart()" class="btn btn-primary">
           Show Map
         </button>
+      </div>
+      <div id="correlationOptions" class="filterContainer">
+        <div class="col-auto">
+          <select id="firstModel" class="select-dropdown">
+            <option value="" disabled selected>Model</option>
+            <option value="store">Store</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <select id="xAttribute" class="select-dropdown">
+            <option value="" disabled selected>x-Attribute</option>
+            <option value="revenue">Revenue</option>
+            <option value="customerCount">Customer</option>
+            <option value="averageordervalue">Average Order-Value</option>
+            <option value="averageordervalueperstore">
+              Average Order-Value per Store
+            </option>
+            <option value="averageordervaluepercustomer">
+              Average Order-Value per Customer
+            </option>
+            <option value="totalrevenuepercustomerperstore">
+              Revenue per Customer per Store
+            </option>
+            <option value="ordercountperproductperstore">
+              Orders per Product per Store
+            </option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <select id="yAttribute" class="select-dropdown">
+            <option value="" disabled selected>y-Attribute</option>
+            <option value="revenue">Revenue</option>
+            <option value="customerCount">Customer</option>
+            <option value="averageordervalue">Average Order-Value</option>
+            <option value="averageordervalueperstore">
+              Average Order-Value per Store
+            </option>
+            <option value="averageordervaluepercustomer">
+              Average Order-Value per Customer
+            </option>
+            <option value="totalrevenuepercustomerperstore">
+              Revenue per Customer per Store
+            </option>
+            <option value="ordercountperproductperstore">
+              Orders per Product per Store
+            </option>
+          </select>
+        </div>
+
+        <div class="col-auto">
+          <div
+            class="setDate"
+            style="display: flex; flex-direction: column; margin-right: 10px"
+          >
+            <form>
+              <input type="date" id="fromDateCor" name="fromDate" />
+              <br />
+              <input type="date" id="toDateCor" name="toDate" />
+            </form>
+          </div>
+        </div>
         <div style="width: 20px"></div>
         <button onclick="createCorrelationChart()" class="btn btn-primary">
           Show correlation
         </button>
       </div>
+      <div id="mapOptions" class="filterContainer">
+        <div class="col-auto">
+          <select id="attributeMap" class="select-dropdown">
+            <option value="" disabled>Attribute</option>
+            <option value="revenue">revenue</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <div
+            class="setDate"
+            style="display: flex; flex-direction: column; margin-right: 10px"
+          >
+            <form>
+              <input
+                type="date"
+                id="fromDateMap"
+                name="fromDate"
+                value="2022-01-01"
+              />
+              <br />
+              <input
+                type="date"
+                id="toDateMap"
+                name="toDate"
+                value="2022-06-01"
+              />
+            </form>
+          </div>
+        </div>
+        <div style="width: 20px"></div>
+        <button onclick="createMapChart()" class="btn btn-primary">
+          Show Map
+        </button>
+      </div>
     </div>
+    <div class="container mt-5"></div>
     <div id="charts">
       <div class="container mt-5" id="barChartDiv">
         <canvas id="barChart"></canvas>
@@ -154,9 +255,6 @@
         <canvas id="scatterChart"></canvas>
       </div>
     </div>
-
-    <script src="../../data/chartsRepo.js"></script>
-    <script src="../../data/mapChart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -165,7 +263,6 @@
     ></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js"></script>
-    <script src="./data/models/order.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../../data/filterTotalNumbersRepo.js"></script>
     <script src="../general/sidebar.js"></script>
@@ -182,17 +279,8 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
-    <script src="https://code.highcharts.com/maps/modules/data.js"></script>
-    <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
-    <script src="https://code.highcharts.com/maps/modules/accessibility.js"></script>
 
-    <div class="container mt-5" id="mapChartDiv">
-      <div id="container"></div>
-      <div id="table-div">
-        <table id="data"></table>
-      </div>
-    </div>
+    <div class="container mt-5" id="mapChartDiv"></div>
+    <div id="mapInfoDiv"></div>
   </body>
 </html>
