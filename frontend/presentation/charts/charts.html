@@ -53,6 +53,18 @@
           <a href="../home/home.html" class="btn btn-transparent">
             <i class="fa-solid fa-chart-pie" style="color: #ffffff"></i>
           </a>
+          <a
+            href="../storeanalyse_page/storeanalyse.html"
+            class="btn btn-transparent"
+          >
+            <i class="fa-solid fa-store" style="color: #ffffff"></i>
+          </a>
+          <a
+            href="../productanalyse_page/productanalyse.html"
+            class="btn btn-transparent"
+          >
+            <i class="fa-solid fa-pizza-slice" style="color: #ffffff"></i>
+          </a>
           <a href="../charts/charts.html" class="btn btn-transparent">
             <i class="fa-solid fa-chart-line fa-xl" style="color: #ffffff"></i>
           </a>
@@ -87,7 +99,11 @@
     </nav>
     <div class="container-fluid mt-5 mb-4">
       <div class="chartSelection">
-        <select id="chartType" onchange="toggleChartOptions()">
+        <select
+          id="chartType"
+          onchange="toggleChartOptions()"
+          class="select-dropdown"
+        >
           <option value="barLine">Bar- and Line-Chart</option>
           <option value="correlation">Correlation Chart</option>
           <option value="map">Map Chart</option>
@@ -96,7 +112,7 @@
       <div id="barLineOptions" class="filterContainer">
         <div class="col-auto">
           <select id="modelSelect" class="select-dropdown">
-            <option value="" disabled selected>Model</option>
+            <option value="" disabled>Model</option>
             <option value="Category">Category</option>
             <option value="Store">Store</option>
             <option value="Product">Product</option>
@@ -104,7 +120,7 @@
         </div>
         <div class="col-auto">
           <select id="attributeSelect" class="select-dropdown">
-            <option value="" disabled selected>Attribute</option>
+            <option value="" disabled>Attribute</option>
             <option value="totalRevenue">Revenue</option>
             <option value="sales">Sales</option>
             <option value="customer">Customer</option>
@@ -118,42 +134,49 @@
             style="display: flex; flex-direction: column; margin-right: 10px"
           >
             <form>
-              <input type="date" id="fromDate" name="fromDate" />
+              <input
+                type="date"
+                id="fromDate"
+                name="fromDate"
+                value="2022-01-01"
+              />
               <br />
-              <input type="date" id="toDate" name="toDate" />
+              <input type="date" id="toDate" name="toDate" value="2022-06-30" />
             </form>
           </div>
         </div>
         <div class="col-auto">
           <select id="limitSelect" class="select-dropdown">
-            <option value="" disabled selected>Limit</option>
+            <option value="" disabled>Limit</option>
             <option value="1">1</option>
             <option value="3">3</option>
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="30">30</option>
+            <option value="100">All</option>
           </select>
         </div>
         <button onclick="createBarLineChart()" class="btn btn-primary">
           Show Bar- and Line-Chart
         </button>
         <div style="width: 20px"></div>
-        <button onclick="createMapChart()" class="btn btn-primary">
-          Show Map
-        </button>
       </div>
-      <div id="correlationOptions" class="filterContainer">
+      <div
+        id="correlationOptions"
+        class="filterContainer"
+        style="display: none"
+      >
         <div class="col-auto">
           <select id="firstModel" class="select-dropdown">
-            <option value="" disabled selected>Model</option>
+            <option value="" disabled>Model</option>
             <option value="store">Store</option>
           </select>
         </div>
         <div class="col-auto">
           <select id="xAttribute" class="select-dropdown">
-            <option value="" disabled selected>x-Attribute</option>
-            <option value="revenue">Revenue</option>
-            <option value="customerCount">Customer</option>
+            <option value="" disabled>x-Attribute</option>
+            <option value="totalRevenue">Revenue</option>
+            <option value="orderCount">Order count</option>
             <option value="averageordervalue">Average Order-Value</option>
             <option value="averageordervalueperstore">
               Average Order-Value per Store
@@ -171,9 +194,9 @@
         </div>
         <div class="col-auto">
           <select id="yAttribute" class="select-dropdown">
-            <option value="" disabled selected>y-Attribute</option>
-            <option value="revenue">Revenue</option>
-            <option value="customerCount">Customer</option>
+            <option value="" disabled>y-Attribute</option>
+            <option value="totalRevenue">Revenue</option>
+            <option value="orderCount">Customer</option>
             <option value="averageordervalue">Average Order-Value</option>
             <option value="averageordervalueperstore">
               Average Order-Value per Store
@@ -196,9 +219,19 @@
             style="display: flex; flex-direction: column; margin-right: 10px"
           >
             <form>
-              <input type="date" id="fromDateCor" name="fromDate" />
+              <input
+                type="date"
+                id="fromDateCor"
+                name="fromDate"
+                value="2022-01-01"
+              />
               <br />
-              <input type="date" id="toDateCor" name="toDate" />
+              <input
+                type="date"
+                id="toDateCor"
+                name="toDate"
+                value="2022-06-30"
+              />
             </form>
           </div>
         </div>
@@ -207,7 +240,7 @@
           Show correlation
         </button>
       </div>
-      <div id="mapOptions" class="filterContainer">
+      <div id="mapOptions" class="filterContainer" style="display: none">
         <div class="col-auto">
           <select id="attributeMap" class="select-dropdown">
             <option value="" disabled>Attribute</option>
@@ -231,7 +264,7 @@
                 type="date"
                 id="toDateMap"
                 name="toDate"
-                value="2022-06-01"
+                value="2022-06-30"
               />
             </form>
           </div>
@@ -247,9 +280,7 @@
       <div class="container mt-5" id="barChartDiv">
         <canvas id="barChart"></canvas>
       </div>
-      <div class="container mt-5" id="lineChartDiv">
-        <canvas id="lineChart"></canvas>
-      </div>
+
       <div class="container mt-5" id="scatterChartDiv">
         <p id="correlation" style="color: white"></p>
         <canvas id="scatterChart"></canvas>
@@ -282,5 +313,8 @@
 
     <div class="container mt-5" id="mapChartDiv"></div>
     <div id="mapInfoDiv"></div>
+    <div class="container mt-5" id="lineChartDiv">
+      <canvas id="lineChart"></canvas>
+    </div>
   </body>
 </html>

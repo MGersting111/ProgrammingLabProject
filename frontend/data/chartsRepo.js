@@ -31,6 +31,7 @@ function createBarLineChart() {
     })
     .then((data) => {
       processData(data);
+      console.log(data);
     })
     .catch((error) => {
       console.error("Fetch error:", error);
@@ -41,7 +42,7 @@ function processData(data) {
   const storeDataMap = new Map();
 
   data.forEach((store) => {
-    const storeName = store.storeId;
+    const storeName = getKeyByValue(store.storeId);
     const monthlyData = store.metrics;
     const totalSum = store.total;
 
@@ -60,7 +61,18 @@ function processData(data) {
   createInitialLineChart(storeDataMap); // Create the initial line chart for all stores
 }
 
+function getKeyByValue(searchValue) {
+  const storeNames = new StoreData().storeData;
+  for (let [key, value] of Object.entries(storeNames)) {
+    if (value === searchValue) {
+      return key;
+    }
+  }
+  return searchValue;
+}
+
 function createBarChart(storeDataMap) {
+  var initialLineChartCreated = true;
   var barChartDiv = document.getElementById("barChartDiv");
   barChartDiv.style.display = "block";
   var lineChartDiv = document.getElementById("lineChartDiv");
@@ -131,12 +143,18 @@ function createBarChart(storeDataMap) {
           beginAtZero: true,
         },
       },
+
       onClick: (event, elements) => {
-        console.log(elements);
         if (elements.length > 0) {
           const elementIndex = elements[0].index;
           const storeName = storeNames[elementIndex];
-          handleBarClick(storeName, storeDataMap);
+          if (initialLineChartCreated) {
+            handleBarClick(storeName, storeDataMap);
+            initialLineChartCreated = false;
+          } else {
+            createInitialLineChart(storeDataMap);
+            initialLineChartCreated = true;
+          }
         }
       },
     },
@@ -144,6 +162,7 @@ function createBarChart(storeDataMap) {
 }
 
 function createInitialLineChart(storeDataMap) {
+  console.log(storeDataMap);
   const ctx = document.getElementById("lineChart").getContext("2d");
 
   const datasets = [];
@@ -280,45 +299,39 @@ function createMapChart() {
   fetch(url)
     .then((response) => response.json())
     .then((rows) => {
+      const response = rows;
+      const summedValuesPerStore = response.map((store) => {
+        const { State, City, Latitude, Longitude, ...months } = store;
+        const total = Object.values(months).reduce((acc, val) => acc + val, 0);
+        return total;
+      });
+
+      // Liste mit Storenamen (State + City)
+      const storeNames = response.map(
+        (store) => `${store.State} ${store.City}`
+      );
+
+      // Map/Liste mit Storenamen und den jeweiligen Monaten mit Werten
+      const storeDataMap = response.reduce((acc, store) => {
+        const { State, City, Latitude, Longitude, ...months } = store;
+        const storeName = `${State} ${City}`;
+        acc[storeName] = months;
+        return acc;
+      }, {});
+
       function unpack(rows, key) {
         return rows.map((row) => row[key]);
       }
+      var cityMonthlyValueList = {};
+      var cityLat = unpack(rows, "Latitude");
+      var cityLon = unpack(rows, "Longitude");
 
-      var cityName = unpack(rows, "City"),
-        cityLat = unpack(rows, "Latitude"),
-        cityLon = unpack(rows, "Longitude"),
-        cityValues = rows.map((row) => {
-          // Summe aller Monate berechnen und abrunden
-          let sum = 0;
-          for (let key in row) {
-            if (
-              [
-                "Januar",
-                "Februar",
-                "März",
-                "April",
-                "Mai",
-                "Juni",
-                "Juli",
-                "August",
-                "September",
-                "Oktober",
-                "November",
-                "Dezember",
-              ].includes(key)
-            ) {
-              sum += parseFloat(row[key]) || 0;
-            }
-          }
-          return Math.round(sum);
-        }),
-        citySize = [],
-        hoverText = [],
-        scale = 50000;
+      (citySize = []), (hoverText = []), (scale = 50000);
 
-      for (var i = 0; i < cityValues.length; i++) {
-        var currentSize = cityValues[i] / scale;
-        var currentText = cityName[i] + " value: " + cityValues[i];
+      for (var i = 0; i < summedValuesPerStore.length; i++) {
+        var currentSize = summedValuesPerStore[i] / scale;
+        var currentText = storeNames[i] + " value: " + summedValuesPerStore[i];
+        cityMonthlyValueList[storeNames[i]] = summedValuesPerStore[i];
         citySize.push(currentSize);
         hoverText.push(currentText);
       }
@@ -348,10 +361,20 @@ function createMapChart() {
       ];
 
       var layout = {
-        title: `Values from ${dateFrom} to ${dateTo}`,
+        title: `Revenue per Store from ${dateFrom} to ${dateTo}`,
         showlegend: false,
+
+        width: 1200, // Breite des Diagramms
+        height: 800, // Höhe des Diagramms
+        margin: {
+          l: 100, // linker Rand
+          r: 100, // rechter Rand
+          t: 100, // oberer Rand
+          b: 100, // unterer Rand
+        },
+        paper_bgcolor: "#77b0aa",
         geo: {
-          scope: "usa",
+          scope: "nevada",
           projection: {
             type: "albers usa",
           },
@@ -365,7 +388,7 @@ function createMapChart() {
             lat: avgLat,
             lon: avgLon,
           },
-          zoom: 2, // erhöhtes Zoom-Level
+          zoom: 4, // erhöhtes Zoom-Level
         },
       };
 
@@ -375,31 +398,9 @@ function createMapChart() {
       mapChartDiv.on("plotly_click", function (data) {
         // Extrahiere die Indexnummer des angeklickten Punktes
         var pointIndex = data.points[0].pointIndex;
-
         // Extrahiere die Informationen für die angeklickte Stadt
-        var clickedCity = cityName[pointIndex];
-        var clickedValues = Object.keys(data.points[0].data)
-          .filter((key) =>
-            [
-              "Januar",
-              "Februar",
-              "März",
-              "April",
-              "Mai",
-              "Juni",
-              "Juli",
-              "August",
-              "September",
-              "Oktober",
-              "November",
-              "Dezember",
-            ].includes(key)
-          )
-          .map((key) => data.points[0].data[key][pointIndex]);
-
-        // Drucke die Informationen der angeklickten Stadt
-        console.log("Stadt:", clickedCity);
-        console.log("Monatliche Werte:", clickedValues);
+        var clickedCityValues = storeDataMap[storeNames[pointIndex]];
+        createMapStoreLineChart(storeNames[pointIndex], clickedCityValues);
       });
     })
     .catch((err) => console.error(err));
@@ -493,6 +494,50 @@ async function createCorrelationChart() {
   }
 }
 
+function createMapStoreLineChart(storeName, monthValueMap) {
+  var lineChartDiv = document.getElementById("lineChartDiv");
+  lineChartDiv.style.display = "block";
+  const ctx = document.getElementById("lineChart").getContext("2d");
+
+  const months = Object.keys(monthValueMap);
+  const revenues = months.map((month) => monthValueMap[month]);
+  console.log(months);
+  console.log(revenues);
+
+  const dataset = {
+    label: storeName,
+    data: revenues,
+    fill: false,
+    borderColor: getRandomColor(),
+    borderWidth: 2,
+  };
+
+  if (lineChart != null) {
+    lineChart.destroy();
+  }
+
+  lineChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: months,
+      datasets: [dataset],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          ticks: { color: "white" },
+          beginAtZero: true,
+        },
+        y: {
+          ticks: { color: "white" },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+}
+
 function toggleChartOptions() {
   var chartType = document.getElementById("chartType").value;
   var barLineOptions = document.getElementById("barLineOptions");
@@ -500,16 +545,16 @@ function toggleChartOptions() {
   var mapOptions = document.getElementById("mapOptions");
 
   if (chartType === "barLine") {
-    barLineOptions.style.display = "block";
+    barLineOptions.style.display = "flex";
     correlationOptions.style.display = "none";
     mapOptions.style.display = "none";
   } else if (chartType === "correlation") {
     barLineOptions.style.display = "none";
-    correlationOptions.style.display = "block";
+    correlationOptions.style.display = "flex";
     mapOptions.style.display = "none";
   } else if (chartType === "map") {
     barLineOptions.style.display = "none";
     correlationOptions.style.display = "none";
-    mapOptions.style.display = "block";
+    mapOptions.style.display = "flex";
   }
 }
