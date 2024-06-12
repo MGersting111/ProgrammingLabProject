@@ -7,12 +7,17 @@ namespace api.Dto
 {
     public class ChartsInfo
     {
-
         public string? StoreId { get; set; }
 
-        public Dictionary<string, double> Metrics { get; set; }
-        //public List<DateTime> OrderDates { get; set; }
+        public Dictionary<int, YearlyMetrics> MetricsByYear { get; set; }
+
         public int Total { get; set; }
-        
+    }
+
+    public class YearlyMetrics
+    {
+        public Dictionary<string, double> Metrics { get; set; }
+
+        public int Total { get; set; }
     }
 }

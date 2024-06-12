@@ -31,6 +31,7 @@ builder.Services.AddScoped<ICorrelationRepository, CorrelationRepository>();
 builder.Services.AddScoped<IMapChartsRepository, MapChartsRepository>();
 builder.Services.AddScoped<IGoalRepository, GoalRepository>();
 builder.Services.AddScoped<ICompareChartsRepository, CompareChartsRepository>();
+builder.Services.AddScoped<IProductSaleRepository, ProductSaleRepository>();
 
 
 
