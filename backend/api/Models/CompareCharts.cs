@@ -7,10 +7,10 @@ namespace api.Models
 {
     public class CompareCharts
     {
-        
+
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public string Metrics { get; set; } =string.Empty;
+        public string Metrics { get; set; } = string.Empty;
 
         public int Limit { get; set; }
 

@@ -45,9 +45,9 @@ namespace api.Repository
 
                     foreach (var store in stores)
                     {
-                        var chartsInfo = new ChartsInfo 
-                        { 
-                            StoreId = store.StoreId, 
+                        var chartsInfo = new ChartsInfo
+                        {
+                            StoreId = store.StoreId,
                             MetricsByYear = new Dictionary<int, YearlyMetrics>()
                         };
 
@@ -55,7 +55,7 @@ namespace api.Repository
                             .AsNoTracking()
                             .Where(order => order.StoreId == store.StoreId && order.OrderDate >= filter.StartTime && order.OrderDate <= filter.EndTime)
                             .GroupBy(order => new { order.OrderDate.Year, order.OrderDate.Month })
-                            .Select(group => new 
+                            .Select(group => new
                             {
                                 Year = group.Key.Year,
                                 Month = group.Key.Month,
@@ -113,7 +113,7 @@ namespace api.Repository
                         .Include(orderItem => orderItem.Order)
                         .Where(orderItem => orderItem.Order.OrderDate >= filter.StartTime && orderItem.Order.OrderDate <= filter.EndTime)
                         .GroupBy(orderItem => new { orderItem.Product.Name, Year = orderItem.Order.OrderDate.Year, Month = orderItem.Order.OrderDate.Month })
-                        .Select(group => new 
+                        .Select(group => new
                         {
                             ProductName = group.Key.Name,
                             Year = group.Key.Year,
@@ -183,9 +183,9 @@ namespace api.Repository
                     var categories = new List<string> { "Classic", "Vegetarian", "Specialty" };
                     foreach (var category in categories)
                     {
-                        var chartsInfo = new ChartsInfo 
-                        { 
-                            StoreId = category, 
+                        var chartsInfo = new ChartsInfo
+                        {
+                            StoreId = category,
                             MetricsByYear = new Dictionary<int, YearlyMetrics>()
                         };
 
@@ -203,7 +203,7 @@ namespace api.Repository
                                 .Include(orderItem => orderItem.Order)
                                 .Where(orderItem => orderItem.Product.Category == category && orderItem.Order.OrderDate.Month == date.Month && orderItem.Order.OrderDate.Year == date.Year)
                                 .GroupBy(orderItem => new { orderItem.Order.OrderDate.Year, orderItem.Order.OrderDate.Month })
-                                .Select(group => new 
+                                .Select(group => new
                                 {
                                     Year = group.Key.Year,
                                     Month = group.Key.Month,
