@@ -7,9 +7,10 @@ namespace api.Models
 {
     public class ProductSale
     {
-        public string ProductName { get; set; }
-        public string Category { get; set; }
-        public string Size { get; set; }
-        public int Quantity { get; set; }
+        public int Year { get; set; }
+    public int Month { get; set; }
+    public string Size { get; set; }
+    public string Category { get; set; }
+    public int TotalSales { get; set; }
     }
 }

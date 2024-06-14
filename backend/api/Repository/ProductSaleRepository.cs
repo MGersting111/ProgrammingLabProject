@@ -21,28 +21,78 @@ namespace api.Repository
     }
 
    
-   public async Task<ProductSaleInfo> GetProductSaleInfoAsync(DateTime fromDate, DateTime toDate)
+
+
+public async Task<ProductSaleInfo> GetProductSaleInfoAsync(DateTime fromDate, DateTime toDate)
 {
     var productSaleInfo = new ProductSaleInfo
     {
         FromDate = fromDate,
-        ToDate = toDate
+        ToDate = toDate,
+        ProductSalesByMonth = new Dictionary<int, Dictionary<string, int>>(),
+        ProductSalesBySize = new Dictionary<string, int>(),
+        ProductSalesByCategory = new Dictionary<string, int>()
     };
 
-    productSaleInfo.ProductSales = await _context.OrderItems
+    // Verkaufszahlen nach Monat und Jahr
+    var salesByMonth = await _context.OrderItems
         .Where(orderItem => orderItem.Order.OrderDate >= fromDate && orderItem.Order.OrderDate <= toDate)
-        .GroupBy(orderItem => new { orderItem.Product.Name, orderItem.Product.Category, orderItem.Product.Size })
-        .Select(group => new ProductSale
+        .GroupBy(orderItem => new { orderItem.Order.OrderDate.Year, orderItem.Order.OrderDate.Month })
+        .Select(group => new 
         {
-            ProductName = group.Key.Name,
-            Category = group.Key.Category,
-            Size = group.Key.Size,
-            Quantity = group.Count()
+            Year = group.Key.Year,
+            Month = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(group.Key.Month),
+            TotalSales = group.Count()
         })
         .ToListAsync();
 
+    foreach (var sale in salesByMonth)
+    {
+        if (!productSaleInfo.ProductSalesByMonth.ContainsKey(sale.Year))
+        {
+            productSaleInfo.ProductSalesByMonth[sale.Year] = new Dictionary<string, int>();
+        }
+        productSaleInfo.ProductSalesByMonth[sale.Year][sale.Month] = sale.TotalSales;
+    }
+
+    // Verkaufszahlen nach Größe
+    var salesBySize = await _context.OrderItems
+        .Where(orderItem => orderItem.Order.OrderDate >= fromDate && orderItem.Order.OrderDate <= toDate)
+        .GroupBy(orderItem => orderItem.Product.Size)
+        .Select(group => new 
+        {
+            Size = group.Key,
+            TotalSales = group.Count()
+        })
+        .ToListAsync();
+
+    foreach (var sale in salesBySize)
+    {
+        productSaleInfo.ProductSalesBySize[sale.Size] = sale.TotalSales;
+    }
+
+    // Verkaufszahlen nach Kategorie
+    var salesByCategory = await _context.OrderItems
+        .Where(orderItem => orderItem.Order.OrderDate >= fromDate && orderItem.Order.OrderDate <= toDate)
+        .GroupBy(orderItem => orderItem.Product.Category)
+        .Select(group => new 
+        {
+            Category = group.Key,
+            TotalSales = group.Count()
+        })
+        .ToListAsync();
+
+    foreach (var sale in salesByCategory)
+    {
+        productSaleInfo.ProductSalesByCategory[sale.Category] = sale.TotalSales;
+    }
+
     return productSaleInfo;
 }
+
+
+
+
 
 }
 }
