@@ -43,22 +43,32 @@ function processData(data) {
 
   data.forEach((store) => {
     const storeName = getKeyByValue(store.storeId);
-    const monthlyData = store.metrics;
-    const totalSum = store.total;
+    const yearlyMetrics = store.metricsByYear;
+
+    let monthlyDataList = [];
+    let totalSum = store.total;
+
+    // Iterate through each year's metrics
+    for (const year in yearlyMetrics) {
+      const monthlyData = yearlyMetrics[year].metrics;
+
+      // Add each month's data to the list
+      for (const month in monthlyData) {
+        monthlyDataList.push({ month, value: monthlyData[month] });
+      }
+    }
 
     // Create store object
     const storeObject = {
       totalSum,
-      ...monthlyData,
+      monthlyData: monthlyDataList,
     };
 
     storeDataMap.set(storeName, storeObject);
   });
-
-  console.log(storeDataMap);
-
-  createBarChart(storeDataMap); // Call the chart creation function with the data map
-  createInitialLineChart(storeDataMap); // Create the initial line chart for all stores
+  console.log("storeDataMap: ", storeDataMap);
+  createBarChart(storeDataMap);
+  createInitialLineChart(storeDataMap);
 }
 
 function getKeyByValue(searchValue) {
@@ -162,13 +172,19 @@ function createBarChart(storeDataMap) {
 }
 
 function createInitialLineChart(storeDataMap) {
-  console.log(storeDataMap);
   const ctx = document.getElementById("lineChart").getContext("2d");
 
   const datasets = [];
+  let labels = [];
+
   storeDataMap.forEach((storeObject, storeName) => {
-    const months = Object.keys(storeObject).filter((key) => key !== "totalSum");
-    const revenues = months.map((month) => storeObject[month]);
+    const monthlyData = storeObject.monthlyData;
+    const revenues = monthlyData.map((data) => data.value);
+
+    if (labels.length === 0) {
+      labels = monthlyData.map((data) => data.month);
+    }
+
     datasets.push({
       label: storeName,
       data: revenues,
@@ -185,9 +201,7 @@ function createInitialLineChart(storeDataMap) {
   lineChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: Object.keys(storeDataMap.values().next().value).filter(
-        (key) => key !== "totalSum"
-      ),
+      labels: labels,
       datasets: datasets,
     },
     options: {
@@ -209,12 +223,20 @@ function createInitialLineChart(storeDataMap) {
 function handleBarClick(storeName, storeDataMap) {
   const ctx = document.getElementById("lineChart").getContext("2d");
   const storeObject = storeDataMap.get(storeName);
+
+  if (!storeObject) {
+    console.error(`Store ${storeName} not found in storeDataMap`);
+    return;
+  }
+
   // Extract months and their corresponding revenues
-  const months = Object.keys(storeObject).filter((key) => key !== "totalSum");
-  const revenues = months.map((month) => storeObject[month]);
+  const months = storeObject.monthlyData.map((data) => data.month);
+  const revenues = storeObject.monthlyData.map((data) => data.value);
+
   if (window.lineChart != null) {
     window.lineChart.destroy();
   }
+
   // Create the line chart
   window.lineChart = new Chart(ctx, {
     type: "line",
@@ -224,34 +246,9 @@ function handleBarClick(storeName, storeDataMap) {
         {
           label: `Revenue for ${storeName}`,
           data: revenues,
-          backgroundColor: [
-            "#EC9740",
-            "#FFB347",
-            "#FFC966",
-            "#EFA94A",
-            "#FFD700",
-            "#8FBC8F",
-            "#4682B4",
-            "#6A5ACD",
-            "#DAA520",
-            "#CD5C5C",
-            "#F08080",
-          ],
-          borderColor: [
-            "#EC9740",
-            "#FFB347",
-            "#FFC966",
-            "#EFA94A",
-            "#FFD700",
-            "#8FBC8F",
-            "#4682B4",
-            "#6A5ACD",
-            "#DAA520",
-            "#CD5C5C",
-            "#F08080",
-          ],
-          fill: true,
+          borderColor: "#4682B4", // A single color for the line
           borderWidth: 2,
+          fill: false,
         },
       ],
     },

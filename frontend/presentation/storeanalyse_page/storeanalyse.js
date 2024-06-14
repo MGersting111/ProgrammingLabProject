@@ -1,28 +1,33 @@
 const storeBaseUrl = "http://localhost:3000/analyseStore";
 
 function analyseStore() {
-  getData().then((data) => {
-    if (data) {
-      var firstChartContainer = document.getElementById("firstChartContainer");
-      firstChartContainer.style.display = "block";
-      createBarChart(data, "Test Chart", testOnclick, "test");
-    }
-  });
+  getData()
+    .then((data) => {
+      if (data) {
+        var firstChartContainer = document.getElementById(
+          "firstChartContainer"
+        );
+        firstChartContainer.style.display = "block";
+        createBarChart(data, "Test Chart", testOnclick, "test");
+      }
+    })
+    .catch((error) => {
+      console.error("Error in analyseStore:", error);
+    });
 }
 
 function testOnclick() {
   console.log("test on click");
 }
+
 function getData() {
   const attribute = document.getElementById("attributeSelect").value;
   const dateFrom = document.getElementById("fromDate").value;
   const dateTo = document.getElementById("toDate").value;
-  url = `${storeBaseUrl}?StartTime=${dateFrom}&EndTime=${dateTo}&Metrics=${attribute}`;
-  fetch(url, {
+  const url = `${storeBaseUrl}?StartTime=${dateFrom}&EndTime=${dateTo}&Metrics=${attribute}`;
+
+  return fetch(url, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
   })
     .then((response) => {
       if (!response.ok) {
