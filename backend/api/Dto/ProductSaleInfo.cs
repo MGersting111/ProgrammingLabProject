@@ -13,12 +13,15 @@ namespace api.Dto
         public DateTime ToDate { get; set; }
 
         // Verkaufszahlen nach Monat und Jahr
-        public Dictionary<int, Dictionary<string, int>> ProductSalesByMonth { get; set; }
+        public Dictionary<string, SortedDictionary<string, int>> ProductSalesByMonth { get; set; }
 
-        // Verkaufszahlen nach Größe
-        public Dictionary<string, int> ProductSalesBySize { get; set; }
+        // Verkaufszahlen nach Größe und Jahr
+        public Dictionary<string, Dictionary<string, int>> ProductSalesBySize { get; set; }
 
-        // Verkaufszahlen nach Kategorie
-        public Dictionary<string, int> ProductSalesByCategory { get; set; }
+        // Verkaufszahlen nach Kategorie und Jahr
+        public Dictionary<string, Dictionary<string, int>> ProductSalesByCategory { get; set; }
+
+        // Gesamtverkaufszahlen
+        public int TotalSales { get; set; }
     }
 }
