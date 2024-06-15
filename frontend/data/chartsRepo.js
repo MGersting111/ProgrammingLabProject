@@ -8,6 +8,69 @@ var barChart;
 var lineChart;
 var scatterChart;
 
+const attributes = {
+  store: [
+    { value: "totalRevenue", text: "Revenue" },
+    { value: "orderCount", text: "Order count" },
+    { value: "averageordervalue", text: "Average Order-Value" },
+    {
+      value: "averageordervalueperstore",
+      text: "Average Order-Value per Store",
+    },
+    {
+      value: "averageordervaluepercustomer",
+      text: "Average Order-Value per Customer",
+    },
+    {
+      value: "totalrevenuepercustomerperstore",
+      text: "Revenue per Customer per Store",
+    },
+    {
+      value: "ordercountperproductperstore",
+      text: "Orders per Product per Store",
+    },
+  ],
+  product: [
+    { value: "totalunitssold", text: "Total units sold" },
+    { value: "price", text: "Price" },
+    {
+      value: "averageordervalueperproduct",
+      text: "Average Order Value per Product",
+    },
+    { value: "totalrevenue", text: "Revenue" },
+  ],
+  customer: [
+    { value: "averageordervalue", text: "Average order value" },
+    { value: "ordercountpercustomer", text: "Orders per customer" },
+    { value: "totalrevenuepercustomer", text: "Revenue per customer" },
+  ],
+};
+
+function updateAttributes() {
+  const model = document.getElementById("firstModel").value;
+  const xSelect = document.getElementById("xAttribute");
+  const ySelect = document.getElementById("yAttribute");
+
+  // Clear existing options
+  xSelect.innerHTML = '<option value="" disabled selected>x-Attribute</option>';
+  ySelect.innerHTML = '<option value="" disabled selected>y-Attribute</option>';
+
+  if (model && attributes[model]) {
+    // Add new options based on selected model
+    attributes[model].forEach((attr) => {
+      const optionX = document.createElement("option");
+      optionX.value = attr.value;
+      optionX.text = attr.text;
+      xSelect.appendChild(optionX);
+
+      const optionY = document.createElement("option");
+      optionY.value = attr.value;
+      optionY.text = attr.text;
+      ySelect.appendChild(optionY);
+    });
+  }
+}
+
 function createBarLineChart() {
   const model = document.getElementById("modelSelect").value;
   const attribute = document.getElementById("attributeSelect").value;
@@ -189,7 +252,7 @@ function createInitialLineChart(storeDataMap) {
       label: storeName,
       data: revenues,
       fill: false,
-      borderColor: getRandomColor(),
+      borderColor: interpolateColors(),
       borderWidth: 2,
     });
   });
@@ -275,6 +338,41 @@ function getRandomColor() {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
+}
+
+function interpolateColors() {
+  const steps = 35;
+  const color1 = "#004669";
+  const color2 = "#00F9FF";
+
+  const start = hexToRgb(color1);
+  const end = hexToRgb(color2);
+  const stepFactor = 1 / (steps - 1);
+  const interpolatedColors = [];
+
+  for (let i = 0; i < steps; i++) {
+    const r = Math.round(start.r + (end.r - start.r) * (i * stepFactor));
+    const g = Math.round(start.g + (end.g - start.g) * (i * stepFactor));
+    const b = Math.round(start.b + (end.b - start.b) * (i * stepFactor));
+    interpolatedColors.push(rgbToHex(r, g, b));
+  }
+
+  return interpolatedColors;
+}
+
+function hexToRgb(hex) {
+  const bigint = parseInt(hex.slice(1), 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return { r, g, b };
+}
+
+function rgbToHex(r, g, b) {
+  return (
+    "#" +
+    ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()
+  );
 }
 
 function createMapChart() {
