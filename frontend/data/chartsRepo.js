@@ -8,6 +8,69 @@ var barChart;
 var lineChart;
 var scatterChart;
 
+const attributes = {
+  store: [
+    { value: "totalRevenue", text: "Revenue" },
+    { value: "orderCount", text: "Order count" },
+    { value: "averageordervalue", text: "Average Order-Value" },
+    {
+      value: "averageordervalueperstore",
+      text: "Average Order-Value per Store",
+    },
+    {
+      value: "averageordervaluepercustomer",
+      text: "Average Order-Value per Customer",
+    },
+    {
+      value: "totalrevenuepercustomerperstore",
+      text: "Revenue per Customer per Store",
+    },
+    {
+      value: "ordercountperproductperstore",
+      text: "Orders per Product per Store",
+    },
+  ],
+  product: [
+    { value: "totalunitssold", text: "Total units sold" },
+    { value: "price", text: "Price" },
+    {
+      value: "averageordervalueperproduct",
+      text: "Average Order Value per Product",
+    },
+    { value: "totalrevenue", text: "Revenue" },
+  ],
+  customer: [
+    { value: "averageordervalue", text: "Average order value" },
+    { value: "ordercountpercustomer", text: "Orders per customer" },
+    { value: "totalrevenuepercustomer", text: "Revenue per customer" },
+  ],
+};
+
+function updateAttributes() {
+  const model = document.getElementById("firstModel").value;
+  const xSelect = document.getElementById("xAttribute");
+  const ySelect = document.getElementById("yAttribute");
+
+  // Clear existing options
+  xSelect.innerHTML = '<option value="" disabled selected>x-Attribute</option>';
+  ySelect.innerHTML = '<option value="" disabled selected>y-Attribute</option>';
+
+  if (model && attributes[model]) {
+    // Add new options based on selected model
+    attributes[model].forEach((attr) => {
+      const optionX = document.createElement("option");
+      optionX.value = attr.value;
+      optionX.text = attr.text;
+      xSelect.appendChild(optionX);
+
+      const optionY = document.createElement("option");
+      optionY.value = attr.value;
+      optionY.text = attr.text;
+      ySelect.appendChild(optionY);
+    });
+  }
+}
+
 function createBarLineChart() {
   const model = document.getElementById("modelSelect").value;
   const attribute = document.getElementById("attributeSelect").value;
@@ -113,32 +176,8 @@ function createBarChart(storeDataMap) {
         {
           label: "# revenue",
           data: storeSums,
-          backgroundColor: [
-            "#EC9740",
-            "#FFB347",
-            "#FFC966",
-            "#EFA94A",
-            "#FFD700",
-            "#8FBC8F",
-            "#4682B4",
-            "#6A5ACD",
-            "#DAA520",
-            "#CD5C5C",
-            "#F08080",
-          ],
-          borderColor: [
-            "#EC9740",
-            "#FFB347",
-            "#FFC966",
-            "#EFA94A",
-            "#FFD700",
-            "#8FBC8F",
-            "#4682B4",
-            "#6A5ACD",
-            "#DAA520",
-            "#CD5C5C",
-            "#F08080",
-          ],
+          backgroundColor: interpolateColors(storeNames.length),
+          borderColor: interpolateColors(storeNames.length),
           borderWidth: 1,
         },
       ],
@@ -159,7 +198,11 @@ function createBarChart(storeDataMap) {
           const elementIndex = elements[0].index;
           const storeName = storeNames[elementIndex];
           if (initialLineChartCreated) {
-            handleBarClick(storeName, storeDataMap);
+            handleBarClick(
+              storeName,
+              storeDataMap,
+              interpolateColors(storeNames.length)[elementIndex]
+            );
             initialLineChartCreated = false;
           } else {
             createInitialLineChart(storeDataMap);
@@ -189,7 +232,7 @@ function createInitialLineChart(storeDataMap) {
       label: storeName,
       data: revenues,
       fill: false,
-      borderColor: getRandomColor(),
+      borderColor: interpolateColors(revenues.length),
       borderWidth: 2,
     });
   });
@@ -220,7 +263,7 @@ function createInitialLineChart(storeDataMap) {
   });
 }
 
-function handleBarClick(storeName, storeDataMap) {
+function handleBarClick(storeName, storeDataMap, color) {
   const ctx = document.getElementById("lineChart").getContext("2d");
   const storeObject = storeDataMap.get(storeName);
 
@@ -246,7 +289,7 @@ function handleBarClick(storeName, storeDataMap) {
         {
           label: `Revenue for ${storeName}`,
           data: revenues,
-          borderColor: "#4682B4", // A single color for the line
+          borderColor: color, // A single color for the line
           borderWidth: 2,
           fill: false,
         },
@@ -275,6 +318,43 @@ function getRandomColor() {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
+}
+
+function interpolateColors(steps) {
+  if (steps === undefined) {
+    const steps = 35;
+  }
+  const color1 = "#004669";
+  const color2 = "#00F9FF";
+
+  const start = hexToRgb(color1);
+  const end = hexToRgb(color2);
+  const stepFactor = 1 / (steps - 1);
+  const interpolatedColors = [];
+
+  for (let i = 0; i < steps; i++) {
+    const r = Math.round(start.r + (end.r - start.r) * (i * stepFactor));
+    const g = Math.round(start.g + (end.g - start.g) * (i * stepFactor));
+    const b = Math.round(start.b + (end.b - start.b) * (i * stepFactor));
+    interpolatedColors.push(rgbToHex(r, g, b));
+  }
+
+  return interpolatedColors;
+}
+
+function hexToRgb(hex) {
+  const bigint = parseInt(hex.slice(1), 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return { r, g, b };
+}
+
+function rgbToHex(r, g, b) {
+  return (
+    "#" +
+    ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()
+  );
 }
 
 function createMapChart() {
@@ -398,6 +478,9 @@ function createMapChart() {
         // Extrahiere die Informationen für die angeklickte Stadt
         var clickedCityValues = storeDataMap[storeNames[pointIndex]];
         createMapStoreLineChart(storeNames[pointIndex], clickedCityValues);
+        createMapInfoContainer(storeNames[pointIndex], dateFrom, dateTo);
+        var mapInfoContainer = document.getElementById("mapInfoContainer");
+        mapInfoContainer.style.display = "flex";
       });
     })
     .catch((err) => console.error(err));
@@ -452,12 +535,8 @@ async function createCorrelationChart() {
           {
             label: "Total Revenue vs Order Count",
             data: scatterData,
-            backgroundColor: "#EC9740",
-            borderColor: "#EC9740",
-            pointBackgroundColor: "#EC9740",
-            pointBorderColor: "#fff",
-            pointHoverBackgroundColor: "#fff",
-            pointHoverBorderColor: "#EC9740",
+            backgroundColor: "rgb(65, 184, 213, 0.8)",
+            borderWidth: 0,
           },
         ],
       },
@@ -494,18 +573,17 @@ async function createCorrelationChart() {
 function createMapStoreLineChart(storeName, monthValueMap) {
   var lineChartDiv = document.getElementById("lineChartDiv");
   lineChartDiv.style.display = "block";
+  lineChartDiv.style.flexGrow = 1;
   const ctx = document.getElementById("lineChart").getContext("2d");
 
   const months = Object.keys(monthValueMap);
   const revenues = months.map((month) => monthValueMap[month]);
-  console.log(months);
-  console.log(revenues);
 
   const dataset = {
     label: storeName,
     data: revenues,
     fill: false,
-    borderColor: getRandomColor(),
+    borderColor: "rgb(65, 184, 213)",
     borderWidth: 2,
   };
 
@@ -533,6 +611,50 @@ function createMapStoreLineChart(storeName, monthValueMap) {
       },
     },
   });
+}
+
+function createMapInfoContainer(storeName, fromDate, toDate) {
+  const storeData = new StoreData().storeData;
+  storeName = storeName.replace(" ", " - ");
+  const storeId = storeData[storeName];
+  const url = `${baseUrl}?StoreId=${storeId}&OrderDateFrom=${fromDate}&OrderDateTo=${toDate}`;
+  fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      const infoDiv = document.getElementById("infoDiv");
+      infoDiv.style.flexGrow = 1;
+      if (infoDiv.innerHTML !== "") {
+        infoDiv.innerHTML = "";
+      }
+      data.forEach((item) => {
+        const p = document.createElement("p");
+        p.innerHTML = `
+          <strong>Store ID:</strong> ${item.storeId}<br>
+          <strong>Order Count:</strong> ${item.orderCount}<br>
+          <strong>Total Revenue:</strong> ${item.totalRevenue}<br>
+          <strong>Customer Count:</strong> ${item.customerCount}<br>
+          <strong>Revenue Per Customer:</strong> ${item.revenuePerCustomer}<br>
+          <hr>
+        `;
+        infoDiv.appendChild(p);
+      });
+    })
+    .catch((error) => {
+      console.error(
+        "There has been a problem with your fetch operation:",
+        error
+      );
+    });
 }
 
 function toggleChartOptions() {

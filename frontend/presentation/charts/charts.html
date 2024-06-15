@@ -167,9 +167,15 @@
         style="display: none"
       >
         <div class="col-auto">
-          <select id="firstModel" class="select-dropdown">
+          <select
+            id="firstModel"
+            class="select-dropdown"
+            onchange="updateAttributes()"
+          >
             <option value="" disabled>Model</option>
             <option value="store">Store</option>
+            <option value="product">Product</option>
+            <option value="customer">Customer</option>
           </select>
         </div>
         <div class="col-auto">
@@ -196,7 +202,7 @@
           <select id="yAttribute" class="select-dropdown">
             <option value="" disabled>y-Attribute</option>
             <option value="totalRevenue">Revenue</option>
-            <option value="orderCount">Customer</option>
+            <option value="orderCount">Order count</option>
             <option value="averageordervalue">Average Order-Value</option>
             <option value="averageordervalueperstore">
               Average Order-Value per Store
@@ -312,9 +318,24 @@
     ></script>
 
     <div class="container mt-5" id="mapChartDiv"></div>
-    <div id="mapInfoDiv"></div>
-    <div class="container mt-5" id="lineChartDiv">
-      <canvas id="lineChart"></canvas>
+    <div
+      class="container mt-5"
+      id="mapInfoContainer"
+      style="display: none; max-width: 800"
+    >
+      <div id="lineChartDiv">
+        <canvas id="lineChart"></canvas>
+      </div>
+      <div
+        id="infoDiv"
+        style="
+          max-width: 300;
+          background-color: #77b0aa;
+          border-radius: 10px;
+          color: white;
+          padding: 10px;
+        "
+      ></div>
     </div>
   </body>
 </html>
