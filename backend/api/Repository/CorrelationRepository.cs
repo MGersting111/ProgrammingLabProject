@@ -20,42 +20,197 @@ namespace api.Repository
 
         public async Task<bool> IsModelSupported(string model)
         {
-            return model.ToLower() == "store" || model.ToLower() == "order";
+            return model.ToLower() == "store" || model.ToLower() == "order" || model.ToLower() == "product"|| model.ToLower() == "customer";
         }
 
         public async Task<bool> AreAttributesValid(string model, string xAttribute, string yAttribute)
         {
-            if (model.ToLower() == "order")
+            switch (model.ToLower())
+    {
+        case "order":
+            var orderProps = typeof(Order).GetProperties().Select(p => p.Name.ToLower()).ToList();
+            return orderProps.Contains(xAttribute.ToLower()) && orderProps.Contains(yAttribute.ToLower());
+
+        case "store":
+            var validStoreAttributes = new List<string> { "totalrevenue", "ordercount", "averageordervalueperstore", "averageordervalue", "averageordervaluepercustomer", "ordercountperproductperstore", "totalrevenuepercustomerperstore" };
+            return validStoreAttributes.Contains(xAttribute.ToLower()) && validStoreAttributes.Contains(yAttribute.ToLower());
+
+        case "product":
+            var validProductAttributes = new List<string> { "totalunitssold", "price", "averageordervalueperproduct","totalrevenue"};
+            return validProductAttributes.Contains(xAttribute.ToLower()) && validProductAttributes.Contains(yAttribute.ToLower());
+        
+        case "customer":
+                    var validCustomerAttributes = new List<string> { "averageordervalue", "ordercountpercustomer", "totalrevenuepercustomer" };
+                    return validCustomerAttributes.Contains(xAttribute.ToLower()) && validCustomerAttributes.Contains(yAttribute.ToLower());
+
+        default:
+            return false; // Falls ein ungültiges Modell angegeben wurde
+    }
+}
+
+       public async Task<(double[] XValues, double[] YValues)> FetchData(string model, DateTime startTime, DateTime endTime, string xAttribute, string yAttribute,string size = null, string category = null)
+{
+    switch (model.ToLower())
+    {
+        case "store":
+            var storeIds = await _context.Orders
+                .Where(o => o.OrderDate >= startTime && o.OrderDate <= endTime)
+                .Select(o => o.StoreId)
+                .Distinct()
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            var xValues = await GetAttributeValues(storeIds, startTime, endTime, xAttribute).ConfigureAwait(false);
+            var yValues = await GetAttributeValues(storeIds, startTime, endTime, yAttribute).ConfigureAwait(false);
+
+            return (xValues, yValues);
+
+        case "product":
+            IQueryable<OrderItem> orderItemsQuery = _context.OrderItems
+                .Where(oi => oi.Order.OrderDate >= startTime && oi.Order.OrderDate <= endTime);
+
+            if (!string.IsNullOrEmpty(size))
             {
-                var orderProps = typeof(Order).GetProperties().Select(p => p.Name.ToLower()).ToList();
-                return orderProps.Contains(xAttribute.ToLower()) && orderProps.Contains(yAttribute.ToLower());
+                orderItemsQuery = orderItemsQuery.Where(oi => oi.Product.Size.ToLower() == size.ToLower());
             }
-            else if (model.ToLower() == "store")
+
+            if (!string.IsNullOrEmpty(category))
             {
-                var validAttributes = new List<string> { "totalrevenue", "ordercount","averageordervalueperstore","averageordervalue", "averageordervaluepercustomer", "ordercountperproductperstore", "totalrevenuepercustomerperstore" };
-                return validAttributes.Contains(xAttribute.ToLower()) && validAttributes.Contains(yAttribute.ToLower());
+                orderItemsQuery = orderItemsQuery.Where(oi => oi.Product.Category.ToLower() == category.ToLower());
             }
-            return false;
+
+            var SKUs = await orderItemsQuery
+                .Select(oi => oi.SKU)
+                .Distinct()
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            var xValuesProduct = await GetProductAttributeValues(SKUs, startTime, endTime, xAttribute).ConfigureAwait(false);
+            var yValuesProduct = await GetProductAttributeValues(SKUs, startTime, endTime, yAttribute).ConfigureAwait(false);
+
+            return (xValuesProduct, yValuesProduct);
+        
+        case "customer":
+                    var customerIds = await _context.Orders
+                        .Where(o => o.OrderDate >= startTime && o.OrderDate <= endTime)
+                        .Select(o => o.CustomerId)
+                        .Distinct()
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+
+                    var xValuesCustomer = await GetCustomerAttributeValues(customerIds, startTime, endTime, xAttribute).ConfigureAwait(false);
+                    var yValuesCustomer = await GetCustomerAttributeValues(customerIds, startTime, endTime, yAttribute).ConfigureAwait(false);
+
+                    return (xValuesCustomer, yValuesCustomer);
+        default:
+            throw new ArgumentException("Invalid model specified.");
+    }
+}
+
+private async Task<double[]> GetCustomerAttributeValues(List<string> customerIds, DateTime startTime, DateTime endTime, string attribute)
+        {
+            switch (attribute.ToLower())
+            {              
+                case "averageordervalue":
+            var averageOrderValues = await _context.Orders
+                .Where(o => customerIds.Contains(o.CustomerId) && o.OrderDate >= startTime && o.OrderDate <= endTime)
+                .GroupBy(o => o.CustomerId)
+                .Select(g => new
+                {
+                    CustomerId = g.Key,
+                    TotalRevenue = g.Sum(o => o.total),
+                    OrderCount = g.Count()
+                })
+                .OrderBy(g => g.CustomerId) // Sortierung nach CustomerId hinzugefügt
+                .ToListAsync()
+                .ConfigureAwait(false);
+            return averageOrderValues.Select(aov => aov.TotalRevenue / aov.OrderCount).ToArray();
+
+        case "totalrevenuepercustomer":
+    var totalRevenuePerCustomer = await _context.Orders
+        .Where(o => customerIds.Contains(o.CustomerId) && o.OrderDate >= startTime && o.OrderDate <= endTime)
+        .GroupBy(o => o.CustomerId)
+        .Select(g => new
+        {
+            CustomerId = g.Key,
+            TotalRevenue = g.Sum(o => o.total)
+        })
+        .OrderBy(g => g.CustomerId) // Sortierung nach CustomerId hinzugefügt
+        .ToListAsync()
+        .ConfigureAwait(false);
+
+    return totalRevenuePerCustomer.Select(tr => (double)tr.TotalRevenue).ToArray();
+
+        case "ordercountpercustomer":
+    var orderCountPerCustomer = await _context.Orders
+        .Where(o => customerIds.Contains(o.CustomerId) && o.OrderDate >= startTime && o.OrderDate <= endTime)
+        .GroupBy(o => o.CustomerId)
+        .Select(g => new
+        {
+            CustomerId = g.Key,
+            OrderCount = g.Count()
+        })
+        .OrderBy(g => g.CustomerId) // Sortierung nach CustomerId hinzugefügt
+        .ToListAsync()
+        .ConfigureAwait(false);
+
+    return orderCountPerCustomer.Select(oc => (double)oc.OrderCount).ToArray();
+
+                default:
+                    throw new ArgumentException($"Invalid attribute specified: {attribute}");
+            }
         }
 
-       public async Task<(double[] XValues, double[] YValues)> FetchData(string model, DateTime startTime, DateTime endTime, string xAttribute, string yAttribute)
+
+private async Task<double[]> GetProductAttributeValues(List<string> SKUs, DateTime startTime, DateTime endTime, string attribute)
 {
-    if (model.ToLower() == "store")
+    switch (attribute.ToLower())
     {
-        var storeIds = await _context.Orders
-            .Where(o => o.OrderDate >= startTime && o.OrderDate <= endTime)
-            .Select(o => o.StoreId)
-            .Distinct()
-            .ToListAsync()
-            .ConfigureAwait(false);
+        case "averageordervalueperproduct":
+            var averageOrderValues = await _context.OrderItems
+                .Where(oi => SKUs.Contains(oi.SKU) && oi.Order.OrderDate >= startTime && oi.Order.OrderDate <= endTime)
+                .GroupBy(oi => oi.Product.SKU)
+                .Select(g => new
+                {
+                    SKU = g.Key,
+                    TotalRevenue = g.Sum(oi => oi.Order.total),
+                    OrderCount = g.Count()
+                })
+                .ToListAsync()
+                .ConfigureAwait(false);
+            return averageOrderValues.Select(aov => aov.TotalRevenue / aov.OrderCount).ToArray();
 
-        var xValues = await GetAttributeValues(storeIds, startTime, endTime, xAttribute).ConfigureAwait(false);
-        var yValues = await GetAttributeValues(storeIds, startTime, endTime, yAttribute).ConfigureAwait(false);
+            case "totalrevenue":
+            var totalRevenuePerProduct = await _context.OrderItems
+                .Where(oi => SKUs.Contains(oi.SKU) && oi.Order.OrderDate >= startTime && oi.Order.OrderDate <= endTime)
+                .GroupBy(oi => oi.SKU)
+                .Select(g => g.Sum(oi => oi.Order.total))
+                .ToListAsync()
+                .ConfigureAwait(false);
+            return totalRevenuePerProduct.Select(tr => (double)tr).ToArray();
 
-        return (xValues, yValues);
+        case "price":
+                    var prices = await _context.Products
+                        .Where(p => SKUs.Contains(p.SKU))
+                        .Select(p => p.Price)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+                    return prices.Select(p => (double)p).ToArray();
+
+                case "totalunitssold":
+                    var totalUnitsSold = await _context.OrderItems
+                        .Where(oi => SKUs.Contains(oi.SKU) && oi.Order.OrderDate >= startTime && oi.Order.OrderDate <= endTime)
+                        .GroupBy(oi => oi.SKU)
+                        .Select(g => g.Count())
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+                    return totalUnitsSold.Select(tus => (double)tus).ToArray();
+
+
+ default:
+            throw new ArgumentException($"Invalid attribute specified: {attribute}");
     }
 
-    throw new ArgumentException("Invalid model specified.");
 }
 
 private async Task<double[]> GetAttributeValues(List<string> storeIds, DateTime startTime, DateTime endTime, string attribute)
@@ -80,19 +235,19 @@ private async Task<double[]> GetAttributeValues(List<string> storeIds, DateTime 
                 .ConfigureAwait(false);
             return orderCounts.Select(oc => (double)oc).ToArray();
 
-        //durchschnittliche bestellwert pro produkt
         case "averageordervalue":
-            var averageOrderValues = await _context.OrderItems
-                .Where(oi => storeIds.Contains(oi.Order.StoreId) && oi.Order.OrderDate >= startTime && oi.Order.OrderDate <= endTime)
-                .GroupBy(oi => oi.Product.SKU)
-                .Select(g => new
-                {
-                    ProductSKU = g.Key,
-                    TotalRevenue = g.Sum(oi => oi.Order.total),
-                    OrderCount = g.Count()
-                })
-                .ToListAsync()
-                .ConfigureAwait(false);
+            var averageOrderValues = await _context.Orders
+    .Where(o => storeIds.Contains(o.StoreId) && o.OrderDate >= startTime && o.OrderDate <= endTime)
+    .GroupBy(o => o.StoreId)
+    .Select(g => new
+    {
+        StoreId = g.Key,
+        TotalRevenue = g.Sum(o => o.total),
+        OrderCount = g.Count()
+    })
+    .ToListAsync()
+    .ConfigureAwait(false);
+
             return averageOrderValues.Select(aov => aov.TotalRevenue / aov.OrderCount).ToArray();
             
 
@@ -112,20 +267,23 @@ private async Task<double[]> GetAttributeValues(List<string> storeIds, DateTime 
             return averageOrderValuesPerStore.Select(aov => aov.TotalRevenue / aov.OrderCount).ToArray();
             
 
-            //durchschnittliche bestellwert pro customer
+            //durchschnittliche bestellwert pro customer per store
             case "averageordervaluepercustomer":
-            var averageOrderValuesPerCustomer = await _context.Orders
-                .Where(o => o.OrderDate >= startTime && o.OrderDate <= endTime)
-                .GroupBy(o => o.CustomerId)
-                .Select(g => new
-                {
-                    CustomerId = g.Key,
-                    TotalRevenue = g.Sum(o => o.total),
-                    OrderCount = g.Count()
-                })
-                .ToListAsync()
-                .ConfigureAwait(false);
-            return averageOrderValuesPerCustomer.Select(aov => aov.TotalRevenue / aov.OrderCount).ToArray();
+    var averageOrderValuesPerCustomer = await _context.Orders
+        .Where(o => o.OrderDate >= startTime && o.OrderDate <= endTime)
+        .GroupBy(o => new { o.StoreId, o.CustomerId })
+        .Select(g => new
+        {
+            StoreId = g.Key.StoreId,
+            CustomerId = g.Key.CustomerId,
+            TotalRevenue = g.Sum(o => o.total),
+            OrderCount = g.Count()
+        })
+        .OrderBy(g => g.StoreId) // Sortierung nach StoreId hinzugefügt
+        .ToListAsync()
+        .ConfigureAwait(false);
+
+    return averageOrderValuesPerCustomer.Select(aov => aov.TotalRevenue / aov.OrderCount).ToArray();
 
             //total revenue von BESTELLWERT pro customer pro store
             case "totalrevenuepercustomerperstore":

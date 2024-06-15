@@ -6,6 +6,8 @@ using System.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using api.Models;
 using api.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+
 
 
 namespace api.Dto
@@ -17,6 +19,10 @@ namespace api.Dto
         public string FirstModel { get; set; }
         public string XAttribute { get; set; }
         public string YAttribute { get; set; }
+
+    public string? Size { get; set; }
+
+    public string? Category { get; set; }
     
     }
 }
