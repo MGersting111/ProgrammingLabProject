@@ -318,9 +318,24 @@
     ></script>
 
     <div class="container mt-5" id="mapChartDiv"></div>
-    <div id="mapInfoDiv"></div>
-    <div class="container mt-5" id="lineChartDiv">
-      <canvas id="lineChart"></canvas>
+    <div
+      class="container mt-5"
+      id="mapInfoContainer"
+      style="display: none; max-width: 800"
+    >
+      <div id="lineChartDiv">
+        <canvas id="lineChart"></canvas>
+      </div>
+      <div
+        id="infoDiv"
+        style="
+          max-width: 300;
+          background-color: #77b0aa;
+          border-radius: 10px;
+          color: white;
+          padding: 10px;
+        "
+      ></div>
     </div>
   </body>
 </html>
