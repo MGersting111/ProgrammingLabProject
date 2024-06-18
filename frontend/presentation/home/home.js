@@ -287,3 +287,30 @@ function generateWeeklyLabels(weeks) {
     }
     return labels;
 }
+function downloadPDF() {
+    // Ensure html2canvas captures the whole page
+    html2canvas(document.body, {
+        scale: 1, // Adjust scale based on your quality needs
+        scrollY: -window.scrollY, // Corrects an issue where the capture might start from the current scroll position
+        scrollX: -window.scrollX, // Ensures capture starts from the very left
+        windowHeight: document.documentElement.scrollHeight,
+        windowWidth: document.documentElement.scrollWidth,
+        useCORS: true // Ensures images hosted on other domains are loaded correctly
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 210; // Width of an A4 page in mm
+        const imgHeight = canvas.height * imgWidth / canvas.width; // Calculate the height based on the scaled width
+
+        const pdf = new jspdf.jsPDF({
+            orientation: 'p',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        // Add image to PDF and fit it to a single page
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save('download.pdf');
+    });
+}
+
+
