@@ -15,8 +15,6 @@ namespace api.Models
        public int NItems { get; set; }
        public double total { get; set; }
 
-       public OrderItem? orderItem { get; set; }
-
        //public string StoreId { get; set;} = string.Empty;
        //public Store? Store { get; set;}
 
