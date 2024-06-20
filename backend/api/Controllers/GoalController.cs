@@ -26,21 +26,29 @@ namespace api.Controllers
         {
             _goalRepository = goalRepository;
             _context = context;
-            
+
         }
 
         // GET: api/Goal/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Goal>> GetGoal(int id)
+        [HttpGet("id")]
+        public async Task<ActionResult<IEnumerable<Goal>>> GetGoal(int? id)
         {
-            var goal = await _goalRepository.GetGoalAsync(id);
-
-            if (goal == null)
+            if (id == null)
             {
-                return NotFound();
+                // Wenn keine ID übergeben wird, alle Goals zurückgeben
+                var allGoals = await _context.Goals.ToListAsync();
+                return Ok(allGoals);
             }
-
-            return goal;
+            else
+            {
+                // Wenn eine ID übergeben wird, das entsprechende Goal zurückgeben
+                var goal = await _goalRepository.GetGoalAsync(id.Value);
+                if (goal == null)
+                {
+                    return NotFound();
+                }
+                return Ok(new List<Goal> { goal });
+            }
         }
 
         // PUT: api/Goal/5
