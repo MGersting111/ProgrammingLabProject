@@ -1,15 +1,14 @@
-import { fetchGoals, addGoal, updateGoal, deleteGoal } from './goalRepo.js';
-
 let currentIndex = 0;
 const slidesContainer = document.getElementById('slides');
 const chartContainer = document.getElementById('chart-slides');
 const leftArrow = document.getElementById('left-arrow');
 const rightArrow = document.getElementById('right-arrow');
-const lineChartCanvas = document.getElementById('lineChart');
+const areaChartCtx = document.getElementById('areaChart').getContext('2d');
+let areaChart;
 
 const goalsByPeriod = {};
+const actualDataByPeriod = {}; // To store actual data for each period
 const chartInstances = {}; // To store chart instances
-let lineChartInstance; // To store the line chart instance
 
 document.getElementById('openModal').addEventListener('click', function() {
     document.getElementById('inputWrapper').classList.add('show'); // Show the wrapper
@@ -19,9 +18,15 @@ function closeWrapper() {
     document.getElementById('inputWrapper').classList.remove('show'); // Hide the wrapper
 }
 
-document.querySelector('.icon-close').addEventListener('click', closeWrapper);
+// Optional: Close when clicking outside the form box
+window.addEventListener('click', function(event) {
+    let formBox = document.querySelector('.form-box');
+    if (event.target == document.getElementById('inputWrapper') && !formBox.contains(event.target)) {
+        closeWrapper();
+    }
+});
 
-document.getElementById('dataForm').addEventListener('submit', async function(event) {
+document.getElementById('dataForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the form from submitting traditionally
 
     // Get the values from the form
@@ -29,43 +34,52 @@ document.getElementById('dataForm').addEventListener('submit', async function(ev
     const periodSelect = document.getElementById('periodSelect').value;
     const dataInput = document.getElementById('dataInput').value;
 
-    const goal = {
-        name: topicSelect,
-        period: parseInt(periodSelect),
-        number: parseInt(dataInput)
-    };
-
-    const newGoal = await addGoal(goal);
-    if (newGoal) {
-        if (!goalsByPeriod[periodSelect]) {
-            goalsByPeriod[periodSelect] = [];
-        }
-
-        goalsByPeriod[periodSelect].push(newGoal);
-
-        // Create or update the slide for the period
-        updatePeriodSlides(periodSelect);
-
-        // Reset form and close wrapper
-        document.getElementById('dataForm').reset();
-        closeWrapper();
-
-        // Update slides to show the new one
-        currentIndex = slidesContainer.children.length - 1;
-        updateSlidePosition();
+    if (!goalsByPeriod[periodSelect]) {
+        goalsByPeriod[periodSelect] = [];
     }
+
+    goalsByPeriod[periodSelect].push({
+        topic: topicSelect,
+        target: parseInt(dataInput)
+    });
+
+    // Generate fake actual data for the period
+    generateFakeActualData(periodSelect);
+
+    // Create or update the slide for the period
+    updatePeriodSlides(periodSelect);
+
+    // Reset form and close wrapper
+    document.getElementById('dataForm').reset();
+    closeWrapper();
+
+    // Update slides to show the new one
+    currentIndex = slidesContainer.children.length - 1;
+    updateSlidePosition();
 });
 
-async function initializeGoals() {
-    const goals = await fetchGoals();
-    goals.forEach(goal => {
-        const period = goal.period;
-        if (!goalsByPeriod[period]) {
-            goalsByPeriod[period] = [];
+function generateFakeActualData(period) {
+    if (!actualDataByPeriod[period]) {
+        actualDataByPeriod[period] = [];
+    }
+
+    const weeksInPeriod = 12;
+    let cumulativeSum = 0;
+    let actualData = Math.floor(Math.random() * 1200) + 800; // Random actual value between 800 and 2000
+
+    for (let i = 0; i < weeksInPeriod; i++) {
+        let weeklyValue;
+        if (i === weeksInPeriod - 1) {
+            weeklyValue = actualData - cumulativeSum; // Make sure the last week's value makes the sum equal to the actual data
+        } else {
+            weeklyValue = Math.floor(Math.random() * (actualData / weeksInPeriod));
+            cumulativeSum += weeklyValue;
         }
-        goalsByPeriod[period].push(goal);
-        updatePeriodSlides(period);
-    });
+        actualDataByPeriod[period].push(weeklyValue);
+    }
+
+    // Set the actual value in the bar chart to the total cumulative value
+    actualDataByPeriod[`${period}_total`] = actualData;
 }
 
 function updatePeriodSlides(period) {
@@ -83,7 +97,7 @@ function updatePeriodSlides(period) {
     goalList.innerHTML = ''; // Clear previous list
     goalsByPeriod[period].forEach((goal, index) => {
         const listItem = document.createElement('li');
-        listItem.innerHTML = `Topic: ${goal.name}, Number: ${goal.number} <br> <button class="zoom-icon" onclick="zoomGoal('${period}', ${index})"><i class="fas fa-search-plus"></i></button>`;
+        listItem.innerHTML = `Topic: ${goal.topic}, Number: ${goal.target} <br> <button class="zoom-icon" onclick="zoomGoal('${period}', ${index})"><i class="fas fa-search-plus"></i></button>`;
         goalList.appendChild(listItem);
     });
 
@@ -105,10 +119,10 @@ function updatePeriodSlides(period) {
             const activePoints = chartInstances[period].getElementsAtEventForMode(evt, 'nearest', { intersect: true }, false);
             if (activePoints.length) {
                 const firstPoint = activePoints[0];
-                const label = chartInstances[period].data.labels[firstPoint.index];
                 const datasetLabel = chartInstances[period].data.datasets[firstPoint.datasetIndex].label;
                 if (datasetLabel === 'Actual') {
-                    displayAreaChart(period, goalsByPeriod[period][firstPoint.index].name);
+                    const topic = goalsByPeriod[period][firstPoint.index].topic;
+                    createAreaChart(period, topic);
                 }
             }
         };
@@ -119,30 +133,32 @@ function updatePeriodSlides(period) {
     }
 
     // Add delete event listener for the period
-    goalSlide.querySelector('.delete-button').addEventListener('click', async function() {
+    goalSlide.querySelector('.delete-button').addEventListener('click', function() {
         if (confirm('Are you sure you want to delete all goals for this period?')) {
-            const deleteSuccess = await deleteGoal(period);
-            if (deleteSuccess) {
-                delete goalsByPeriod[period];
-                goalSlide.remove();
-                chartSlide.remove();
-                if (currentIndex >= slidesContainer.children.length) {
-                    currentIndex = slidesContainer.children.length - 1;
-                }
-                updateSlidePosition();
+            delete goalsByPeriod[period];
+            goalSlide.remove();
+            chartSlide.remove();
+            if (currentIndex >= slidesContainer.children.length) {
+                currentIndex = slidesContainer.children.length - 1;
             }
+            updateSlidePosition();
         }
     });
 }
 
 function zoomGoal(period, index) {
     const chart = chartInstances[period];
-    const labels = chart.data.labels;
-    const datasets = chart.data.datasets;
+    const labels = chart.data.labels.slice(); // Copy labels
+    const datasets = chart.data.datasets.map(dataset => {
+        return {
+            ...dataset,
+            data: dataset.data.slice() // Copy data
+        };
+    });
 
     chart.data.labels = [labels[index]];
-    datasets.forEach(dataset => {
-        dataset.data = [dataset.data[index]];
+    chart.data.datasets.forEach((dataset, i) => {
+        dataset.data = [datasets[i].data[index]];
     });
 
     chart.update();
@@ -150,9 +166,9 @@ function zoomGoal(period, index) {
 
 function getChartConfig(period) {
     const periodGoals = goalsByPeriod[period];
-    const labels = periodGoals.map(goal => goal.name);
-    const targetData = periodGoals.map(goal => goal.number);
-    const actualData = periodGoals.map(goal => Math.floor(Math.random() * goal.number)); // Hardcoded actual value for demonstration
+    const labels = periodGoals.map(goal => goal.topic);
+    const targetData = periodGoals.map(goal => goal.target);
+    const actualData = periodGoals.map(goal => actualDataByPeriod[`${period}_total`] || 0); // Use the total cumulative value
 
     return {
         type: 'bar',
@@ -185,9 +201,14 @@ function getChartConfig(period) {
                             enabled: false // Disable zooming with mouse wheel
                         },
                         pinch: {
-                            enabled: true // Enable pinch zooming
+                            enabled: true // Enable zooming with pinch gesture
                         },
-                        mode: 'x'
+                        mode: 'xy' // Allow zooming in both x and y directions
+                    },
+                    pan: {
+                        enabled: true,
+                        mode: 'xy', // Allow panning in both x and y directions
+                        threshold: 10
                     }
                 }
             }
@@ -195,28 +216,73 @@ function getChartConfig(period) {
     };
 }
 
-function displayAreaChart(period, topic) {
-    const weeklyData = {
-        'periodical_revenue': generateWeeklyData(12),
-        'amount_of_customers': generateWeeklyData(12),
-        'net_profit': generateWeeklyData(12),
-        'employee_productivity': generateWeeklyData(12),
-        'operational_efficiency': generateWeeklyData(12)
-    };
+function updateChart(canvas, period) {
+    const chart = chartInstances[period];
+    const periodGoals = goalsByPeriod[period];
+    const labels = periodGoals.map(goal => goal.topic);
+    const targetData = periodGoals.map(goal => goal.target);
+    const actualData = periodGoals.map(goal => actualDataByPeriod[`${period}_total`] || 0); // Use the total cumulative value
 
-    const labels = generateWeeklyLabels(12); // 12 weeks for the first 3 months
-    const data = weeklyData[topic];
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = targetData;
+    chart.data.datasets[1].data = actualData;
+    chart.update();
+}
 
-    const config = {
+document.getElementById('resetZoomButton').addEventListener('click', function() {
+    const period = Object.keys(chartInstances)[currentIndex];
+    if (period) {
+        const chart = chartInstances[period];
+        updateChart(chart.canvas, period); // Reset zoom by updating chart with original data
+    }
+});
+
+leftArrow.addEventListener('click', function() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        updateSlidePosition();
+    }
+});
+
+rightArrow.addEventListener('click', function() {
+    if (currentIndex < slidesContainer.children.length - 1) {
+        currentIndex++;
+        updateSlidePosition();
+    }
+});
+
+function updateSlidePosition() {
+    slidesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
+    chartContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
+}
+
+function createAreaChart(period, topic) {
+    // Use the generated actual data and create cumulative data
+    const weeklyData = actualDataByPeriod[period];
+    const cumulativeData = weeklyData.reduce((acc, val, index) => {
+        acc.push((acc[index - 1] || 0) + val);
+        return acc;
+    }, []);
+
+    const weeklyLabels = Array.from({ length: 12 }, (_, i) => `Week ${i + 1}`);
+
+    // Create or update the area chart
+    if (areaChart) {
+        areaChart.destroy();
+    }
+
+    areaChart = new Chart(areaChartCtx, {
         type: 'line',
         data: {
-            labels: labels,
+            labels: weeklyLabels,
             datasets: [{
-                label: `${topic} Actual Data`,
-                data: data,
-                borderColor: 'yellow',
-                backgroundColor: 'rgba(255, 255, 0, 0.3)', // Yellow fill
-                fill: true
+                label: 'Cumulative Data',
+                data: cumulativeData,
+                fill: true,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                pointBackgroundColor: 'rgba(75, 192, 192, 1)'
             }]
         },
         options: {
@@ -227,38 +293,10 @@ function displayAreaChart(period, topic) {
                 }
             }
         }
-    };
-
-    if (lineChartInstance) {
-        lineChartInstance.destroy();
-    }
-
-    lineChartInstance = new Chart(lineChartCanvas, config);
-
-    // Ensure the line chart is visible
-    lineChartCanvas.style.display = 'block';
-
-    // Scroll to the line chart
-    lineChartCanvas.scrollIntoView({ behavior: 'smooth' });
-}
-
-// Function to generate fake weekly data for a given number of weeks
-function generateWeeklyData(weeks) {
-    const data = [];
-    for (let i = 0; i < weeks; i++) {
-        data.push(Math.floor(Math.random() * 1000) + 100); // Generate random data
-    }
-    return data;
-}
-
-// Function to generate labels for a given number of weeks
-function generateWeeklyLabels(weeks) {
-    const labels = [];
-    for (let i = 1; i <= weeks; i++) {
-        labels.push(`Week ${i}`);
-    }
-    return labels;
+    });
 }
 
 // Initialize goals on page load
-initializeGoals();
+document.addEventListener("DOMContentLoaded", function() {
+    initializeGoals();
+});
