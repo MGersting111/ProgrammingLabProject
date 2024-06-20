@@ -28,26 +28,26 @@ namespace api.Repository
         }
 
         public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter, ComparisonType comparisonType)
-{
-    var chartsInfos = new List<ChartsInfo>();
+        {
+            var chartsInfos = new List<ChartsInfo>();
 
-    switch (comparisonType)
-    {
-        case ComparisonType.Store:
-            _context.Database.SetCommandTimeout(300);
-
-            // Abfrage aller Stores, wenn keine Store-ID angegeben ist
-            var storeQuery = _context.Stores.AsNoTracking();
-            if (!string.IsNullOrEmpty(filter.StoreId))
+            switch (comparisonType)
             {
-                var storeIdList = filter.StoreId.Split(',').ToList();
-                storeQuery = storeQuery.Where(store => storeIdList.Contains(store.StoreId));
-            }
+                case ComparisonType.Store:
+                    _context.Database.SetCommandTimeout(300);
 
-            var stores = await storeQuery
-                .Where(store => store.Orders.Any(order => order.OrderDate >= filter.StartTime && order.OrderDate <= filter.EndTime))
-                .Take(filter.Limit ?? int.MaxValue)
-                .ToListAsync();
+                    // Abfrage aller Stores, wenn keine Store-ID angegeben ist
+                    var storeQuery = _context.Stores.AsNoTracking();
+                    if (!string.IsNullOrEmpty(filter.StoreId))
+                    {
+                        var storeIdList = filter.StoreId.Split(',').ToList();
+                        storeQuery = storeQuery.Where(store => storeIdList.Contains(store.StoreId));
+                    }
+
+                    var stores = await storeQuery
+                        .Where(store => store.Orders.Any(order => order.OrderDate >= filter.StartTime && order.OrderDate <= filter.EndTime))
+                        .Take(filter.Limit ?? int.MaxValue)
+                        .ToListAsync();
 
                     foreach (var store in stores)
                     {
