@@ -12,6 +12,7 @@ namespace api.Models
 {
     public class FilterCharts
     {
+        public string? StoreId { get; set; } = null;
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public int? Limit { get; set; }
