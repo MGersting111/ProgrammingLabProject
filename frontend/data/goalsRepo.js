@@ -1,75 +1,114 @@
+// Assuming you have these base URLs defined
 const goalApiBaseUrl = "http://localhost:5004/api/Goal";
 const actualDataApiBaseUrl = "http://localhost:5004/api/TotalNumber/FilteredStoreInfo";
 
-// Fetch all goals
-function fetchGoals() {
-    return fetch(goalApiBaseUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Network response was not ok: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .catch(error => {
-            console.error("Fetch goals error:", error);
-            return [];
-        });
-}
+function fetchDataBasedOnInput() {
+    // Retrieve values from form inputs
+    const topic = document.getElementById("topicSelect").value;
+    const period = document.getElementById("periodSelect").value;
+    const dataInput = document.getElementById("dataInput").value;
 
-// Fetch actual data
-function fetchActualData(period, topic) {
-    const url = `${actualDataApiBaseUrl}?period=${period}&topic=${topic}`;
-    console.log(`Fetching actual data from URL: ${url}`);
-    return fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Network response was not ok: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .catch(error => {
-            console.error("Fetch actual data error:", error);
-            return [];
-        });
-}
+    // Construct the URL with query parameters based on input values
+    const url = `${actualDataApiBaseUrl}?period=${period}&topic=${topic}&data=${dataInput}`;
+    console.log(`Fetching data from URL: ${url}`);
 
-// Add a new goal
-function addGoal(goal) {
-    return fetch(goalApiBaseUrl, {
-        method: "POST",
+    // Make a GET request to the constructed URL
+    fetch(url, {
+        method: "GET",
         headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Fetched data based on input:", data);
+        processData(data);  // Function to handle the fetched data
+    })
+    .catch(error => {
+        console.error("Fetch data error:", error);
+    });
+}
+
+function postDataBasedOnInput() {
+    const topic = document.getElementById("topicSelect").value;
+    const period = document.getElementById("periodSelect").value;
+    const dataInput = document.getElementById("dataInput").value;
+
+    const goal = {
+        name: topic,
+        period: parseInt(period),
+        number: parseInt(dataInput)
+    };
+
+    console.log("Posting new goal:", goal);
+
+    fetch(goalApiBaseUrl, {
+        method: "POST",
+        headers:    {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(goal)
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.statusText}`);
+            throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
         }
         return response.json();
     })
+    .then(data => {
+        console.log("Posted new goal:", data);
+        
+        fetchActualData(data.period, data.name);
+    })
     .catch(error => {
-        console.error("Add goal error:", error);
-        return null;
+        console.error("Post goal error:", error);
     });
 }
 
-// Delete a goal
-function deleteGoal(goalId) {
-    return fetch(`${goalApiBaseUrl}/${goalId}`, {
-        method: "DELETE"
+function fetchActualData(period, topic) {
+    const url = `${actualDataApiBaseUrl}?period=${period}&topic=${topic}`;
+    console.log(`Fetching actual data from URL: ${url}`);
+
+    fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.statusText}`);
+            throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
         }
-        return true;
+        return response.json();
+    })
+    .then(data => {
+        console.log("Fetched actual data:", data);
+        processData(data);  
     })
     .catch(error => {
-        console.error("Delete goal error:", error);
-        return false;
+        console.error("Fetch actual data error:", error);
     });
 }
+
+
+function processData(data) {
+    // Handle the data fetched from the API
+    // For example, update the charts or display the data in some way
+    console.log("Processing data:", data);
+    // Add your chart updating logic here
+}
+
+// Event listener for the fetch data button
+document.getElementById("fetchDataButton").addEventListener("click", fetchDataBasedOnInput);
+
+// Event listener for the post data button
+document.getElementById("fetchDataButton").addEventListener("click", postDataBasedOnInput);
+
 
 // Main logic for managing goals and charts
 document.addEventListener("DOMContentLoaded", function() {
