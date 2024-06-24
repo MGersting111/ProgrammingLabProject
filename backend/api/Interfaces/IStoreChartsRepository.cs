@@ -11,7 +11,7 @@ namespace api.Interfaces
 {
     public interface IStoreChartsRepository
     {
-        Task<List<StoreChartsInfo>> GetStoreChartsInfoAsync(DateTime fromDate, DateTime toDate);
+        Task<List<StoreChartsInfo>> GetStoreChartsInfoAsync(DateTime StartDate, DateTime EndtDate);
     
 
     }

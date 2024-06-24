@@ -22,7 +22,6 @@ namespace api.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Goal> Goals { get; set; }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             string connectionString = "server=localhost;user=root;password=password;database=testdb;port=3306";
@@ -58,6 +57,7 @@ namespace api.Data
             modelBuilder.Entity<Order>().HasIndex(o => o.StoreId);
             modelBuilder.Entity<OrderItem>().HasIndex(oi => oi.OrderId);
             modelBuilder.Entity<OrderItem>().HasIndex(oi => oi.SKU);
+
 
         }
     }

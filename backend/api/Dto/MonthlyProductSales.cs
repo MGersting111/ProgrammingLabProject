@@ -10,7 +10,14 @@ namespace api.Dto
     public class MonthlyProductSales
     {
         public string SKU { get; set; }
+        public string ProductName { get; set; }
         public string Month { get; set; }
         public int Sales { get; set; }
     }
-}
+//     public class MonthlyProductSalesInfo
+// {
+//     public string ProductSKU { get; set; } = string.Empty;
+//     public string ProductName { get; set; } = string.Empty;
+//     public Dictionary<string, int> Sales { get; set; } = new Dictionary<string, int>();
+// }
+ }

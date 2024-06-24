@@ -19,33 +19,19 @@ namespace api.Controllers
     [ApiController]
     public class StoreChartsController : ControllerBase
     {
-        private readonly IProductSaleRepository _productSaleRepository;
-        private readonly ApplicationDBContext _context;
-        private readonly IProductRepository _productRepository;
-        private readonly IOrderItemRepository _orderItemRepository;
-        private readonly IStoreRepository _storeRepository;
-        private readonly ICustomerRepository _customerRepository;
-        private readonly IOrderRepository _orderRepository;
-        private readonly ITotalNumberRepository _totalNumberRepository;
+        
          private readonly IStoreChartsRepository _storeChartsRepository;
 
-        public StoreChartsController(IStoreChartsRepository storeChartsRepository, ApplicationDBContext context, ITotalNumberRepository totalNumberRepository, IProductRepository productRepository,
-            IStoreRepository storeRepository, ICustomerRepository customerRepository, IOrderRepository orderRepository, IOrderItemRepository orderItemRepository)
+        public StoreChartsController(IStoreChartsRepository storeChartsRepository)
         {
             _storeChartsRepository = storeChartsRepository;
-            _context = context;
-            _storeRepository = storeRepository;
-            _orderItemRepository = orderItemRepository;
-            _orderRepository = orderRepository;
-            _productRepository = productRepository;
-            _customerRepository = customerRepository;
-            _totalNumberRepository = totalNumberRepository;
+        
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetStoreChartsInfo([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
+        public async Task<IActionResult> GetStoreChartsInfo([FromQuery] DateTime StartDate, [FromQuery] DateTime EndDate)
         {
-            var storeChartsInfo = await _storeChartsRepository.GetStoreChartsInfoAsync(fromDate, toDate);
+            var storeChartsInfo = await _storeChartsRepository.GetStoreChartsInfoAsync(StartDate, EndDate);
             return Ok(storeChartsInfo);
         }
     }
