@@ -240,7 +240,7 @@ function handleBarClick(months, values, storeName, color) {
         label: `Revenue for ${storeName}`,
         data: values,
         borderColor: color,
-        borderWidth: interpolateColors(1),
+        borderWidth: 2,
         fill: false,
       },
     ];
