@@ -25,6 +25,7 @@ namespace api.Repository
 
 public async Task<ProductSaleInfo> GetProductSaleInfoAsync(DateTime fromDate, DateTime toDate)
 {
+    var monthsOrder = new List<string> { "Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez" };
     var productSaleInfo = new ProductSaleInfo
     {
         FromDate = fromDate,
@@ -41,48 +42,45 @@ public async Task<ProductSaleInfo> GetProductSaleInfoAsync(DateTime fromDate, Da
     int numMonths = ((toDate.Year - fromDate.Year) * 12) + toDate.Month - fromDate.Month + 1;
 
     // Verkaufszahlen und Umsatz nach Monat und Jahr
-    var salesByMonth = await _context.OrderItems
-        .Include(oi => oi.Order)
+   var salesByMonth = await _context.OrderItems
         .Where(orderItem => orderItem.Order.OrderDate >= fromDate && orderItem.Order.OrderDate <= toDate)
         .GroupBy(orderItem => new { orderItem.Order.OrderDate.Year, orderItem.Order.OrderDate.Month })
         .Select(group => new
         {
             Year = group.Key.Year.ToString(),
-            Month = group.Key.Month,
+            Month = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(group.Key.Month),
             TotalSales = group.Count(),
             TotalRevenue = group.Sum(oi => oi.Order.total)
         })
         .ToListAsync();
 
-
     foreach (var sale in salesByMonth)
     {
-        string year = sale.Year;
-        string monthName = CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(sale.Month);
+        var year = sale.Year;
+        var monthName = sale.Month;
 
-        // Verkaufszahlen
         if (!productSaleInfo.ProductSalesByMonth.ContainsKey(year))
-            productSaleInfo.ProductSalesByMonth[year] = new SortedDictionary<string, int>();
+        {
+            productSaleInfo.ProductSalesByMonth[year] = new SortedDictionary<string, int>(Comparer<string>.Create((x, y) => monthsOrder.IndexOf(x).CompareTo(monthsOrder.IndexOf(y))));
+            productSaleInfo.ProductRevenue[year] = new SortedDictionary<string, double>(Comparer<string>.Create((x, y) => monthsOrder.IndexOf(x).CompareTo(monthsOrder.IndexOf(y))));
+        }
+
         productSaleInfo.ProductSalesByMonth[year][monthName] = sale.TotalSales;
-
-        // Umsatz
-        if (!productSaleInfo.ProductRevenue.ContainsKey(year))
-            productSaleInfo.ProductRevenue[year] = new SortedDictionary<string, double>();
         productSaleInfo.ProductRevenue[year][monthName] = sale.TotalRevenue;
-
-        productSaleInfo.TotalSales += sale.TotalSales;
-        productSaleInfo.TotalRevenue += sale.TotalRevenue;
     }
     
         // Durchschnittsberechnungen hinzufügen
-    foreach (var year in productSaleInfo.ProductSalesByMonth.Keys.ToList())
-    {
-        productSaleInfo.ProductSalesByMonth[year]["Total"] = productSaleInfo.ProductSalesByMonth[year].Values.Sum();
-        productSaleInfo.ProductSalesByMonth[year]["Durchschnitt Sales"] = (int)(productSaleInfo.ProductSalesByMonth[year]["Total"] / (double)numMonths); 
+   foreach (var year in productSaleInfo.ProductSalesByMonth.Keys.ToList())
+{
+    var totalSales = productSaleInfo.ProductSalesByMonth[year].Values.Sum();
+    var totalRevenue = productSaleInfo.ProductRevenue[year].Values.Sum();
 
-        productSaleInfo.ProductRevenue[year]["TotalRevenue"] = productSaleInfo.ProductRevenue[year].Values.Sum();
-        productSaleInfo.ProductRevenue[year]["Durchschnittlicher Umsatz"] = productSaleInfo.ProductRevenue[year]["TotalRevenue"] / numMonths; 
-    }
+    // Adding Total and TotalRevenue at the end
+    productSaleInfo.ProductSalesByMonth[year].Add("Total", totalSales);
+    productSaleInfo.ProductRevenue[year].Add("TotalRevenue", totalRevenue);
+}
+
+return productSaleInfo;
 
 
     // Verkaufszahlen nach Größe und Jahr
