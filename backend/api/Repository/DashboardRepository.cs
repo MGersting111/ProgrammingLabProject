@@ -20,29 +20,48 @@ namespace api.Repository
             _context = context;
         }
 
-        public async Task<DashboardDto> GetDashboardDataAsync(DateTime startDate, DateTime endDate)
+       public async Task<DashboardDto> GetDashboardDataAsync(DateTime startDate, DateTime endDate)
+{
+    _context.Database.SetCommandTimeout(300);
+
+    var dashboardDto = new DashboardDto();
+    var monthsOrder = new List<string> { "Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez" };
+
+    // Fetching order statistics grouped by Year, Month, and StoreId
+    var orderStats = await _context.Orders
+        .AsNoTracking()
+        .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
+        .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month, o.StoreId })
+        .Select(g => new
         {
-            _context.Database.SetCommandTimeout(300);
+            Year = g.Key.Year,
+            Month = g.Key.Month,
+            g.Key.StoreId,
+            Total = g.Sum(o => o.total)
+        })
+        .ToListAsync();
 
-            var dashboardDto = new DashboardDto();
-            var orderStats = await _context.Orders
-    .AsNoTracking()
-    .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
-    .GroupBy(o => new { o.OrderDate.Month, o.StoreId })
-    .Select(g => new
-    {
-        g.Key.Month,
-        g.Key.StoreId,
-        Total = g.Sum(o => o.total)
-    })
-    .ToListAsync();
+    // 1. Revenue by Year and Month:
+   dashboardDto.RevenueByYearAndMonth = orderStats
+    .GroupBy(o => o.Year)
+    .ToDictionary(
+        yearGroup => yearGroup.Key,
+        yearGroup => yearGroup
+            .GroupBy(monthGroup => monthGroup.Month)
+            .OrderBy(monthGroup => monthsOrder.IndexOf(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(monthGroup.Key)))
+            .ToDictionary(
+                monthGroup => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(monthGroup.Key),
+                monthGroup => monthGroup.Sum(o => o.Total)
+            )
+    );
 
-            // 1. Revenue by Month:
-            // Utilize EF Core's AsNoTracking for read-only queries to improve performance
-            dashboardDto.RevenueByMonth = orderStats
-    .GroupBy(o => o.Month)
-    .Select(g => new { Month = g.Key, Revenue = g.Sum(o => o.Total) })
-    .ToDictionary(x => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month), x => x.Revenue);
+    // Adding yearly totals to the dictionary
+    foreach (var year in dashboardDto.RevenueByYearAndMonth.Keys.ToList())
+{
+    var total = dashboardDto.RevenueByYearAndMonth[year].Sum(x => x.Value);
+    dashboardDto.RevenueByYearAndMonth[year].Add("Total", total);
+}
+
 
             // 2. Average Revenue Per Store:
             dashboardDto.AvgRevenuePerStore = orderStats

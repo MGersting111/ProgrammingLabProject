@@ -8,7 +8,7 @@ namespace api.Dto
 {
     public class DashboardDto
     {
-          public Dictionary<string, double> RevenueByMonth { get; set; }
+        public Dictionary<int, Dictionary<string, double>> RevenueByYearAndMonth { get; set; }
         public double AvgRevenuePerStore { get; set; }
         public string BestSellingProduct { get; set; }
         public string MostPurchasedSize { get; set; }
