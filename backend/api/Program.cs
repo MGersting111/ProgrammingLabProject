@@ -34,6 +34,7 @@ builder.Services.AddScoped<ICompareChartsRepository, CompareChartsRepository>();
 builder.Services.AddScoped<IProductSaleRepository, ProductSaleRepository>();
 builder.Services.AddScoped<IStoreChartsRepository, StoreChartsRepository>();
 builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+builder.Services.AddScoped<IStoreMetricsRepository, StoreMetricsRepository>();
 
 
 
