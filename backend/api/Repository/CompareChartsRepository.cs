@@ -109,14 +109,10 @@ namespace api.Repository
                     break;
 
                 case ComparisonType.Product:
-                    // Erhöhung des Command Timeout
-                    _context.Database.SetCommandTimeout(300);  // Setzt den Timeout auf 300 Sekunden
+                    _context.Database.SetCommandTimeout(300);
 
-                    // Berechnung der Metriken direkt in der Datenbank
                     var productMetrics = await _context.OrderItems
                         .AsNoTracking()
-                        .Include(orderItem => orderItem.Product)
-                        .Include(orderItem => orderItem.Order)
                         .Where(orderItem => orderItem.Order.OrderDate >= filter.StartTime && orderItem.Order.OrderDate <= filter.EndTime)
                         .GroupBy(orderItem => new { orderItem.Product.Name, Year = orderItem.Order.OrderDate.Year, Month = orderItem.Order.OrderDate.Month })
                         .Select(group => new
@@ -184,6 +180,19 @@ namespace api.Repository
                 case ComparisonType.Category:
                     // Erhöhung des Command Timeout
                     _context.Database.SetCommandTimeout(300);  // Setzt den Timeout auf 300 Sekunden
+
+                    var categoryMetrics = await _context.OrderItems
+        .AsNoTracking()
+        .Where(orderItem => orderItem.Order.OrderDate >= filter.StartTime && orderItem.Order.OrderDate <= filter.EndTime)
+        .GroupBy(orderItem => new { orderItem.Product.Category, Year = orderItem.Order.OrderDate.Year, Month = orderItem.Order.OrderDate.Month })
+        .Select(group => new
+        {
+            Category = group.Key.Category,
+            Year = group.Key.Year,
+            Month = group.Key.Month,
+            TotalOrders = group.Count()
+        })
+        .ToListAsync();
 
                     // Berechnung der Metriken direkt in der Datenbank
                     var categories = new List<string> { "Classic", "Vegetarian", "Specialty" };
