@@ -97,6 +97,14 @@
     <div class="box-container">
       <div class="box goals-box">
         <h2 class="mb-4">Goals</h2>
+        <h4>Revenue Goal:</h4>
+        <p id="revenueGoal"></p>
+        <h4>Actual Revenue:</h4>
+        <p id="actualRevenue"></p>
+        <h4>Sales Goal:</h4>
+        <p id="salesGoal"></p>
+        <h4>Actual Sales:</h4>
+        <p id="actualSales"></p>
         <div class="slider-container">
           <div class="slides" id="slides">
             <!-- Slides will be dynamically populated here -->
@@ -134,7 +142,6 @@
               <option value="RevenueGoal">Periodical Revenue</option>
               <option value="CustomerGoal">Amount of Customers</option>
               <option value="SalesGoal">Sales</option>
-              <option value="ProductGoal">Product Sales</option>
             </select>
             <label for="topicSelect">Topic</label>
           </div>
@@ -153,7 +160,7 @@
             <input type="text" id="dataInput" pattern="^[0-9,]+$" required />
             <label for="dataInput">Number</label>
           </div>
-          <button type="submit" class="custom-button">OK</button>
+          <button type="submit" class="custom-button" id="fetchDataButton">OK</button>
         </form>
       </div>
     </div>
@@ -194,7 +201,6 @@
           <i class="fa-solid fa-store"></i>
           <p class="text">Top Stores</p>
         </div>
-        <!-- Fügen Sie weitere Divs hinzu, wie benötigt -->
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -203,7 +209,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="../../data/goalsRepo.js"></script>
-    <script src="home.js"></script>
     <script src="../general/sidebar.js"></script>
   </body>
 </html>
