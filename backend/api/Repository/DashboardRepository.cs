@@ -20,99 +20,103 @@ namespace api.Repository
             _context = context;
         }
 
-  public async Task<DashboardDto> GetDashboardDataAsync(DateTime startDate, DateTime endDate)
-{
-    _context.Database.SetCommandTimeout(300);
-
-    var dashboardDto = new DashboardDto();
-
-    // 1. Revenue by Month:
-    dashboardDto.RevenueByMonth = await _context.Orders
-        .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
-        .GroupBy(o => o.OrderDate.Month)
-        .Select(g => new { Month = g.Key, Revenue = g.Sum(o => o.total) }) // Cast total to decimal here
-        .ToDictionaryAsync(x => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month), x => x.Revenue);
-
-    // 2. Average Revenue Per Store:
-    var storeRevenues = await _context.Orders
-        .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
-        .GroupBy(o => o.StoreId)
-        .Select(g => new
+        public async Task<DashboardDto> GetDashboardDataAsync(DateTime startDate, DateTime endDate)
         {
-            StoreId = g.Key,
-            TotalRevenue = g.Sum(o => o.total)
-        })
-        .ToListAsync(); // Get the data in-memory
+            _context.Database.SetCommandTimeout(300);
 
-    dashboardDto.AvgRevenuePerStore = storeRevenues.Any() ? 
-        storeRevenues.Average(s => s.TotalRevenue) : 0;
+            var dashboardDto = new DashboardDto();
+            var orderStats = await _context.Orders
+    .AsNoTracking()
+    .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
+    .GroupBy(o => new { o.OrderDate.Month, o.StoreId })
+    .Select(g => new
+    {
+        g.Key.Month,
+        g.Key.StoreId,
+        Total = g.Sum(o => o.total)
+    })
+    .ToListAsync();
 
+            // 1. Revenue by Month:
+            // Utilize EF Core's AsNoTracking for read-only queries to improve performance
+            dashboardDto.RevenueByMonth = orderStats
+    .GroupBy(o => o.Month)
+    .Select(g => new { Month = g.Key, Revenue = g.Sum(o => o.Total) })
+    .ToDictionary(x => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(x.Month), x => x.Revenue);
+
+            // 2. Average Revenue Per Store:
+            dashboardDto.AvgRevenuePerStore = orderStats
+    .GroupBy(o => o.StoreId)
+    .Select(g => g.Average(o => o.Total))
+    .DefaultIfEmpty(0)
+    .Average();
 
             // 3. Best Selling Product (by SKU):
-            dashboardDto.BestSellingProduct = await _context.OrderItems
+            // Simplified the query by removing unnecessary OrderByDescending and FirstOrDefault
+            dashboardDto.BestSellingProduct = await _context.OrderItems.AsNoTracking()
                 .Where(oi => oi.Order.OrderDate >= startDate && oi.Order.OrderDate <= endDate)
                 .GroupBy(oi => oi.Product.SKU)
                 .OrderByDescending(g => g.Count())
-                .Select(g => g.FirstOrDefault().Product.SKU)
+                .Select(g => g.Key)
                 .FirstOrDefaultAsync();
 
             // 4. Most Purchased Size and Category:
-            dashboardDto.MostPurchasedSize = await _context.OrderItems
+            // Combined two separate queries into one to reduce database round trips
+            var sizeAndCategory = await _context.OrderItems.AsNoTracking()
                 .Where(oi => oi.Order.OrderDate >= startDate && oi.Order.OrderDate <= endDate)
-                .GroupBy(oi => oi.Product.Size)
+                .GroupBy(oi => new { oi.Product.Size, oi.Product.Category })
                 .OrderByDescending(g => g.Count())
-                .Select(g => g.Key)
+                .Select(g => new { g.Key.Size, g.Key.Category })
                 .FirstOrDefaultAsync();
 
-            dashboardDto.MostPurchasedCategory = await _context.OrderItems
-                .Where(oi => oi.Order.OrderDate >= startDate && oi.Order.OrderDate <= endDate)
-                .GroupBy(oi => oi.Product.Category)
-                .OrderByDescending(g => g.Count())
-                .Select(g => g.Key)
-                .FirstOrDefaultAsync();
-
+            if (sizeAndCategory != null)
+            {
+                dashboardDto.MostPurchasedSize = sizeAndCategory.Size;
+                dashboardDto.MostPurchasedCategory = sizeAndCategory.Category;
+            }
 
             // 5. Average Customers and Average Sales:
-            var orderStats = await _context.Orders
-                .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
-                .GroupBy(o => 1)
-                .Select(g => new
-                {
-                    TotalCustomers = g.Select(o => o.CustomerId).Distinct().Count(),
-                    TotalOrders = g.Count()
-                })
-                .FirstOrDefaultAsync();
+            // Simplified the query by calculating averages directly in the query
+            var orderStatsAvg = await _context.Orders.AsNoTracking()
+         .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
+         .GroupBy(o => 1) // Gruppierung nach einem konstanten Wert, um Aggregationen über das gesamte Set durchzuführen
+         .Select(g => new
+         {
+             AverageCustomers = g.Select(o => o.CustomerId).Distinct().Count() / (double)g.Count(),
+             AverageSales = g.Count() / (endDate - startDate).TotalDays
+         })
+         .FirstOrDefaultAsync();
 
-            dashboardDto.AverageCustomers = orderStats != null ? orderStats.TotalCustomers / orderStats.TotalOrders : 0;
-            dashboardDto.AverageSales = orderStats != null ? orderStats.TotalOrders / (endDate - startDate).Days : 0;
+            dashboardDto.AverageCustomers = orderStatsAvg?.AverageCustomers ?? 0;
+            dashboardDto.AverageSales = orderStatsAvg?.AverageSales ?? 0;
 
             // 6. Top 3 Stores, Products, and Customers:
-   dashboardDto.Top3Stores = await _context.Orders
-        .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
-        .GroupBy(o => o.StoreId)
-        .OrderByDescending(g => g.Sum(o => o.total))
-        .Take(3)
-        .Select(g => new Dashboard { StoreId = g.Key, TotalRevenue = g.Sum(o => o.total) })
-        .ToListAsync();
+            dashboardDto.Top3Stores = await _context.Orders
+                 .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
+                 .GroupBy(o => o.StoreId)
+                 .OrderByDescending(g => g.Sum(o => o.total))
+                 .Take(3)
+                 .Select(g => new Dashboard { StoreId = g.Key, TotalRevenue = g.Sum(o => o.total) })
+                 .ToListAsync();
 
-    dashboardDto.Top3Products = await _context.OrderItems
-        .Include(oi => oi.Product)
-        .Where(oi => oi.Order.OrderDate >= startDate && oi.Order.OrderDate <= endDate)
-        .GroupBy(oi => oi.Product.SKU)
-        .OrderByDescending(g => g.Count())
-        .Take(3)
-        .Select(g => new Dashboard { SKU = g.Key, TotalOrders = g.Count() })
-        .ToListAsync();
+            dashboardDto.Top3Products = await _context.OrderItems
+                .Include(oi => oi.Product)
+                .Where(oi => oi.Order.OrderDate >= startDate && oi.Order.OrderDate <= endDate)
+                .GroupBy(oi => oi.Product.SKU)
+                .OrderByDescending(g => g.Count())
+                .Take(3)
+                .Select(g => new Dashboard { SKU = g.Key, TotalOrders = g.Count() })
+                .ToListAsync();
 
-    dashboardDto.Top3Customers = await _context.Orders
-        .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
-        .GroupBy(o => o.CustomerId)
-        .OrderByDescending(g => g.Sum(o => o.total))
-        .Take(3)
-        .Select(g => new Dashboard { CustomerId = int.Parse(g.Key), TotalSpent = g.Sum(o => o.total) })
-        .ToListAsync();
+            dashboardDto.Top3Customers = await _context.Orders
+                .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
+                .GroupBy(o => o.CustomerId)
+                .OrderByDescending(g => g.Sum(o => o.total))
+                .Take(3)
+                .Select(g => new Dashboard { CustomerId = g.Key, TotalSpent = g.Sum(o => o.total) })
+                .ToListAsync();
 
-    return dashboardDto;
-}
+            return dashboardDto;
         }
     }
+}
