@@ -80,20 +80,20 @@ namespace api.Repository
                             }
                             if (filter.Metrics.Contains("totalRevenue"))
                             {
-                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric + " Total Revenue", orderMetric.TotalRevenue);
+                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric , orderMetric.TotalRevenue);
                             }
                             if (filter.Metrics.Contains("customer"))
                             {
-                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric + " Customer Count", orderMetric.CustomerCount);
+                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric , orderMetric.CustomerCount);
                             }
                             if (filter.Metrics.Contains("revenuePerCustomer"))
                             {
                                 var revenuePerCustomer = orderMetric.CustomerCount > 0 ? orderMetric.TotalRevenue / orderMetric.CustomerCount : 0;
-                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric + " Revenue Per Customer", revenuePerCustomer);
+                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric, revenuePerCustomer);
                             }
                             if (filter.Metrics.Contains("sales"))
                             {
-                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric + " Order Count", orderMetric.OrderCount);
+                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric , orderMetric.OrderCount);
                             }
                         }
 
