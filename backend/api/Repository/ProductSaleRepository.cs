@@ -80,7 +80,7 @@ public async Task<ProductSaleInfo> GetProductSaleInfoAsync(DateTime fromDate, Da
     productSaleInfo.ProductRevenue[year].Add("TotalRevenue", totalRevenue);
 }
 
-return productSaleInfo;
+
 
 
     // Verkaufszahlen nach Größe und Jahr
