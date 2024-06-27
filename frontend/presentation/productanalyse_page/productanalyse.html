@@ -108,11 +108,17 @@
         </div>
       </div>
       <div style="width: 20px"></div>
-      <button onclick="analyseProduct()" class="btn btn-primary">Analyze</button>
+      <button id="analyseButton" class="btn btn-primary">Analyze</button>
     </div>
     <div class="chart-container">
-      <canvas id="typeChart" class="pie-chart"></canvas>
-      <canvas id="categoryChart" class="pie-chart"></canvas>
+      <div class="row">
+        <div class="col-md-6">
+          <canvas id="typeChart" class="pie-chart"></canvas>
+        </div>
+        <div class="col-md-6">
+          <canvas id="categoryChart" class="pie-chart"></canvas>
+        </div>
+      </div>
     </div>
     <div class="line-charts-container">
       <canvas id="totalRevenueChart" class="line-chart"></canvas>
@@ -121,6 +127,6 @@
       <canvas id="avgSalesChart" class="line-chart"></canvas>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="productanalyse.js"></script>
+    <script src="products.js"></script>
   </body>
 </html>
