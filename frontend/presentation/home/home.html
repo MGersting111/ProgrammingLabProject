@@ -101,10 +101,12 @@
         <p id="revenueGoal"></p>
         <h4>Actual Revenue:</h4>
         <p id="actualRevenue"></p>
+        <button class="zoom-button" id="zoomRevenueButton">Zoom</button>
         <h4>Sales Goal:</h4>
         <p id="salesGoal"></p>
         <h4>Actual Sales:</h4>
         <p id="actualSales"></p>
+        <button class="zoom-button" id="zoomSalesButton">Zoom</button>
         <div class="slider-container">
           <div class="slides" id="slides">
             <!-- Slides will be dynamically populated here -->
@@ -119,15 +121,11 @@
         <button class="plus-button" id="openModal">+</button>
       </div>
       <div class="box chart-box">
-        <div class="slider-container">
-          <div class="slides" id="chart-slides">
-            <!-- Chart slides will be dynamically populated here -->
-          </div>
-        </div>
-        <button class="zoom-button" id="zoomInButton">Zoom In</button>
+        <canvas id="barChart" style="display: block; width: 100%; height: 250px"></canvas>
         <button class="zoom-button" id="resetZoomButton">Reset Zoom</button>
       </div>
     </div>
+    
 
     <div class="wrapper" id="inputWrapper">
       <div class="form-box">
