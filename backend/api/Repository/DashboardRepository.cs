@@ -101,7 +101,7 @@ namespace api.Repository
          .GroupBy(o => 1) // Gruppierung nach einem konstanten Wert, um Aggregationen über das gesamte Set durchzuführen
          .Select(g => new
          {
-             AverageCustomers = g.Select(o => o.CustomerId).Distinct().Count() / (double)g.Count(),
+             AverageCustomers = g.Select(o => o.CustomerId).Distinct().Count() / (double)g.Select(o => o.OrderDate.Month).Distinct().Count(),
              AverageSales = g.Count() / (endDate - startDate).TotalDays
          })
          .FirstOrDefaultAsync();
