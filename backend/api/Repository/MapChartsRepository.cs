@@ -42,7 +42,6 @@ namespace api.Repository
             var result = storeData.Select(store =>
             {
                 dynamic item = new System.Dynamic.ExpandoObject();
-                item.StoreId = store.StoreId;
                 item.State = store.State;
                 item.City = store.City;
                 item.Latitude = store.Latitude;
