@@ -96,17 +96,15 @@
 
     <div class="box-container">
       <div class="box goals-box">
-        <h2 class="mb-4">Goals</h2>
-        <h4>Revenue Goal:</h4>
-        <p id="revenueGoal"></p>
-        <h4>Actual Revenue:</h4>
-        <p id="actualRevenue"></p>
-        <button class="zoom-button" id="zoomRevenueButton">Zoom</button>
-        <h4>Sales Goal:</h4>
-        <p id="salesGoal"></p>
-        <h4>Actual Sales:</h4>
-        <p id="actualSales"></p>
-        <button class="zoom-button" id="zoomSalesButton">Zoom</button>
+        <h3 class="mb-4">Goals</h3>
+        <div id="goalDetails">
+          <p id="revenueGoal"></p>
+          <p id="actualRevenue"></p>
+          <button class="zoom-button" id="zoomRevenueButton">Zoom</button>
+          <p id="salesGoal"></p>
+          <p id="actualSales"></p>
+          <button class="zoom-button" id="zoomSalesButton">Zoom</button>
+        </div>
         <div class="slider-container">
           <div class="slides" id="slides">
             <!-- Slides will be dynamically populated here -->
@@ -125,13 +123,12 @@
         <button class="zoom-button" id="resetZoomButton">Reset Zoom</button>
       </div>
     </div>
-    
 
     <div class="wrapper" id="inputWrapper">
       <div class="form-box">
-        <span class="icon-close" onclick="closeWrapper()"
-          ><i class="bx bx-x"></i
-        ></span>
+        <span class="icon-close" onclick="closeWrapper()">
+          <i class="bx bx-x"></i>
+        </span>
         <h2>Add New Goal</h2>
         <form id="dataForm">
           <div class="input-box">
@@ -163,15 +160,9 @@
       </div>
     </div>
 
-    <!-- Canvas for the bar chart -->
-    <canvas
-      id="barChart"
-      style="display: block; width: 100%; height: 250px"
-    ></canvas>
-    <canvas
-      id="areaChart"
-      style="display: block; width: 100%; height: 250px; margin-top: 20px"
-    ></canvas>
+    <div id="pieChartContainer" style="margin-top: 20px;">
+      <canvas id="pieChart" style="display: block; width: 100%; height: 200px;"></canvas>
+  </div>
 
     <div id="dbContainer">
       <div class="dbRow">

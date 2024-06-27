@@ -2,13 +2,18 @@ const goalApiBaseUrl = "http://localhost:5004/api/Goal";
 const actualDataApiBaseUrl = "http://localhost:5004/api/TotalNumber/FilteredStoreInfo";
 const salesApiBaseUrl = "http://localhost:5004/api/ProductSales"; // New endpoint for product sales
 const barChartContainer = document.querySelector("#barChart");
+const pieChartContainer = document.querySelector("#pieChartContainer");
 let barChart;
-let revenueGoal = null;
-let salesGoal = null;
-let actualRevenue = null;
-let actualSales = null;
+let pieChart;
+let revenueGoal = {};
+let salesGoal = {};
+let actualRevenue = {};
+let actualSales = {};
+let monthlyRevenue = {};
+let monthlySales = {}; // Add monthlySales for storing sales data
+let currentPeriod = 1;
 
-function postDataBasedOnInput(salesGoal, revenueGoal) {
+function postDataBasedOnInput(salesGoalValue, revenueGoalValue) {
     const topic = document.getElementById("topicSelect").value;
     const period = document.getElementById("periodSelect").value;
     const dataInput = document.getElementById("dataInput").value;
@@ -16,8 +21,8 @@ function postDataBasedOnInput(salesGoal, revenueGoal) {
     const goal = {
         name: topic,
         period: parseInt(period),
-        salesGoal: salesGoal !== undefined ? salesGoal : parseInt(dataInput),
-        revenueGoal: revenueGoal !== undefined ? revenueGoal : parseFloat(dataInput)  // Use revenueGoal if available
+        salesGoal: salesGoalValue !== undefined ? salesGoalValue : parseInt(dataInput),
+        revenueGoal: revenueGoalValue !== undefined ? revenueGoalValue : parseFloat(dataInput)  // Use revenueGoal if available
     };
 
     console.log("Posting new goal:", goal);
@@ -48,13 +53,13 @@ function postDataBasedOnInput(salesGoal, revenueGoal) {
 function getPeriodDateRange(period) {
     switch (parseInt(period)) {
         case 1:
-            return { fromDate: "2022-01-01", toDate: "2022-02-28" };
+            return { fromDate: "2022-01-01", toDate: "2022-03-31" };
         case 2:
-            return { fromDate: "2022-03-01", toDate: "2022-05-31" };
+            return { fromDate: "2022-04-01", toDate: "2022-06-30" };
         case 3:
-            return { fromDate: "2022-06-01", toDate: "2022-08-31" };
+            return { fromDate: "2022-07-01", toDate: "2022-09-30" };
         case 4:
-            return { fromDate: "2022-09-01", toDate: "2022-12-31" };
+            return { fromDate: "2022-10-01", toDate: "2022-12-31" };
         default:
             throw new Error("Invalid period selected.");
     }
@@ -88,9 +93,20 @@ function fetchDataBasedOnInput() {
     })
     .then(data => {
         console.log("Fetched data based on input:", data);
-        actualRevenue = data.productRevenue["2022"].TotalRevenue;
-        actualSales = data.productSalesByMonth["2022"].Total;
-        updateFrontend(dataInput, actualRevenue, actualSales, topic);  // Update frontend with the user input and actual data
+        actualRevenue[period] = data.productRevenue["2022"].TotalRevenue;
+        actualSales[period] = data.productSalesByMonth["2022"].Total;
+        monthlyRevenue[period] = {
+            Jan: data.productRevenue["2022"].Jan,
+            Feb: data.productRevenue["2022"].Feb,
+            Mar: data.productRevenue["2022"].Mär
+        };
+        monthlySales[period] = { // Storing monthly sales data
+            Jan: data.productSalesByMonth["2022"].Jan,
+            Feb: data.productSalesByMonth["2022"].Feb,
+            Mar: data.productSalesByMonth["2022"].Mär
+        };
+        updateFrontend(dataInput, actualRevenue[period], actualSales[period], topic, period);  // Update frontend with the user input and actual data
+        createSlide(period, topic, actualRevenue[period], actualSales[period]);
         return { salesGoal: parseInt(dataInput), revenueGoal: parseFloat(dataInput) };
     })
     .catch(error => {
@@ -99,18 +115,13 @@ function fetchDataBasedOnInput() {
     });
 }
 
-function updateFrontend(userGoal, fetchedActualRevenue, fetchedActualSales, topic) {
-    const period = document.getElementById("periodSelect").value;
+function updateFrontend(userGoal, fetchedActualRevenue, fetchedActualSales, topic, period) {
     if (topic === "RevenueGoal") {
-        revenueGoal = parseFloat(userGoal);
-        actualRevenue = fetchedActualRevenue;
-        document.getElementById("revenueGoal").innerText = `Goal: ${userGoal}`;
-        document.getElementById("actualRevenue").innerText = `Actual Revenue: ${actualRevenue}`;
+        revenueGoal[period] = parseFloat(userGoal);
+        actualRevenue[period] = fetchedActualRevenue;
     } else if (topic === "SalesGoal") {
-        salesGoal = parseInt(userGoal);
-        actualSales = fetchedActualSales;
-        document.getElementById("salesGoal").innerText = `Goal: ${userGoal}`;
-        document.getElementById("actualSales").innerText = `Actual Sales: ${actualSales}`;
+        salesGoal[period] = parseInt(userGoal);
+        actualSales[period] = fetchedActualSales;
     }
     createBarChart(period); // Update the chart
 }
@@ -151,7 +162,59 @@ document.addEventListener("DOMContentLoaded", function () {
             closeWrapper();
         }
     });
+
+    // Arrow button event listeners
+    document.getElementById("left-arrow").addEventListener("click", slideLeft);
+    document.getElementById("right-arrow").addEventListener("click", slideRight);
 });
+
+function createSlide(period, topic, actualRevenue, actualSales) {
+    const slidesContainer = document.getElementById("slides");
+
+    // Create new slide element
+    const slide = document.createElement("div");
+    slide.className = "slide";
+    slide.dataset.period = period;
+
+    // Populate the slide with the necessary content
+    let slideContent = `
+        <h5>Period: ${period}</h5>
+        <p>Topic: ${topic}</p>
+    `;
+    if (revenueGoal[period] !== undefined) {
+        slideContent += `<p>Actual Revenue: ${actualRevenue}</p>`;
+        slideContent += `<p>Goal Revenue: ${revenueGoal[period]}</p>`;
+    }
+    if (salesGoal[period] !== undefined) {
+        slideContent += `<p>Actual Sales: ${actualSales}</p>`;
+        slideContent += `<p>Goal Sales: ${salesGoal[period]}</p>`;
+    }
+
+    slide.innerHTML = slideContent;
+
+    // Append the slide to the container
+    slidesContainer.appendChild(slide);
+    updateSlidesVisibility();
+}
+
+function updateSlidesVisibility() {
+    const slides = document.querySelectorAll('.slide');
+    slides.forEach(slide => {
+        slide.style.display = slide.dataset.period == currentPeriod ? 'block' : 'none';
+    });
+}
+
+function slideLeft() {
+    currentPeriod = currentPeriod > 1 ? currentPeriod - 1 : currentPeriod;
+    updateSlidesVisibility();
+    createBarChart(currentPeriod);
+}
+
+function slideRight() {
+    currentPeriod = currentPeriod < 4 ? currentPeriod + 1 : currentPeriod;
+    updateSlidesVisibility();
+    createBarChart(currentPeriod);
+}
 
 // Funktion zum Erstellen des Bar-Charts
 function createBarChart(period) {
@@ -160,16 +223,16 @@ function createBarChart(period) {
     const goalData = [];
     const actualData = [];
 
-    if (revenueGoal !== null && actualRevenue !== null) {
+    if (revenueGoal[period] !== undefined && actualRevenue[period] !== undefined) {
         labels.push('Revenue');
-        goalData.push(revenueGoal);
-        actualData.push(actualRevenue);
+        goalData.push(revenueGoal[period]);
+        actualData.push(actualRevenue[period]);
     }
 
-    if (salesGoal !== null && actualSales !== null) {
+    if (salesGoal[period] !== undefined && actualSales[period] !== undefined) {
         labels.push('Sales');
-        goalData.push(salesGoal);
-        actualData.push(actualSales);
+        goalData.push(salesGoal[period]);
+        actualData.push(actualSales[period]);
     }
 
     const data = {
@@ -218,6 +281,18 @@ function createBarChart(period) {
                     mode: 'x',
                 }
             }
+        },
+        onClick: (e, elements) => {
+            if (elements.length > 0) {
+                const clickedElementIndex = elements[0].index;
+                const label = data.labels[clickedElementIndex];
+                if (label === 'Revenue' && monthlyRevenue[period]) {
+                    createPieChart(period, monthlyRevenue[period], 'Revenue Breakdown');
+                }
+                if (label === 'Sales' && monthlySales[period]) { // Check for sales data
+                    createPieChart(period, monthlySales[period], 'Sales Breakdown');
+                }
+            }
         }
     };
 
@@ -227,6 +302,55 @@ function createBarChart(period) {
     barChart = new Chart(ctx, {
         type: 'bar',
         data: data,
+        options: options
+    });
+}
+
+// Funktion zum Erstellen des Pie-Charts
+function createPieChart(period, data, title) {
+    const pieChartContainer = document.querySelector("#pieChartContainer");
+    pieChartContainer.innerHTML = '<canvas id="pieChart" style="display: block; width: 100%; height: 200px;"></canvas>'; // Reset pie chart container
+
+    const ctx = document.querySelector("#pieChart").getContext('2d');
+
+    const pieData = {
+        labels: Object.keys(data),
+        datasets: [
+            {
+                label: `${title} for Period ${period}`,
+                data: Object.values(data),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }
+        ]
+    };
+
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false, // Ensure the pie chart is smaller
+        plugins: {
+            title: {
+                display: true,
+                text: `${title} for Period ${period}`
+            }
+        }
+    };
+
+    if (pieChart) {
+        pieChart.destroy();
+    }
+    pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: pieData,
         options: options
     });
 }
