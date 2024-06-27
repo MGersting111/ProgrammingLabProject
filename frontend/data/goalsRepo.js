@@ -1,6 +1,12 @@
 const goalApiBaseUrl = "http://localhost:5004/api/Goal";
 const actualDataApiBaseUrl = "http://localhost:5004/api/TotalNumber/FilteredStoreInfo";
 const salesApiBaseUrl = "http://localhost:5004/api/ProductSales"; // New endpoint for product sales
+const barChartContainer = document.querySelector("#barChart");
+let barChart;
+let revenueGoal = null;
+let salesGoal = null;
+let actualRevenue = null;
+let actualSales = null;
 
 function postDataBasedOnInput(salesGoal, revenueGoal) {
     const topic = document.getElementById("topicSelect").value;
@@ -82,8 +88,8 @@ function fetchDataBasedOnInput() {
     })
     .then(data => {
         console.log("Fetched data based on input:", data);
-        const actualRevenue = data.totalRevenue;
-        const actualSales = data.totalSales;
+        actualRevenue = data.productRevenue["2022"].TotalRevenue;
+        actualSales = data.productSalesByMonth["2022"].Total;
         updateFrontend(dataInput, actualRevenue, actualSales, topic);  // Update frontend with the user input and actual data
         return { salesGoal: parseInt(dataInput), revenueGoal: parseFloat(dataInput) };
     })
@@ -93,16 +99,21 @@ function fetchDataBasedOnInput() {
     });
 }
 
-function updateFrontend(userGoal, actualRevenue, actualSales, topic) {
-  if (topic === "RevenueGoal") {
-      document.getElementById("revenueGoal").innerText = `Goal: ${userGoal}`;
-      document.getElementById("actualRevenue").innerText = `Actual Revenue: ${actualRevenue}`;
-  } else if (topic === "SalesGoal") {
-      document.getElementById("salesGoal").innerText = `Goal: ${userGoal}`;
-      document.getElementById("actualSales").innerText = `Actual Sales: ${actualSales}`;
-  }
+function updateFrontend(userGoal, fetchedActualRevenue, fetchedActualSales, topic) {
+    const period = document.getElementById("periodSelect").value;
+    if (topic === "RevenueGoal") {
+        revenueGoal = parseFloat(userGoal);
+        actualRevenue = fetchedActualRevenue;
+        document.getElementById("revenueGoal").innerText = `Goal: ${userGoal}`;
+        document.getElementById("actualRevenue").innerText = `Actual Revenue: ${actualRevenue}`;
+    } else if (topic === "SalesGoal") {
+        salesGoal = parseInt(userGoal);
+        actualSales = fetchedActualSales;
+        document.getElementById("salesGoal").innerText = `Goal: ${userGoal}`;
+        document.getElementById("actualSales").innerText = `Actual Sales: ${actualSales}`;
+    }
+    createBarChart(period); // Update the chart
 }
-
 
 document.getElementById("dataForm").addEventListener("submit", function(event) {
     event.preventDefault(); // Prevent the form from submitting traditionally
@@ -126,18 +137,6 @@ function closeWrapper() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    let currentIndex = 0;
-    const slidesContainer = document.getElementById("slides");
-    const chartContainer = document.getElementById("chart-slides");
-    const leftArrow = document.getElementById("left-arrow");
-    const rightArrow = document.getElementById("right-arrow");
-    const barChartCtx = document.getElementById("barChart").getContext("2d");
-    let barChart;
-
-    const goalsByPeriod = {};
-    const actualDataByPeriod = {};
-    const chartInstances = {};
-
     document.getElementById("openModal").addEventListener("click", function () {
         document.getElementById("inputWrapper").classList.add("show"); // Show the wrapper
     });
@@ -152,296 +151,99 @@ document.addEventListener("DOMContentLoaded", function () {
             closeWrapper();
         }
     });
+});
 
-    function initializeGoals() {
-        fetchGoals().then((goals) => {
-            goals.forEach((goal) => {
-                const period = goal.period;
-                if (!goalsByPeriod[period]) {
-                    goalsByPeriod[period] = [];
-                }
-                goalsByPeriod[period].push(goal);
-                fetchActualData(goal.period, goal.name).then((actualData) => {
-                    actualDataByPeriod[goal.period] = actualData;
-                    updatePeriodSlides(period);
-                });
-            });
-        });
+// Funktion zum Erstellen des Bar-Charts
+function createBarChart(period) {
+    const ctx = document.querySelector("#barChart").getContext('2d');
+    const labels = [];
+    const goalData = [];
+    const actualData = [];
+
+    if (revenueGoal !== null && actualRevenue !== null) {
+        labels.push('Revenue');
+        goalData.push(revenueGoal);
+        actualData.push(actualRevenue);
     }
 
-    function updatePeriodSlides(period) {
-        // Create or update the goal slide
-        let goalSlide = document.querySelector(`.slide[data-period='${period}']`);
-        if (!goalSlide) {
-            goalSlide = document.createElement("div");
-            goalSlide.classList.add("slide");
-            goalSlide.setAttribute("data-period", period);
-            goalSlide.innerHTML = `<h3>Period: ${period}</h3><ul></ul><button class="delete-button">Delete Period</button>`;
-            slidesContainer.appendChild(goalSlide);
-        }
-
-        const goalList = goalSlide.querySelector("ul");
-        goalList.innerHTML = ""; // Clear previous list
-        goalsByPeriod[period].forEach((goal, index) => {
-            const listItem = document.createElement("li");
-            listItem.innerHTML = `Topic: ${goal.name}, Sales Goal: ${goal.salesGoal}, Revenue Goal: ${goal.revenueGoal} <br> <button class="zoom-icon" onclick="zoomGoal('${period}', ${index})"><i class="fas fa-search-plus"></i></button>`;
-            goalList.appendChild(listItem);
-        });
-
-        // Create or update the chart slide
-        let chartSlide = document.querySelector(
-            `.chart-slide[data-period='${period}']`
-        );
-        if (!chartSlide) {
-            chartSlide = document.createElement("div");
-            chartSlide.classList.add("slide", "chart-slide");
-            chartSlide.setAttribute("data-period", period);
-            const chartCanvas = document.createElement("canvas");
-            chartCanvas.style.width = "100%";
-            chartCanvas.style.height = "250px"; // Adjust height to fit the box
-            chartSlide.appendChild(chartCanvas);
-            chartContainer.appendChild(chartSlide);
-
-            // Create new chart instance
-            chartInstances[period] = new Chart(chartCanvas, getChartConfig(period));
-            chartCanvas.onclick = function (evt) {
-                const activePoints = chartInstances[period].getElementsAtEventForMode(
-                    evt,
-                    "nearest",
-                    { intersect: true },
-                    false
-                );
-                if (activePoints.length) {
-                    const firstPoint = activePoints[0];
-                    const label = chartInstances[period].data.labels[firstPoint.index];
-                    const datasetLabel =
-                        chartInstances[period].data.datasets[firstPoint.datasetIndex].label;
-                    if (datasetLabel === "Actual") {
-                        displayAreaChart(
-                            period,
-                            goalsByPeriod[period][firstPoint.index].name
-                        );
-                    }
-                }
-            };
-        } else {
-            // Update existing chart instance
-            const chartCanvas = chartSlide.querySelector("canvas");
-            updateChart(chartCanvas, period);
-        }
-
-        // Add delete event listener for the period
-        goalSlide
-            .querySelector(".delete-button")
-            .addEventListener("click", function () {
-                if (
-                    confirm("Are you sure you want to delete all goals for this period?")
-                ) {
-                    deleteGoal(period).then((deleteSuccess) => {
-                        if (deleteSuccess) {
-                            delete goalsByPeriod[period];
-                            goalSlide.remove();
-                            chartSlide.remove();
-                            if (currentIndex >= slidesContainer.children.length) {
-                                currentIndex = slidesContainer.children.length - 1;
-                            }
-                            updateSlidePosition();
-                        }
-                    });
-                }
-            });
+    if (salesGoal !== null && actualSales !== null) {
+        labels.push('Sales');
+        goalData.push(salesGoal);
+        actualData.push(actualSales);
     }
 
-    // Zoom into a specific goal
-    function zoomGoal(period, index) {
-        const chart = chartInstances[period];
-        const labels = chart.data.labels;
-        const datasets = chart.data.datasets;
-
-        chart.data.labels = [labels[index]];
-        datasets.forEach((dataset) => {
-            dataset.data = [dataset.data[index]];
-        });
-
-        chart.update();
-    }
-
-    // Get chart configuration
-    function getChartConfig(period) {
-        const periodGoals = goalsByPeriod[period];
-        const labels = periodGoals.map((goal) => goal.name);
-        const targetSalesData = periodGoals.map((goal) => goal.salesGoal);
-        const targetRevenueData = periodGoals.map((goal) => goal.revenueGoal);
-        const actualSalesData = actualDataByPeriod[period].map((data) => data.totalSales); // Fetch actual sales data from backend
-        const actualRevenueData = actualDataByPeriod[period].map((data) => data.totalRevenue); // Fetch actual revenue data from backend
-
-        const datasets = [];
-
-        if (targetSalesData.length > 0) {
-            datasets.push({
-                label: "Sales Goal",
-                data: targetSalesData,
-                backgroundColor: "#007bff",
-            });
-        }
-        if (actualSalesData.length > 0) {
-            datasets.push({
-                label: "Actual Sales",
-                data: actualSalesData,
-                backgroundColor: "#ffc107",
-            });
-        }
-        if (targetRevenueData.length > 0) {
-            datasets.push({
-                label: "Revenue Goal",
-                data: targetRevenueData,
-                backgroundColor: "#28a745",
-            });
-        }
-        if (actualRevenueData.length > 0) {
-            datasets.push({
-                label: "Actual Revenue",
-                data: actualRevenueData,
-                backgroundColor: "#dc3545",
-            });
-        }
-
-        return {
-            type: "bar",
-            data: {
-                labels: labels,
-                datasets: datasets,
+    const data = {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Goal',
+                data: goalData,
+                backgroundColor: 'rgba(75, 192, 192, 1)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
             },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                    },
-                },
-                plugins: {
-                    zoom: {
-                        zoom: {
-                            wheel: {
-                                enabled: false, // Disable zooming with mouse wheel
-                            },
-                            pinch: {
-                                enabled: true, // Enable zooming with pinch gesture
-                            },
-                            mode: "xy", // Allow zooming in both x and y directions
-                        },
-                        pan: {
-                            enabled: true,
-                            mode: "xy", // Allow panning in both x and y directions
-                            threshold: 10,
-                        },
-                    },
-                },
-            },
-        };
-    }
-    // Update chart with original data
-    function updateChart(canvas, period) {
-        const chart = chartInstances[period];
-        const periodGoals = goalsByPeriod[period];
-        const labels = periodGoals.map((goal) => goal.name);
-        const targetSalesData = periodGoals.map((goal) => goal.salesGoal);
-        const targetRevenueData = periodGoals.map((goal) => goal.revenueGoal);
-        const actualSalesData = actualDataByPeriod[period].map((data) => data.totalSales); // Fetch actual sales data from backend
-        const actualRevenueData = actualDataByPeriod[period].map((data) => data.totalRevenue); // Fetch actual revenue data from backend
-
-        chart.data.labels = labels;
-        chart.data.datasets[0].data = targetSalesData;
-        chart.data.datasets[1].data = actualSalesData;
-        chart.data.datasets[2].data = targetRevenueData;
-        chart.data.datasets[3].data = actualRevenueData;
-        chart.update();
-    }
-
-    // Display area chart for a specific goal and period
-    function displayAreaChart(period, topic) {
-        // Fetch actual data for the topic and period
-        fetchActualData(period, topic).then((data) => {
-            const labels = data.map((item) => item.date);
-            const actualData = data.map((item) => item.value);
-
-            // Destroy existing chart if any
-            if (barChart) {
-                barChart.destroy();
+            {
+                label: 'Actual',
+                data: actualData,
+                backgroundColor: 'rgba(153, 102, 255, 1)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
             }
-
-            barChart = new Chart(barChartCtx, {
-                type: "line",
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: "Actual Data",
-                            data: actualData,
-                            fill: true,
-                            backgroundColor: "rgba(255, 206, 86, 0.2)",
-                            borderColor: "rgba(255, 206, 86, 1)",
-                            borderWidth: 1,
-                            pointBackgroundColor: "rgba(255, 206, 86, 1)",
-                        },
-                    ],
+        ]
+    };
+    const options = {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: `Period ${period}`
+            },
+            zoom: {
+                pan: {
+                    enabled: true,
+                    mode: 'x',
                 },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                        },
+                zoom: {
+                    wheel: {
+                        enabled: true,
                     },
-                    plugins: {
-                        zoom: {
-                            zoom: {
-                                wheel: {
-                                    enabled: false, // Disable zooming with mouse wheel
-                                },
-                                pinch: {
-                                    enabled: true, // Enable zooming with pinch gesture
-                                },
-                                mode: "xy", // Allow zooming in both x and y directions
-                            },
-                            pan: {
-                                enabled: true,
-                                mode: "xy", // Allow panning in both x and y directions
-                                threshold: 10,
-                            },
-                        },
+                    pinch: {
+                        enabled: true
                     },
-                },
-            });
-
-            // Scroll to the chart
-            document
-                .getElementById("barChart")
-                .scrollIntoView({ behavior: "smooth" });
-        });
-    }
-
-    // Update slide position
-    function updateSlidePosition() {
-        slidesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
-        chartContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
-    }
-
-    // Initialize goals on page load
-    initializeGoals();
-
-    // Event listeners for arrow buttons
-    leftArrow.addEventListener("click", function () {
-        if (currentIndex > 0) {
-            currentIndex--;
-            updateSlidePosition();
+                    mode: 'x',
+                }
+            }
         }
-    });
+    };
 
-    rightArrow.addEventListener("click", function () {
-        if (currentIndex < slidesContainer.children.length - 1) {
-            currentIndex++;
-            updateSlidePosition();
-        }
+    if (barChart) {
+        barChart.destroy();
+    }
+    barChart = new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: options
     });
+}
+
+// Zoom-Funktion für Revenue
+document.getElementById("zoomRevenueButton").addEventListener("click", function() {
+    barChart.zoom(1.5);
+    barChart.update();
+});
+
+// Zoom-Funktion für Sales
+document.getElementById("zoomSalesButton").addEventListener("click", function() {
+    barChart.zoom(1.5);
+    barChart.update();
+});
+
+// Reset Zoom-Funktion
+document.getElementById("resetZoomButton").addEventListener("click", function() {
+    barChart.resetZoom();
 });
