@@ -193,6 +193,14 @@ body {
 
 #dbContainer{
     padding: 20px;
+    background-color: #77B0AA;
+}
+
+.dbChartsContainer{
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+
 }
 
 
@@ -203,16 +211,17 @@ body {
 }
 
 .dbBox {
+    flex: 1 1 calc(33.333% - 20px);
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     background-color: #77B0AA;
     color: white;  /* Hintergrundfarbe */
     border-radius: 10px;  /* Abgerundete Ecken */
-    width: 200px;  /* Feste Breite */
-    height: 200px;  /* Feste Höhe */
-    padding: 10px;
+    width: 300px;  /* Feste Breite */
+    height: 400px;  /* Feste Höhe */
+    padding: 5px;
 }
 
 .icon {
@@ -221,4 +230,8 @@ body {
 
 .text {
     text-align: center;
+}
+
+canvas{
+    margin-top: 20px;
 }
