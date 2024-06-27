@@ -16,7 +16,7 @@ namespace api.Models
        public double total { get; set; }
 
        //public string StoreId { get; set;} = string.Empty;
-       //public Store? Store { get; set;}
+       public Store? Store { get; set;}
 
        public Customer? customer { get; set; }
 

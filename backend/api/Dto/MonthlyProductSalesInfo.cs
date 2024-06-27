@@ -5,16 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using api.Models;
 
-
 namespace api.Dto
 {
-    public class ProductSalesInfo 
+    public class MonthlyProductSalesInfo
     {
+
         public string ProductSKU { get; set; } = string.Empty;
     public string ProductName { get; set; } = string.Empty;
-    public int TotalSales { get; set; }
-    public double TotalRevenue { get; set; }
+    public Dictionary<string, int> Sales { get; set; } = new Dictionary<string, int>();
     }
-    
-    
 }

@@ -1,33 +1,35 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using api.Models;
-
 namespace api.Dto
 {
     public class StoreMetrics
     {
         public string StoreId { get; set; }
-        public Dictionary<string, YearMetrics> MetricsByYear { get; set; } = new Dictionary<string, YearMetrics>();
+        public string State { get; set; }
+        public string City { get; set; }
         public int TotalSales { get; set; }
         public double TotalRevenue { get; set; }
-        public double AvgRevenuePerSale { get; set; }
-        public double AvgSalesPerCustomer { get; set; }
-        public Dictionary<string, int> CustomerCountPerMonth { get; set; } = new Dictionary<string, int>();
-        public List<ProductSales> ProductList { get; set; } = new List<ProductSales>();
-    }
-
-    public class YearMetrics
-    {
-        public Dictionary<string, int> Metrics { get; set; } = new Dictionary<string, int>();
-        public int Total { get; set; }
+        public double AvgRevenue { get; set; }
+        public double AvgSales { get; set; }
+        public int TotalCustomers { get; set; }
+        public List<ProductSales> ProductSales { get; set; } = new List<ProductSales>();
+        public Dictionary<string, int> MonthlySales { get; set; } = new Dictionary<string, int>();
+        public Dictionary<string, double> MonthlyRevenue { get; set; } = new Dictionary<string, double>();
+        public Dictionary<string, double> MonthlyAvgRevenuePerSale { get; set; } = new Dictionary<string, double>();
+        public Dictionary<string, int> MonthlyCustomers { get; set; } = new Dictionary<string, int>();
+        public List<MonthlyProductSales> MonthlyProductSales { get; set; } = new List<MonthlyProductSales>();
     }
 
     public class ProductSales
     {
-        public string SKU { get; set; }
-        public int SalesCount { get; set; }
-        public double Revenue { get; set; }
+        public string ProductSKU { get; set; }
+        public string ProductName { get; set; }
+        public int TotalSales { get; set; }
+        public double TotalRevenue { get; set; }
+    }
+
+    public class MonthlyProductSales
+    {
+        public string ProductSKU { get; set; }
+        public string ProductName { get; set; }
+        public Dictionary<string, int> Sales { get; set; } = new Dictionary<string, int>();
     }
 }

@@ -20,66 +20,103 @@ namespace api.Repository
             _context = context;
         }
 
-        public async Task<List<StoreMetrics>> GetAllStoreMetricsAsync(DateTime fromDate, DateTime toDate)
+        public async Task<List<StoreMetrics>> GetAllStoreMetricsAsync(DateTime startDate, DateTime endDate)
         {
             var storeMetricsList = new List<StoreMetrics>();
             var monthsOrder = new List<string> { "Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez" };
 
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
-                .Where(o => o.OrderDate >= fromDate && o.OrderDate <= toDate)
+                    .ThenInclude(oi => oi.Product)
+                .Include(o => o.Store) // Include store to get State and City
+                .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
                 .ToListAsync();
 
             var groupedByStore = orders.GroupBy(o => o.StoreId);
 
             foreach (var storeGroup in groupedByStore)
-        
             {
+                var store = storeGroup.First().Store;
                 var storeMetrics = new StoreMetrics
                 {
                     StoreId = storeGroup.Key,
+                    State = store.State,
+                    City = store.City,
                     TotalSales = storeGroup.Count(),
-                    TotalRevenue = storeGroup.Sum(o => o.OrderItems.Sum(oi => oi.Order.total)),
-                    AvgRevenuePerSale = storeGroup.Average(o => o.OrderItems.Sum(oi => oi.Order.total)),
-                    AvgSalesPerCustomer = storeGroup.GroupBy(o => o.CustomerId).Average(g => g.Count()),
-                  CustomerCountPerMonth = storeGroup
-    .Where(o => o != null) // Stelle sicher, dass o nicht null ist
-    .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
-    .OrderBy(g => g.Key.Year)
-    .ThenBy(g => monthsOrder.IndexOf(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key.Month)))
-    .ToDictionary(
-        g => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key.Month) + " " + g.Key.Year,
-        g => g.Select(o => o.CustomerId).Distinct().Count()
-    ),
-ProductList = storeGroup
-    .SelectMany(o => o.OrderItems)
-    .Where(oi => oi != null && oi.Product != null && oi.Order != null) // Stelle sicher, dass oi, oi.Product und oi.Order nicht null sind
-    .GroupBy(oi => oi.Product.SKU)
-    .Select(g => new ProductSales
-    {
-        SKU = g.Key,
-        SalesCount = g.Count(),
-        Revenue = g.Sum(oi => oi.Order.total) // Hier könnte das Problem liegen, wenn oi.Order null ist
-    }).ToList()
+                    TotalRevenue = storeGroup.Sum(o => o.total),
+                    AvgRevenue = storeGroup.Average(o => o.total),
+                    AvgSales = storeGroup.Count() > 0 ? storeGroup.Average(o => o.NItems) : 0,
+                    TotalCustomers = storeGroup.Select(o => o.CustomerId).Distinct().Count(),
+                    ProductSales = storeGroup
+                        .SelectMany(o => o.OrderItems)
+                        .Where(oi => oi != null && oi.Product != null)
+                        .GroupBy(oi => oi.Product.SKU)
+                        .Select(g => new ProductSales
+                        {
+                            ProductSKU = g.Key,
+                            ProductName = g.First().Product.Name,
+                            TotalSales = g.Select(oi => oi.OrderId).Distinct().Count(),
+                            TotalRevenue = g.Sum(oi => oi.Order.total)
+                        }).ToList(),
+                    MonthlySales = storeGroup
+                        .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                        .Select(mg => new
+                        {
+                            Year = mg.Key.Year,
+                            Month = mg.Key.Month,
+                            Sales = mg.Count()
+                        })
+                        .OrderBy(ms => ms.Year)
+                        .ThenBy(ms => ms.Month)
+                        .ToDictionary(ms => $"Sales {new DateTime(ms.Year, ms.Month, 1).ToString("MMMM")}", ms => ms.Sales),
+                    MonthlyRevenue = storeGroup
+                        .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                        .Select(mg => new
+                        {
+                            Year = mg.Key.Year,
+                            Month = mg.Key.Month,
+                            Revenue = mg.Sum(o => o.total)
+                        })
+                        .OrderBy(mr => mr.Year)
+                        .ThenBy(mr => mr.Month)
+                        .ToDictionary(mr => $"Revenue {new DateTime(mr.Year, mr.Month, 1).ToString("MMMM")}", mr => mr.Revenue),
+                    MonthlyAvgRevenuePerSale = storeGroup
+                        .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                        .Select(mg => new
+                        {
+                            Year = mg.Key.Year,
+                            Month = mg.Key.Month,
+                            AvgRevenuePerSale = mg.Average(o => o.total)
+                        })
+                        .OrderBy(mar => mar.Year)
+                        .ThenBy(mar => mar.Month)
+                        .ToDictionary(mar => $"AvgRevenuePerSale {new DateTime(mar.Year, mar.Month, 1).ToString("MMMM")}", mar => mar.AvgRevenuePerSale),
+                    MonthlyCustomers = storeGroup
+                        .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                        .Select(mg => new
+                        {
+                            Year = mg.Key.Year,
+                            Month = mg.Key.Month,
+                            Customers = mg.Select(o => o.CustomerId).Distinct().Count()
+                        })
+                        .OrderBy(mc => mc.Year)
+                        .ThenBy(mc => mc.Month)
+                        .ToDictionary(mc => $"Customers {new DateTime(mc.Year, mc.Month, 1).ToString("MMMM")}", mc => mc.Customers),
+                    MonthlyProductSales = storeGroup
+                        .SelectMany(o => o.OrderItems)
+                        .GroupBy(oi => new { oi.Product.SKU, oi.Product.Name })
+                        .Select(g => new MonthlyProductSales
+                        {
+                            ProductSKU = g.Key.SKU,
+                            ProductName = g.Key.Name,
+                            Sales = g
+                                .GroupBy(oi => new { oi.Order.OrderDate.Year, oi.Order.OrderDate.Month })
+                                .ToDictionary(
+                                    ms => $"Sales {new DateTime(ms.Key.Year, ms.Key.Month, 1).ToString("MMMM")}",
+                                    ms => ms.Sum(oi => oi.Order.NItems)
+                                )
+                        }).ToList()
                 };
-
-                // Berechnen der Metriken pro Jahr und Monat
-                foreach (var yearGroup in storeGroup.Where(o => o != null).GroupBy(o => o.OrderDate.Year)) // Ensure o is not null
-                {
-                    var yearMetrics = new YearMetrics
-                    {
-                        // Adjust the sorting of months according to monthsOrder
-                        Metrics = yearGroup
-                            .GroupBy(o => o.OrderDate.Month)
-                            .OrderBy(g => monthsOrder.IndexOf(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key)))
-                            .ToDictionary(
-                                g => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key) + " Order Count",
-                                g => g.Count()
-                            ),
-                        Total = yearGroup.Count()
-                    };
-                    storeMetrics.MetricsByYear.Add(yearGroup.Key.ToString(), yearMetrics);
-                }
 
                 storeMetricsList.Add(storeMetrics);
             }

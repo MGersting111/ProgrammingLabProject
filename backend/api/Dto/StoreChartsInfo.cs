@@ -9,11 +9,9 @@ namespace api.Dto
 {
     public class StoreChartsInfo
     {
-        public DateTime FromDate { get; set; }
-        public DateTime ToDate { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public string StoreId { get; set; } = string.Empty;
-        public int Month { get; set; }
-        public int Year { get; set; }
         public double TotalRevenue { get; set; }
         public int TotalSales { get; set; }
         public double AvgRevenue { get; set; }
@@ -25,7 +23,6 @@ namespace api.Dto
          public Dictionary<string, double> MonthlyRevenue { get; set; } = new Dictionary<string, double>();
          public Dictionary<string, double> MonthlyAvgRevenuePerSale { get; set; } = new Dictionary<string, double>();
         public Dictionary<string, int> MonthlyCustomers { get; set; } = new Dictionary<string, int>();
-        public Dictionary<string, Dictionary<string, int>> MonthlyProductSales { get; set; } = new Dictionary<string, Dictionary<string, int>>();
-    
+         public List<MonthlyProductSalesInfo> MonthlyProductSales { get; set; } = new List<MonthlyProductSalesInfo>();
     }
 }

@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 using api.Interfaces;
 using api.Data;
 using api.Models;
-using api.Dto;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using System.Collections.Generic;
 
 namespace api.Repository
 {
@@ -44,6 +42,7 @@ namespace api.Repository
             var result = storeData.Select(store =>
             {
                 dynamic item = new System.Dynamic.ExpandoObject();
+                item.StoreId = store.StoreId;
                 item.State = store.State;
                 item.City = store.City;
                 item.Latitude = store.Latitude;

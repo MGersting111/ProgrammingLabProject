@@ -7,10 +7,12 @@ using api.Models;
 
 namespace api.Dto
 {
-    public class MonthlyProductSales
+    public class MonthlyProductSaless
     {
         public string SKU { get; set; }
+        public string ProductName { get; set; }
         public string Month { get; set; }
         public int Sales { get; set; }
     }
-}
+
+ }
