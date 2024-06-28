@@ -463,7 +463,7 @@ function createMapChart() {
     .then((rows) => {
       const response = rows;
       const summedValuesPerStore = response.map((store) => {
-        const { State, City, Latitude, Longitude, ...months } = store;
+        const { StoreId, State, City, Latitude, Longitude, ...months } = store;
         const total = Object.values(months).reduce((acc, val) => acc + val, 0);
         return total;
       });
