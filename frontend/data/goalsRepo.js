@@ -170,16 +170,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function createSlide(period, topic, actualRevenue, actualSales) {
     const slidesContainer = document.getElementById("slides");
-
-    // Create new slide element
-    const slide = document.createElement("div");
-    slide.className = "slide";
-    slide.dataset.period = period;
-
+    
+    // Find existing slide for the period or create a new one
+    let slide = slidesContainer.querySelector(`.slide[data-period="${period}"]`);
+    if (!slide) {
+        slide = document.createElement("div");
+        slide.className = "slide";
+        slide.dataset.period = period;
+        slidesContainer.appendChild(slide);
+    }
+    
     // Populate the slide with the necessary content
     let slideContent = `
         <h5>Period: ${period}</h5>
-        <p>Topic: ${topic}</p>
     `;
     if (revenueGoal[period] !== undefined) {
         slideContent += `<p>Actual Revenue: ${actualRevenue}</p>`;
@@ -189,11 +192,16 @@ function createSlide(period, topic, actualRevenue, actualSales) {
         slideContent += `<p>Actual Sales: ${actualSales}</p>`;
         slideContent += `<p>Goal Sales: ${salesGoal[period]}</p>`;
     }
-
+    
+    // Add zoom buttons
+    if (revenueGoal[period] !== undefined) {
+        slideContent += `<button class="zoom-button" onclick="zoom('revenue', ${period})"><i class="fas fa-search-plus"></i></button>`;
+    }
+    if (salesGoal[period] !== undefined) {
+        slideContent += `<button class="zoom-button" onclick="zoom('sales', ${period})"><i class="fas fa-search-plus"></i></button>`;
+    }
+    
     slide.innerHTML = slideContent;
-
-    // Append the slide to the container
-    slidesContainer.appendChild(slide);
     updateSlidesVisibility();
 }
 
@@ -216,7 +224,6 @@ function slideRight() {
     createBarChart(currentPeriod);
 }
 
-// Funktion zum Erstellen des Bar-Charts
 function createBarChart(period) {
     const ctx = document.querySelector("#barChart").getContext('2d');
     const labels = [];
@@ -306,7 +313,6 @@ function createBarChart(period) {
     });
 }
 
-// Funktion zum Erstellen des Pie-Charts
 function createPieChart(period, data, title) {
     const pieChartContainer = document.querySelector("#pieChartContainer");
     pieChartContainer.innerHTML = '<canvas id="pieChart" style="display: block; width: 100%; height: 200px;"></canvas>'; // Reset pie chart container
@@ -355,17 +361,13 @@ function createPieChart(period, data, title) {
     });
 }
 
-// Zoom-Funktion für Revenue
-document.getElementById("zoomRevenueButton").addEventListener("click", function() {
-    barChart.zoom(1.5);
-    barChart.update();
-});
-
-// Zoom-Funktion für Sales
-document.getElementById("zoomSalesButton").addEventListener("click", function() {
-    barChart.zoom(1.5);
-    barChart.update();
-});
+function zoom(type, period) {
+    if (type === 'revenue') {
+        createPieChart(period, monthlyRevenue[period], 'Revenue Breakdown');
+    } else if (type === 'sales') {
+        createPieChart(period, monthlySales[period], 'Sales Breakdown');
+    }
+}
 
 // Reset Zoom-Funktion
 document.getElementById("resetZoomButton").addEventListener("click", function() {
