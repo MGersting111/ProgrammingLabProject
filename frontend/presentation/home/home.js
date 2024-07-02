@@ -587,4 +587,4 @@ function getStoreKeyByValue(searchValue) {
   return searchValue;
 }
 
-document.addEventListener("DOMContentLoaded", createDashboard);
+//document.addEventListener("DOMContentLoaded", createDashboard);
