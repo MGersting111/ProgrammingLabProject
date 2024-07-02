@@ -2,6 +2,7 @@ const productBaseUrl = "http://localhost:5004/api/ProductSales";
 const pieChartContainer = document.querySelector("#pieChartContainer");
 
 let typeChart;
+let categoryChart;
 
 function analyseProduct() {
   getData();
@@ -10,9 +11,14 @@ function analyseProduct() {
 function getData() {
   const dateFrom = new Date(document.getElementById("fromDate").value);
   const dateTo = new Date(document.getElementById("toDate").value);
-  const year = dateFrom.getFullYear();
-  const url = `${productBaseUrl}?StartTime=${dateFrom.toISOString()}&EndTime=${dateTo.toISOString()}`;
-  
+
+  // Extract the year from the selected dates
+  const yearFrom = dateFrom.getFullYear();
+  const yearTo = dateTo.getFullYear();
+
+  const url = `${productBaseUrl}?fromDate=${dateFrom.toISOString()}&toDate=${dateTo.toISOString()}`;
+  console.log(url);
+
   fetch(url, {
     method: "GET",
     headers: {
@@ -27,20 +33,21 @@ function getData() {
   })
   .then(data => {
     console.log("Fetched data based on input:", data);
-
-    // Log the entire data object to inspect its structure
     console.log("Complete data object:", data);
 
-    if (!data.productSalesBySize) {
-      throw new Error("productSalesBySize data is missing");
+    if (!data.productSalesBySize || Object.keys(data.productSalesBySize).length === 0) {
+      console.error("productSalesBySize data is missing or empty");
+      return;
     }
 
-    if (!data.productSalesBySize[year]) {
-      throw new Error(`productSalesBySize[${year}] data is missing`);
+    if (!data.productSalesByCategory || Object.keys(data.productSalesByCategory).length === 0) {
+      console.error("productSalesByCategory data is missing or empty");
+      return;
     }
 
-    const sizeData = data.productSalesBySize[year];
-    console.log(`Size data for ${year}:`, sizeData);
+    // Dynamically use the year
+    const sizeData = data.productSalesBySize[yearFrom];
+    console.log(`Size data:`, sizeData);
 
     const productSize = {
       Small: sizeData.Small || 0,
@@ -49,20 +56,37 @@ function getData() {
       "Extra Large": sizeData["Extra Large"] || 0
     };
 
-    updatePieCharts(productSize);
+    const categoryData = data.productSalesByCategory[yearFrom];
+    console.log(`Category data:`, categoryData);
+
+    const productCategory = {
+      Classic: categoryData.Classic || 0,
+      Vegetarian: categoryData.Vegetarian || 0,
+      Specialty: categoryData.Specialty || 0
+      // Add more categories as needed
+    };
+
+    updatePieCharts(productSize, productCategory);
   })
   .catch(error => {
     console.error("Fetch error:", error);
   });
 }
 
-function updatePieCharts(productSize) {
+function updatePieCharts(productSize, productCategory) {
   if (typeChart) {
     typeChart.destroy();
   }
 
+  if (categoryChart) {
+    categoryChart.destroy();
+  }
+
   const typeCtx = document.getElementById('typeChart').getContext('2d');
   typeChart = createPieChart(typeCtx, productSize, 'Product Sizes');
+
+  const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+  categoryChart = createPieChart(categoryCtx, productCategory, 'Product Categories');
 }
 
 function createPieChart(ctx, data, title) {
