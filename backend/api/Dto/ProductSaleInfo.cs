@@ -10,12 +10,14 @@ namespace api.Dto
     public class ProductSaleInfo
     {
         public DateTime FromDate { get; set; }
-    public DateTime ToDate { get; set; }
-    public Dictionary<string, SortedDictionary<string, int>> ProductSalesByMonth { get; set; }
-    public Dictionary<string, SortedDictionary<string, double>> ProductRevenue { get; set; } // Neu
-    public Dictionary<string, Dictionary<string, int>> ProductSalesBySize { get; set; }
-    public Dictionary<string, Dictionary<string, int>> ProductSalesByCategory { get; set; }
-    public int TotalSales { get; set; }
-    public double TotalRevenue { get; set; }
+        public DateTime ToDate { get; set; }
+        public Dictionary<string, SortedDictionary<string, int>> ProductSalesByMonth { get; set; } = new();
+        public Dictionary<string, SortedDictionary<string, int>> ProductRevenue { get; set; } = new();
+        public Dictionary<string, SortedDictionary<string, SortedDictionary<string, int>>> ProductSalesBySize { get; set; } = new();
+        public Dictionary<string, SortedDictionary<string, SortedDictionary<string, int>>> ProductSalesByCategory { get; set; } = new();
+        public int TotalSales { get; set; }
+        public int TotalRevenue { get; set; }
+        public Dictionary<string, int> TotalSize { get; set; } = new(); // Total sales per size
+        public Dictionary<string, int> TotalCategory { get; set; } = new();
     }
 }
