@@ -47,24 +47,40 @@ namespace api.Repository
             TotalCustomers = storeGroup.Select(o => o.CustomerId).Distinct().Count(),
             MonthlySales = storeGroup
                 .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+                .GroupBy(g => g.Key.Year)
                 .ToDictionary(
-                    g => new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMMM yyyy"),
-                    g => g.Count()),
+                    yearGroup => yearGroup.Key.ToString(),
+                    yearGroup => yearGroup.ToDictionary(
+                        monthGroup => CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthGroup.Key.Month),
+                        monthGroup => monthGroup.Count())),
             MonthlyRevenue = storeGroup
                 .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+                .GroupBy(g => g.Key.Year)
                 .ToDictionary(
-                    g => new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMMM yyyy"),
-                    g => g.Sum(o => o.total)),
+                    yearGroup => yearGroup.Key.ToString(),
+                    yearGroup => yearGroup.ToDictionary(
+                        monthGroup => CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthGroup.Key.Month),
+                        monthGroup => monthGroup.Sum(o => o.total))),
             MonthlyAvgRevenuePerSale = storeGroup
                 .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+                .GroupBy(g => g.Key.Year)
                 .ToDictionary(
-                    g => new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMMM yyyy"),
-                    g => g.Average(o => o.total)),
+                    yearGroup => yearGroup.Key.ToString(),
+                    yearGroup => yearGroup.ToDictionary(
+                        monthGroup => CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthGroup.Key.Month),
+                        monthGroup => monthGroup.Average(o => o.total))),
             MonthlyCustomers = storeGroup
                 .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+                .GroupBy(g => g.Key.Year)
                 .ToDictionary(
-                    g => new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMMM yyyy"),
-                    g => g.Select(o => o.CustomerId).Distinct().Count()),
+                    yearGroup => yearGroup.Key.ToString(),
+                    yearGroup => yearGroup.ToDictionary(
+                        monthGroup => CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthGroup.Key.Month),
+                        monthGroup => monthGroup.Select(o => o.CustomerId).Distinct().Count())),
             ProductSales = storeGroup
                 .SelectMany(o => o.OrderItems)
                 .Where(oi => oi != null && oi.Product != null)
@@ -74,9 +90,28 @@ namespace api.Repository
                     ProductSKU = g.Key,
                     ProductName = g.First().Product.Name,
                     TotalSales = g.Select(oi => oi.OrderId).Distinct().Count(),
+                    TotalRevenue = g.Sum(oi => oi.Order.total)
                     // Add additional fields as necessary
+                }).ToList(),
+
+
+            MonthlyProductSales = storeGroup
+                .SelectMany(o => o.OrderItems)
+                .Where(oi => oi != null && oi.Product != null)
+                .GroupBy(oi => new { oi.Product.SKU, oi.Product.Name })
+                .Select(g => new MonthlyProductSales
+                {
+                    ProductSKU = g.Key.SKU,
+                    ProductName = g.Key.Name,
+                    Sales = g.GroupBy(oi => new { oi.Order.OrderDate.Year, oi.Order.OrderDate.Month })
+                             .OrderBy(oiGroup => oiGroup.Key.Year).ThenBy(oiGroup => oiGroup.Key.Month)
+                             .GroupBy(oiGroup => oiGroup.Key.Year)
+                             .ToDictionary(
+                                 yearGroup => yearGroup.Key.ToString(),
+                                 yearGroup => yearGroup.ToDictionary(
+                                     monthGroup => CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthGroup.Key.Month),
+                                     monthGroup => monthGroup.Count()))
                 }).ToList()
-            // Add additional metrics calculations as necessary
         };
 
         storeMetricsList.Add(storeMetrics);

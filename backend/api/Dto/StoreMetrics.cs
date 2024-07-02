@@ -11,10 +11,10 @@ namespace api.Dto
         public double AvgSales { get; set; }
         public int TotalCustomers { get; set; }
         public List<ProductSales> ProductSales { get; set; } = new List<ProductSales>();
-        public Dictionary<string, int> MonthlySales { get; set; } = new Dictionary<string, int>();
-        public Dictionary<string, double> MonthlyRevenue { get; set; } = new Dictionary<string, double>();
-        public Dictionary<string, double> MonthlyAvgRevenuePerSale { get; set; } = new Dictionary<string, double>();
-        public Dictionary<string, int> MonthlyCustomers { get; set; } = new Dictionary<string, int>();
+        public Dictionary<string, Dictionary<string, int>> MonthlySales { get; set; } = new Dictionary<string, Dictionary<string, int>>();
+        public Dictionary<string, Dictionary<string, double>> MonthlyRevenue { get; set; } = new Dictionary<string, Dictionary<string, double>>();
+        public Dictionary<string, Dictionary<string, double>> MonthlyAvgRevenuePerSale { get; set; } = new Dictionary<string, Dictionary<string, double>>();
+        public Dictionary<string, Dictionary<string, int>> MonthlyCustomers { get; set; } = new Dictionary<string, Dictionary<string, int>>();
         public List<MonthlyProductSales> MonthlyProductSales { get; set; } = new List<MonthlyProductSales>();
     }
 
@@ -30,6 +30,6 @@ namespace api.Dto
     {
         public string ProductSKU { get; set; }
         public string ProductName { get; set; }
-        public Dictionary<string, int> Sales { get; set; } = new Dictionary<string, int>();
+        public Dictionary<string, Dictionary<string, int>> Sales { get; set; } = new Dictionary<string, Dictionary<string, int>>();
     }
 }
