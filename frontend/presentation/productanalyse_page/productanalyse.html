@@ -10,8 +10,6 @@
   <link rel="stylesheet" href="../general/dropdowns.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <script src="../general/sidebar.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-heatmap"></script>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
@@ -87,9 +85,16 @@
     <canvas id="totalRevenueChart" class="line-chart"></canvas>
     <canvas id="cumulativeSalesChart" class="line-chart"></canvas>
   </div>
-  <div class="heatmapContainer">
-    <canvas id="heatmapChart" class="heatmap-chart"></canvas>
+  <div class="donutChartContainer">
+    <canvas id="donutChart" class="donut-chart"></canvas>
   </div>
+  <div class="additionalChartsContainer">
+    <button id="radarChartButton" class="btn btn-secondary" style="display:none;">Radar Chart</button>
+    <button id="growthRateChartButton" class="btn btn-secondary" style="display:none;">Growth Rate Chart</button>
+    <canvas id="radarChart" class="additional-chart" style="display:none;"></canvas>
+    <canvas id="growthRateChart" class="additional-chart" style="display:none;"></canvas>
+</div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="productanalyse.js"></script>
 </body>
 </html>
