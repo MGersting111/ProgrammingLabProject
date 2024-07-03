@@ -6,8 +6,7 @@ let typeChart;
 let categoryChart;
 let totalRevenueChart;
 let cumulativeSalesChart;
-let radarChart;
-let growthRateChart;
+let donutChart;
 
 function analyseProduct() {
   getData();
@@ -158,9 +157,6 @@ function fetchLineChartData(label, chartType) {
         'rgba(64, 224, 208, 0.8)'   // Turquise for Specialty
       ]);
     }
-    // Show additional buttons after rendering the line charts
-    document.getElementById('radarChartButton').style.display = 'inline-block';
-    document.getElementById('growthRateChartButton').style.display = 'inline-block';
   })
   .catch(error => {
     console.error("Fetch error:", error);
@@ -272,6 +268,13 @@ function updateLineCharts(data, label, chartType, colors) {
           },
           beginAtZero: true
         }
+      },
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const clickedElementIndex = elements[0].index;
+          const month = months[clickedElementIndex];
+          showDonutChart(month, data, chartType);
+        }
       }
     }
   });
@@ -302,137 +305,60 @@ function updateLineCharts(data, label, chartType, colors) {
           },
           beginAtZero: true
         }
-      }
-    }
-  });
-}
-
-function showRadarChart(data) {
-  const ctx = document.getElementById('radarChart').getContext('2d');
-
-  const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun'];
-  const sizes = ['Small', 'Medium', 'Large', 'Extra Large'];
-  const categories = ['Specialty', 'Classic', 'Vegetarian'];
-
-  const sizeDatasets = sizes.map((size, index) => {
-    const sizeData = data.productSalesBySize[size]['2022'];
-    return {
-      label: size,
-      data: months.map(month => sizeData[month] || 0),
-      backgroundColor: `rgba(${index * 50}, ${index * 80}, ${index * 150}, 0.4)`,
-      borderColor: `rgba(${index * 50}, ${index * 80}, ${index * 150}, 0.8)`,
-      fill: true
-    };
-  });
-
-  const categoryDatasets = categories.map((category, index) => {
-    const categoryData = data.productSalesByCategory[category]['2022'];
-    return {
-      label: category,
-      data: months.map(month => categoryData[month] || 0),
-      backgroundColor: `rgba(${index * 100}, ${index * 60}, ${index * 20}, 0.4)`,
-      borderColor: `rgba(${index * 100}, ${index * 60}, ${index * 20}, 0.8)`,
-      fill: true
-    };
-  });
-
-  if (radarChart) {
-    radarChart.destroy();
-  }
-
-  radarChart = new Chart(ctx, {
-    type: 'radar',
-    data: {
-      labels: months,
-      datasets: [...sizeDatasets, ...categoryDatasets]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        title: {
-          display: true,
-          text: 'Sales Comparison Across Sizes and Categories'
-        }
-      }
-    }
-  });
-
-  document.getElementById('radarChart').style.display = 'block';
-}
-
-function showGrowthRateChart(data) {
-  const ctx = document.getElementById('growthRateChart').getContext('2d');
-
-  const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun'];
-  const sizes = ['Small', 'Medium', 'Large', 'Extra Large'];
-  const categories = ['Specialty', 'Classic', 'Vegetarian'];
-
-  const calculateGrowthRate = (values) => {
-    return values.map((value, index) => {
-      if (index === 0) return 0;
-      return ((value - values[index - 1]) / values[index - 1]) * 100;
-    });
-  };
-
-  const sizeDatasets = sizes.map((size, index) => {
-    const sizeData = data.productSalesBySize[size]['2022'];
-    const values = months.map(month => sizeData[month] || 0);
-    return {
-      label: size,
-      data: calculateGrowthRate(values),
-      borderColor: `rgba(${index * 50}, ${index * 80}, ${index * 150}, 0.8)`,
-      fill: false
-    };
-  });
-
-  const categoryDatasets = categories.map((category, index) => {
-    const categoryData = data.productSalesByCategory[category]['2022'];
-    const values = months.map(month => categoryData[month] || 0);
-    return {
-      label: category,
-      data: calculateGrowthRate(values),
-      borderColor: `rgba(${index * 100}, ${index * 60}, ${index * 20}, 0.8)`,
-      fill: false
-    };
-  });
-
-  if (growthRateChart) {
-    growthRateChart.destroy();
-  }
-
-  growthRateChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: months,
-      datasets: [...sizeDatasets, ...categoryDatasets]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        title: {
-          display: true,
-          text: 'Monthly Sales Growth Rate'
-        }
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: 'Growth Rate (%)'
-          }
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const clickedElementIndex = elements[0].index;
+          const month = months[clickedElementIndex];
+          showDonutChart(month, data, chartType);
         }
       }
     }
   });
+}
 
-  document.getElementById('growthRateChart').style.display = 'block';
+function showDonutChart(month, data, chartType) {
+  const year = new Date(document.getElementById("fromDate").value).getFullYear();
+  const monthData = Object.keys(data).reduce((acc, key) => {
+    const metrics = data[key][year];
+    acc[key] = metrics[month] || 0;
+    return acc;
+  }, {});
+
+  const ctx = document.getElementById('donutChart').getContext('2d');
+  if (donutChart) {
+    donutChart.destroy();
+  }
+
+  donutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(monthData),
+      datasets: [{
+        data: Object.values(monthData),
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(153, 102, 255, 0.6)',
+          'rgba(255, 159, 64, 0.6)'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: `Sales Breakdown for ${month} (${chartType})`
+        }
+      }
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('analyseButton').addEventListener('click', analyseProduct);
-  document.getElementById('radarChartButton').addEventListener('click', () => showRadarChart(data));
-  document.getElementById('growthRateChartButton').addEventListener('click', () => showGrowthRateChart(data));
 });
