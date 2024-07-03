@@ -22,7 +22,7 @@ namespace api.Repository
 
         public async Task<List<StoreChartsInfo>> GetStoreChartsInfoAsync(DateTime StartDate, DateTime EndDate)
         {
-            
+            _context.Database.SetCommandTimeout(300);
             var orders = await _context.Orders
                 .Where(o => o.OrderDate >= StartDate && o.OrderDate <= EndDate)
                 .Include(o => o.OrderItems)
