@@ -8,6 +8,8 @@ using api.Models;
 using api.Dto;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 
 namespace api.Repository
 {
@@ -25,16 +27,30 @@ namespace api.Repository
         public CompareChartsRepository(ApplicationDBContext context)
         {
             _context = context;
+
         }
 
         public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter, ComparisonType comparisonType)
         {
+            var startTimeString = filter.StartTime.ToString("yyyyMMddHHmmss");
+            var endTimeString = filter.EndTime.ToString("yyyyMMddHHmmss");
+            var storeIdString = filter.StoreId ?? "no-store";
+            var metricsString = String.Join("-", filter.Metrics);
+            var cacheKey = $"CompareCharts-{storeIdString}-{startTimeString}-{endTimeString}-{comparisonType.ToString()}-{metricsString}";
+            var cachedData = await GetCachedDataAsync(cacheKey);
+            if (cachedData != null)
+            {
+                return cachedData; // Daten aus dem Cache zurückgeben
+            }
+
+            _context.Database.SetCommandTimeout(300);
             var chartsInfos = new List<ChartsInfo>();
+
 
             switch (comparisonType)
             {
                 case ComparisonType.Store:
-                    _context.Database.SetCommandTimeout(300);
+
 
                     // Abfrage aller Stores, wenn keine Store-ID angegeben ist
                     var storeQuery = _context.Stores.AsNoTracking();
@@ -80,11 +96,11 @@ namespace api.Repository
                             }
                             if (filter.Metrics.Contains("totalRevenue"))
                             {
-                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric , orderMetric.TotalRevenue);
+                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric, orderMetric.TotalRevenue);
                             }
                             if (filter.Metrics.Contains("customer"))
                             {
-                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric , orderMetric.CustomerCount);
+                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric, orderMetric.CustomerCount);
                             }
                             if (filter.Metrics.Contains("revenuePerCustomer"))
                             {
@@ -93,7 +109,7 @@ namespace api.Repository
                             }
                             if (filter.Metrics.Contains("sales"))
                             {
-                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric , orderMetric.OrderCount);
+                                chartsInfo.MetricsByYear[orderMetric.Year].Metrics.Add(monthNameMetric, orderMetric.OrderCount);
                             }
                         }
 
@@ -244,8 +260,46 @@ namespace api.Repository
                     }
                     break;
             }
-
+            await SetCachedDataAsync(cacheKey, chartsInfos, DateTime.UtcNow.AddDays(365));
             return chartsInfos;
+        }
+        private async Task<List<ChartsInfo>> GetCachedDataAsync(string cacheKey)
+        {
+          
+            var cacheEntry = await _context.CacheEntries
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ce => ce.CacheKey == cacheKey && ce.ExpirationDate > DateTime.UtcNow);
+
+            if (cacheEntry != null)
+            {
+                return JsonConvert.DeserializeObject<List<ChartsInfo>>(cacheEntry.JsonValue);
+            }
+
+            return null;
+        }
+
+        private async Task SetCachedDataAsync(string cacheKey, List<ChartsInfo> data, DateTime expirationDate)
+        {
+           
+            var jsonData = JsonConvert.SerializeObject(data);
+            var cacheEntry = await _context.CacheEntries.FindAsync(cacheKey);
+
+            if (cacheEntry != null)
+            {
+                cacheEntry.JsonValue = jsonData;
+                cacheEntry.ExpirationDate = expirationDate;
+            }
+            else
+            {
+                _context.CacheEntries.Add(new CacheEntry
+                {
+                    CacheKey = cacheKey,
+                    JsonValue = jsonData,
+                    ExpirationDate = expirationDate
+                });
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }
