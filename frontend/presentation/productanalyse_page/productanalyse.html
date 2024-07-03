@@ -74,19 +74,26 @@
   <div id="pieChartContainer" class="piechartContainer">
     <div class="row">
       <div class="col-md-6">
-        <canvas id="typeChart" style="display: block; width: 100%; height: 200px;"></canvas>
+        <canvas id="typeChart" class="pie-chart"></canvas>
       </div>
       <div class="col-md-6">
-        <canvas id="categoryChart" style="display: block; width: 100%; height: 200px;"></canvas>
+        <canvas id="categoryChart" class="pie-chart"></canvas>
       </div>
     </div>
   </div>
   <div class="lineChartsContainer">
     <canvas id="totalRevenueChart" class="line-chart"></canvas>
-    <canvas id="avgRevenueChart" class="line-chart"></canvas>
-    <canvas id="totalSalesChart" class="line-chart"></canvas>
-    <canvas id="avgSalesChart" class="line-chart"></canvas>
-  </div> 
+    <canvas id="cumulativeSalesChart" class="line-chart"></canvas>
+  </div>
+  <div class="donutChartContainer">
+    <canvas id="donutChart" class="donut-chart"></canvas>
+  </div>
+  <div class="additionalChartsContainer">
+    <button id="radarChartButton" class="btn btn-secondary" style="display:none;">Radar Chart</button>
+    <button id="growthRateChartButton" class="btn btn-secondary" style="display:none;">Growth Rate Chart</button>
+    <canvas id="radarChart" class="additional-chart" style="display:none;"></canvas>
+    <canvas id="growthRateChart" class="additional-chart" style="display:none;"></canvas>
+</div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="productanalyse.js"></script>
 </body>
