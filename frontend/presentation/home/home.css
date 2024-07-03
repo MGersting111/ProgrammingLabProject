@@ -235,3 +235,11 @@ body {
 canvas{
     margin-top: 20px;
 }
+#pieChartContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto; /* Combine top and bottom margins */
+    height: 500px;
+    width: 80%;
+  }
