@@ -130,8 +130,10 @@
               var storesSelect = document.getElementById("stores");
               if (this.value === "Store") {
                 storesSelect.style.display = "block";
+                limitSelect.style.display = "block";
               } else {
                 storesSelect.style.display = "none";
+                limitSelect.style.display = "none";
               }
             });
           document.addEventListener("DOMContentLoaded", () => {
@@ -184,7 +186,11 @@
           </div>
         </div>
         <div class="col-auto">
-          <select id="limitSelect" class="select-dropdown">
+          <select
+            id="limitSelect"
+            class="select-dropdown"
+            style="display: none"
+          >
             <option value="" disabled>Limit</option>
             <option value="1">1</option>
             <option value="3">3</option>
