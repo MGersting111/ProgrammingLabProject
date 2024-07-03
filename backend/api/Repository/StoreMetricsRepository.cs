@@ -8,6 +8,7 @@ using api.Models;
 using api.Dto;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using Newtonsoft.Json;
 
 namespace api.Repository
 {
@@ -22,6 +23,14 @@ namespace api.Repository
 
         public async Task<List<StoreMetrics>> GetAllStoreMetricsAsync(DateTime startDate, DateTime endDate)
         {
+            var startDateString = startDate.ToString("yyyyMMddHHmmss");
+            var endDateString = endDate.ToString("yyyyMMddHHmmss");
+            string cacheKey = $"StoreMetrics-{startDateString}-{endDateString}";
+            var cachedData = await GetCachedDataAsync(cacheKey);
+            if (cachedData != null)
+            {
+                return cachedData;
+            }
 
             _context.Database.SetCommandTimeout(300);
             var storeMetricsList = new List<StoreMetrics>();
@@ -118,8 +127,45 @@ namespace api.Repository
 
                 storeMetricsList.Add(storeMetrics);
             }
+            await SetCachedDataAsync(cacheKey, storeMetricsList, DateTime.UtcNow.AddDays(365));
 
             return storeMetricsList;
+        }
+        private async Task<List<StoreMetrics>> GetCachedDataAsync(string cacheKey)
+        {
+            var cacheEntry = await _context.CacheEntries
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ce => ce.CacheKey == cacheKey && ce.ExpirationDate > DateTime.UtcNow);
+
+            if (cacheEntry != null)
+            {
+                return JsonConvert.DeserializeObject<List<StoreMetrics>>(cacheEntry.JsonValue);
+            }
+
+            return null;
+        }
+
+        private async Task SetCachedDataAsync(string cacheKey, List<StoreMetrics> data, DateTime expirationDate)
+        {
+            var jsonData = JsonConvert.SerializeObject(data);
+            var cacheEntry = await _context.CacheEntries.FindAsync(cacheKey);
+
+            if (cacheEntry != null)
+            {
+                cacheEntry.JsonValue = jsonData;
+                cacheEntry.ExpirationDate = expirationDate;
+            }
+            else
+            {
+                _context.CacheEntries.Add(new CacheEntry
+                {
+                    CacheKey = cacheKey,
+                    JsonValue = jsonData,
+                    ExpirationDate = expirationDate
+                });
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }
