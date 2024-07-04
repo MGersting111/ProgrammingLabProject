@@ -11,6 +11,7 @@ namespace api.Interfaces
 {
     public interface IMapChartsRepository
     {
-        Task<List<dynamic>> GetMapChartDataAsync(string attribute, DateTime startTime, DateTime endTime);
+        Task<List<Dictionary<string, object>>> GetMapChartDataAsync(string attribute, DateTime startTime, DateTime endTime);
+        
     }
 }
