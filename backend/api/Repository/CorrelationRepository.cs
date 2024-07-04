@@ -18,42 +18,45 @@ namespace api.Repository
         {
             _context = context;
         }
+        private async Task SetCachedDataAsync(string cacheKey, string jsonData, DateTime expirationDate)
+        {
+            var cacheEntry = await _context.CacheEntries.FindAsync(cacheKey);
+
+            if (cacheEntry != null)
+            {
+                cacheEntry.JsonValue = jsonData;
+                cacheEntry.ExpirationDate = expirationDate;
+            }
+            else
+            {
+                _context.CacheEntries.Add(new CacheEntry
+                {
+                    CacheKey = cacheKey,
+                    JsonValue = jsonData,
+                    ExpirationDate = expirationDate
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task<(double[] XValues, double[] YValues)> GetCachedDataAsync(string cacheKey)
+        {
+            var cacheEntry = await _context.CacheEntries
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ce => ce.CacheKey == cacheKey && ce.ExpirationDate > DateTime.UtcNow);
+
+            return cacheEntry != null
+                ? JsonConvert.DeserializeObject<(double[], double[])>(cacheEntry.JsonValue)
+                : (null, null); // Oder einen anderen geeigneten Standardwert zurückgeben
+        }
 
         public async Task<bool> IsModelSupported(string model)
         {
             return model.ToLower() == "store" || model.ToLower() == "order" || model.ToLower() == "product" || model.ToLower() == "customer";
         }
 
-           private async Task<string> GetCachedDataAsync(string cacheKey)
-    {
-        var cacheEntry = await _context.CacheEntries
-            .AsNoTracking()
-            .FirstOrDefaultAsync(ce => ce.CacheKey == cacheKey && ce.ExpirationDate > DateTime.UtcNow);
 
-        return cacheEntry?.JsonValue;
-    }
-
-    private async Task SetCachedDataAsync(string cacheKey, string jsonData, DateTime expirationDate)
-    {
-        var cacheEntry = await _context.CacheEntries.FindAsync(cacheKey);
-
-        if (cacheEntry != null)
-        {
-            cacheEntry.JsonValue = jsonData;
-            cacheEntry.ExpirationDate = expirationDate;
-        }
-        else
-        {
-            _context.CacheEntries.Add(new CacheEntry
-            {
-                CacheKey = cacheKey,
-                JsonValue = jsonData,
-                ExpirationDate = expirationDate
-            });
-        }
-
-        await _context.SaveChangesAsync();
-    }
 
         public async Task<bool> AreAttributesValid(string model, string xAttribute, string yAttribute)
         {
@@ -77,13 +80,16 @@ namespace api.Repository
 
         public async Task<(double[] XValues, double[] YValues)> FetchData(string model, DateTime startTime, DateTime endTime, string xAttribute, string yAttribute, string size = null, string category = null)
         {
-
             var cacheKey = $"Correlation{model}-{startTime}-{endTime}-{xAttribute}-{yAttribute}-{size}-{category}";
             var cachedData = await GetCachedDataAsync(cacheKey);
-            if (cachedData != null)
+
+            if (cachedData.XValues != null && cachedData.YValues != null)
             {
-                return JsonConvert.DeserializeObject<(double[], double[])>(cachedData);
+                return cachedData;
             }
+
+            double[] xValues, yValues; // Deklaration außerhalb des switch-Blocks
+
             switch (model.ToLower())
             {
                 case "store":
@@ -91,13 +97,11 @@ namespace api.Repository
                         .Where(o => o.OrderDate >= startTime && o.OrderDate <= endTime)
                         .Select(o => o.StoreId)
                         .Distinct()
-                        .ToListAsync()
-                        .ConfigureAwait(false);
+                        .ToListAsync();
 
-                    var xValues = await GetAttributeValues(storeIds, startTime, endTime, xAttribute).ConfigureAwait(false);
-                    var yValues = await GetAttributeValues(storeIds, startTime, endTime, yAttribute).ConfigureAwait(false);
-
-                    return (xValues, yValues);
+                    xValues = await GetAttributeValues(storeIds, startTime, endTime, xAttribute);
+                    yValues = await GetAttributeValues(storeIds, startTime, endTime, yAttribute);
+                    break;
 
                 case "product":
                     IQueryable<OrderItem> orderItemsQuery = _context.OrderItems
@@ -116,29 +120,32 @@ namespace api.Repository
                     var SKUs = await orderItemsQuery
                         .Select(oi => oi.SKU)
                         .Distinct()
-                        .ToListAsync()
-                        .ConfigureAwait(false);
+                        .ToListAsync();
 
-                    var xValuesProduct = await GetProductAttributeValues(SKUs, startTime, endTime, xAttribute).ConfigureAwait(false);
-                    var yValuesProduct = await GetProductAttributeValues(SKUs, startTime, endTime, yAttribute).ConfigureAwait(false);
-
-                    return (xValuesProduct, yValuesProduct);
+                    xValues = await GetProductAttributeValues(SKUs, startTime, endTime, xAttribute);
+                    yValues = await GetProductAttributeValues(SKUs, startTime, endTime, yAttribute);
+                    break;
 
                 case "customer":
                     var customerIds = await _context.Orders
                         .Where(o => o.OrderDate >= startTime && o.OrderDate <= endTime)
                         .Select(o => o.CustomerId)
                         .Distinct()
-                        .ToListAsync()
-                        .ConfigureAwait(false);
+                        .ToListAsync();
 
-                    var xValuesCustomer = await GetCustomerAttributeValues(customerIds, startTime, endTime, xAttribute).ConfigureAwait(false);
-                    var yValuesCustomer = await GetCustomerAttributeValues(customerIds, startTime, endTime, yAttribute).ConfigureAwait(false);
+                    xValues = await GetCustomerAttributeValues(customerIds, startTime, endTime, xAttribute);
+                    yValues = await GetCustomerAttributeValues(customerIds, startTime, endTime, yAttribute);
+                    break;
 
-                    return (xValuesCustomer, yValuesCustomer);
                 default:
                     throw new ArgumentException("Invalid model specified.");
             }
+
+            // Speichern im Cache (nur wenn noch nicht vorhanden)
+            var jsonData = JsonConvert.SerializeObject((xValues, yValues));
+            await SetCachedDataAsync(cacheKey, jsonData, DateTime.UtcNow.AddDays(1)); // Cache für 1 Tag
+
+            return (xValues, yValues);
         }
 
         private async Task<double[]> GetCustomerAttributeValues(List<string> customerIds, DateTime startTime, DateTime endTime, string attribute)
@@ -392,7 +399,7 @@ namespace api.Repository
 
             return correlation;
         }
-       
+
     }
 }
 
