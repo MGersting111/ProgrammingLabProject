@@ -78,7 +78,7 @@ namespace api.Repository
         public async Task<(double[] XValues, double[] YValues)> FetchData(string model, DateTime startTime, DateTime endTime, string xAttribute, string yAttribute, string size = null, string category = null)
         {
 
-            var cacheKey = $"{model}-{startTime}-{endTime}-{xAttribute}-{yAttribute}-{size}-{category}";
+            var cacheKey = $"Correlation{model}-{startTime}-{endTime}-{xAttribute}-{yAttribute}-{size}-{category}";
             var cachedData = await GetCachedDataAsync(cacheKey);
             if (cachedData != null)
             {
