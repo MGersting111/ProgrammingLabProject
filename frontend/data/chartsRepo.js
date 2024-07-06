@@ -293,6 +293,7 @@ function createMapChart() {
     .then((response) => response.json())
     .then((rows) => {
       const response = rows;
+      console.log(response);
       const summedValuesPerStore = response.map((store) => {
         const { State, City, Latitude, Longitude, ...months } = store;
         const total = Object.values(months).reduce((acc, val) => acc + val, 0);
