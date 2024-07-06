@@ -1,4 +1,4 @@
-const storeBaseUrl = "http://localhost:3000/analyseStore";
+const storeBaseUrl = "http://localhost:5004/api/StoreMetrics";
 var barChart;
 var lineChart;
 var donutChart;
@@ -6,21 +6,17 @@ var donutChart;
 async function analyseStore() {
   var data = await getData();
   if (data) {
+    dataSet = orderData(data);
     var firstChartContainer = document.getElementById("firstChartContainer");
     firstChartContainer.style.display = "block";
     createDonutChart(data, "Test Chart", testOnclick, "testLineChart");
   }
 }
 
-function testOnclick() {
-  console.log("test on click");
-}
-
 function getData() {
-  const attribute = document.getElementById("attributeSelect").value;
   const dateFrom = document.getElementById("fromDate").value;
   const dateTo = document.getElementById("toDate").value;
-  const url = `${storeBaseUrl}?StartTime=${dateFrom}&EndTime=${dateTo}&Metrics=${attribute}`;
+  const url = `${storeBaseUrl}?fromDate=${dateFrom}&toDate=${dateTo}`;
   return fetch(url, {
     method: "GET",
   })
@@ -33,6 +29,10 @@ function getData() {
     .catch((error) => {
       console.error("Fetch error:", error);
     });
+}
+
+function orderData(data) {
+  console.log(data);
 }
 
 function createMapChart() {}
