@@ -335,7 +335,8 @@ function createMapChart() {
         cityLat.reduce((a, b) => a + parseFloat(b), 0) / cityLat.length;
       var avgLon =
         cityLon.reduce((a, b) => a + parseFloat(b), 0) / cityLon.length;
-
+      console.log(avgLat);
+      console.log(avgLon);
       var data = [
         {
           type: "scattergeo",
@@ -353,7 +354,7 @@ function createMapChart() {
           },
         },
       ];
-
+      console.log(data);
       var layout = {
         title: `Revenue per Store from ${dateFrom} to ${dateTo}`,
         showlegend: false,
