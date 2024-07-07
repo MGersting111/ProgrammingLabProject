@@ -1,0 +1,18 @@
+#charts{
+    margin: 25px;
+    display: flex;
+}
+
+#canvasContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  
+  .canvas-item {
+    flex-basis: calc(33.33% - 10px); /* Drei Elemente pro Zeile, mit 10px Abstand zwischen den Elementen */
+    max-width: 600px; /* Maximale Breite des Canvas */
+    max-height: 300px; /* Maximale Höhe des Canvas */
+    margin-bottom: 10px; /* Abstand zwischen den Zeilen */
+  }

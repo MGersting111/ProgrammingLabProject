@@ -1,0 +1,38 @@
+class StoreLocator {
+  constructor() {
+    this.StoreLocatorData = {
+      S490972: { latitude: 41.328852, longitude: -116.12251 },
+      S476770: { latitude: 37.593883, longitude: -121.88281 },
+      S750231: { latitude: 38.744062, longitude: -121.99929 },
+      S688745: { latitude: 33.326956, longitude: -114.68562 },
+      S817950: { latitude: 38.004922, longitude: -121.40022 },
+      S948821: { latitude: 38.97159, longitude: -122.02725 },
+      S872983: { latitude: 37.388718, longitude: -121.63845 },
+      S799887: { latitude: 41.890872, longitude: -114.44545 },
+      S013343: { latitude: 40.489736, longitude: -117.08692 },
+      S068548: { latitude: 34.639682, longitude: -120.4471 },
+      S449313: { latitude: 35.262548, longitude: -120.65196 },
+      S263879: { latitude: 39.748753, longitude: -117.01152 },
+      S276746: { latitude: 39.663256, longitude: -120.24835 },
+      S606312: { latitude: 35.664386, longitude: -121.21965 },
+      S062214: { latitude: 41.782681, longitude: -124.16703 },
+      S064089: { latitude: 39.717627, longitude: -116.02944 },
+      S058118: { latitude: 37.571495, longitude: -117.31507 },
+      S361257: { latitude: 34.639682, longitude: -120.4471 },
+      S918734: { latitude: 41.736424, longitude: -122.40008 },
+      S351225: { latitude: 41.208288, longitude: -114.86098 },
+      S048150: { latitude: 34.31039, longitude: -116.45012 },
+      S370494: { latitude: 37.237216, longitude: -119.23304 },
+      S080157: { latitude: 38.966064, longitude: -118.67848 },
+      S588444: { latitude: 41.596722, longitude: -117.40232 },
+      S486166: { latitude: 41.890872, longitude: -114.44545 },
+      S669665: { latitude: 40.700131, longitude: -118.11473 },
+      S216043: { latitude: 38.898385, longitude: -123.65746 },
+      S396799: { latitude: 38.654705, longitude: -123.3999 },
+      S505400: { latitude: 38.944921, longitude: -115.70749 },
+      S147185: { latitude: 38.835421, longitude: -115.02628 },
+      S122017: { latitude: 39.285782, longitude: -123.22064 },
+      S302800: { latitude: 40.105506, longitude: -113.94372 },
+    };
+  }
+}
