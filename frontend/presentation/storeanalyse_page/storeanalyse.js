@@ -61,6 +61,9 @@ const storeRevenueValues = [];
 const storeSaleValues = [];
 const storeCustomerValues = [];
 const storeAvgRevenueValues = [];
+
+const allStoreProductNames = [];
+const allStoreProductRevenues = [];
 var blackColors;
 var dateFrom;
 var dateTo;
@@ -73,6 +76,7 @@ let salesChart;
 let avgRevenueChart;
 let customerChart;
 let currentStores = [];
+let barCharts = {};
 
 function resetStoreData() {
   currentStores = [];
@@ -80,6 +84,7 @@ function resetStoreData() {
   salesChart = null;
   avgRevenueChart = null;
   customerChart = null;
+  barCharts = {};
   document.getElementById("canvasContainer").innerHTML = "";
   document.getElementById("mapContainer").innerHTML = "";
   Plotly.purge("mapContainer");
@@ -97,6 +102,8 @@ function resetStoreData() {
   storeSaleValues.length = 0;
   storeCustomerValues.length = 0;
   storeAvgRevenueValues.length = 0;
+  allStoreProductNames.length = 0;
+  allStoreProductRevenues.length = 0;
 }
 
 async function analyseStore() {
@@ -105,6 +112,8 @@ async function analyseStore() {
   var data = await getData();
   if (data) {
     dataSet = orderData(data);
+    console.log(allStoreProductNames[0]);
+    console.log(allStoreProductRevenues[0]);
     createMapChart(
       dataSet.storeLat,
       dataSet.storeLong,
@@ -172,6 +181,21 @@ function orderData(data) {
     storeSaleValues.push(allMonthlySales);
     storeAvgRevenueValues.push(allMonthlyAvgRevenuePerSale);
     storeCustomerValues.push(allMonthlyCustomers);
+    let storeProductNames = [];
+    let storeProductRevenues = [];
+    store.productSales.forEach((product) => {
+      if (storeProductNames.includes(product.productName)) {
+        let index = storeProductNames.indexOf(product.productName);
+        storeProductRevenues[index] += Math.round(product.totalRevenue);
+      } else {
+        storeProductNames.push(product.productName);
+        storeProductRevenues.push(Math.round(product.totalRevenue));
+      }
+    });
+    allStoreProductNames.push(storeProductNames);
+    allStoreProductRevenues.push(storeProductRevenues);
+    storeProductNames = [];
+    storeProductRevenues = [];
   });
 
   months24 = months24.slice(0, storeRevenueValues[0].length);
@@ -189,12 +213,14 @@ function orderData(data) {
     storeSaleValues,
     storeCustomerValues,
     storeAvgRevenueValues,
+    allStoreProductNames,
+    allStoreProductRevenues,
   };
 }
 //-------------------------------
 function createMapChart(cityLat, cityLon, cityRevenue, cityName) {
   const mapContainer = document.getElementById("mapContainer");
-  mapContainer.style.display = "block";
+  //mapContainer.style.display = "block";
   const scale = 120000;
   var citySize = [];
   var hoverText = [];
@@ -264,7 +290,6 @@ function createMapChart(cityLat, cityLon, cityRevenue, cityName) {
   Plotly.newPlot("mapContainer", data, layout, { showLink: false });
   mapContainer.on("plotly_click", function (data) {
     const pointIndex = data.points[0].pointIndex;
-
     if (currentStores.includes(pointIndex)) {
       currentStores.splice(currentStores.indexOf(pointIndex), 1);
       blackColors[pointIndex] = "#000000";
@@ -350,6 +375,18 @@ function createMapChart(cityLat, cityLon, cityRevenue, cityName) {
         );
       }
     }
+    if (barCharts[storeNames[pointIndex]]) {
+      barCharts[storeNames[pointIndex]].destroy();
+      barCharts[storeNames[pointIndex]] = null;
+    } else {
+      barCharts[storeNames[pointIndex]] = createBarChart(
+        allStoreProductNames[pointIndex],
+        allStoreProductRevenues[pointIndex],
+        storeNames[pointIndex] + " Product Revenues",
+        () => {},
+        colors[pointIndex]
+      );
+    }
   });
 }
 
@@ -420,6 +457,11 @@ function removeDataFromLineChart(chart, chartName) {
     chart.data.datasets.splice(datasetIndex, 1);
     chart.update();
   }
+  if (chart.data.datasets.length === 0) {
+    chart.destroy();
+    revenueChart = null;
+    document.getElementById("canvasContainer").innerHTML = "";
+  }
 }
 
 //----------------------
@@ -473,13 +515,15 @@ function createDonutChart(dataMap, chartName, onClick, canvaId) {
   });
 }
 
-function createBarChart(dataMap, chartName, onClick, canvaId) {
-  const ctx = document.getElementById(canvaId).getContext("2d");
-  const labels = dataMap.map((obj) => Object.keys(obj)[0]);
-  const dataValues = dataMap.map((obj) => Object.values(obj)[0]);
-  if (barChart != null) {
-    barChart.destroy();
-  }
+function createBarChart(labels, dataValues, chartName, onClick, color) {
+  let canvasContainer = document.getElementById("canvasContainer");
+
+  let newCanvas = document.createElement("canvas");
+  newCanvas.className = "canvas-item";
+  canvasContainer.appendChild(newCanvas);
+
+  let ctx = newCanvas.getContext("2d");
+
   // Erstellen des Charts
   barChart = new Chart(ctx, {
     type: "bar",
@@ -489,8 +533,8 @@ function createBarChart(dataMap, chartName, onClick, canvaId) {
         {
           label: chartName,
           data: dataValues,
-          backgroundColor: "rgba(75, 192, 192, 0.2)",
-          borderColor: "rgba(75, 192, 192, 1)",
+          backgroundColor: color,
+          borderColor: color,
           borderWidth: 1,
         },
       ],
@@ -511,4 +555,5 @@ function createBarChart(dataMap, chartName, onClick, canvaId) {
       },
     },
   });
+  return barChart;
 }
