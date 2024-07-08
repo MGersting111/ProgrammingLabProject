@@ -4,7 +4,7 @@ const lineChartContainer = document.querySelector(".lineChartsContainer");
 
 let typeChart;
 let categoryChart;
-let totalRevenueChart;
+let totalSalesChart;
 let cumulativeSalesChart;
 let donutChart;
 
@@ -226,7 +226,7 @@ function updateLineCharts(data, label, chartType, colors) {
     };
   });
 
-  const totalRevenueData = {
+  const totalSalesData = {
     labels: months,
     datasets: datasets
   };
@@ -236,15 +236,15 @@ function updateLineCharts(data, label, chartType, colors) {
     datasets: cumulativeDatasets
   };
 
-  const ctx1 = document.getElementById('totalRevenueChart').getContext('2d');
+  const ctx1 = document.getElementById('totalSalesChart').getContext('2d');
   const ctx2 = document.getElementById('cumulativeSalesChart').getContext('2d');
 
-  if (totalRevenueChart) totalRevenueChart.destroy();
+  if (totalSalesChart) totalSalesChart.destroy();
   if (cumulativeSalesChart) cumulativeSalesChart.destroy();
 
-  totalRevenueChart = new Chart(ctx1, {
+  totalSalesChart = new Chart(ctx1, {
     type: 'line',
-    data: totalRevenueData,
+    data: totalSalesData,
     options: {
       responsive: true,
       maintainAspectRatio: true,

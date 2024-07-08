@@ -2,9 +2,9 @@ const goalApiBaseUrl = "http://localhost:5004/api/Goal";
 const actualDataApiBaseUrl =
   "http://localhost:5004/api/TotalNumber/FilteredStoreInfo";
 const salesApiBaseUrl = "http://localhost:5004/api/ProductSales"; // New endpoint for product sales
-const barChartContainer = document.querySelector("#barChart");
 const pieChartContainer = document.querySelector("#pieChartContainer");
-let barChart;
+let revenueChart;
+let salesChart;
 let pieChart;
 let revenueGoal = {};
 let salesGoal = {};
@@ -102,17 +102,60 @@ function fetchDataBasedOnInput() {
       console.log("Fetched data based on input:", data);
       actualRevenue[period] = data.productRevenue["2022"].TotalRevenue;
       actualSales[period] = data.productSalesByMonth["2022"].Total;
-      monthlyRevenue[period] = {
-        Jan: data.productRevenue["2022"].Jan,
-        Feb: data.productRevenue["2022"].Feb,
-        Mar: data.productRevenue["2022"].Mär,
-      };
-      monthlySales[period] = {
-        // Storing monthly sales data
-        Jan: data.productSalesByMonth["2022"].Jan,
-        Feb: data.productSalesByMonth["2022"].Feb,
-        Mar: data.productSalesByMonth["2022"].Mär,
-      };
+
+      switch (parseInt(period)) {
+        case 1:
+          monthlyRevenue[period] = {
+            Jan: data.productRevenue["2022"].Jan,
+            Feb: data.productRevenue["2022"].Feb,
+            Mar: data.productRevenue["2022"].Mär,
+          };
+          monthlySales[period] = {
+            Jan: data.productSalesByMonth["2022"].Jan,
+            Feb: data.productSalesByMonth["2022"].Feb,
+            Mar: data.productSalesByMonth["2022"].Mär,
+          };
+          break;
+        case 2:
+          monthlyRevenue[period] = {
+            Apr: data.productRevenue["2022"].Apr,
+            May: data.productRevenue["2022"].Mai,
+            Jun: data.productRevenue["2022"].Jun,
+          };
+          monthlySales[period] = {
+            Apr: data.productSalesByMonth["2022"].Apr,
+            May: data.productSalesByMonth["2022"].Mai,
+            Jun: data.productSalesByMonth["2022"].Jun,
+          };
+          break;
+        case 3:
+          monthlyRevenue[period] = {
+            Jul: data.productRevenue["2022"].Jul,
+            Aug: data.productRevenue["2022"].Aug,
+            Sep: data.productRevenue["2022"].Sep,
+          };
+          monthlySales[period] = {
+            Jul: data.productSalesByMonth["2022"].Jul,
+            Aug: data.productSalesByMonth["2022"].Aug,
+            Sep: data.productSalesByMonth["2022"].Sep,
+          };
+          break;
+        case 4:
+          monthlyRevenue[period] = {
+            Oct: data.productRevenue["2022"].Okt,
+            Nov: data.productRevenue["2022"].Nov,
+            Dec: data.productRevenue["2022"].Dez,
+          };
+          monthlySales[period] = {
+            Oct: data.productSalesByMonth["2022"].Okt,
+            Nov: data.productSalesByMonth["2022"].Nov,
+            Dec: data.productSalesByMonth["2022"].Dez,
+          };
+          break;
+        default:
+          throw new Error("Invalid period selected.");
+      }
+
       updateFrontend(
         dataInput,
         actualRevenue[period],
@@ -251,45 +294,34 @@ function slideRight() {
 }
 
 function createBarChart(period) {
-  const ctx = document.querySelector("#barChart").getContext("2d");
-  const labels = [];
-  const goalData = [];
-  const actualData = [];
+  const revenueCtx = document.querySelector("#revenueGoalChart").getContext("2d");
 
-  if (
-    revenueGoal[period] !== undefined &&
-    actualRevenue[period] !== undefined
-  ) {
-    labels.push("Revenue");
-    goalData.push(revenueGoal[period]);
-    actualData.push(actualRevenue[period]);
-  }
+  // Data for revenue chart
+  const revenueLabels = ["Revenue"];
+  const revenueGoalData = revenueGoal[period] !== undefined ? [revenueGoal[period]] : [];
+  const actualRevenueData = actualRevenue[period] !== undefined ? [actualRevenue[period]] : [];
 
-  if (salesGoal[period] !== undefined && actualSales[period] !== undefined) {
-    labels.push("Sales");
-    goalData.push(salesGoal[period]);
-    actualData.push(actualSales[period]);
-  }
-
-  const data = {
-    labels: labels,
+  // Revenue chart data
+  const revenueData = {
+    labels: revenueLabels,
     datasets: [
       {
         label: "Goal",
-        data: goalData,
+        data: revenueGoalData,
         backgroundColor: "rgba(75, 192, 192, 1)",
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
       },
       {
         label: "Actual",
-        data: actualData,
+        data: actualRevenueData,
         backgroundColor: "rgba(153, 102, 255, 1)",
         borderColor: "rgba(153, 102, 255, 1)",
         borderWidth: 1,
       },
     ],
   };
+
   const options = {
     responsive: true,
     scales: {
@@ -321,26 +353,101 @@ function createBarChart(period) {
     onClick: (e, elements) => {
       if (elements.length > 0) {
         const clickedElementIndex = elements[0].index;
-        const label = data.labels[clickedElementIndex];
+        const label = revenueData.labels[clickedElementIndex];
         if (label === "Revenue" && monthlyRevenue[period]) {
           createPieChart(period, monthlyRevenue[period], "Revenue Breakdown");
-        }
-        if (label === "Sales" && monthlySales[period]) {
-          // Check for sales data
-          createPieChart(period, monthlySales[period], "Sales Breakdown");
         }
       }
     },
   };
 
-  if (barChart) {
-    barChart.destroy();
+  if (revenueChart) {
+    revenueChart.destroy();
   }
-  barChart = new Chart(ctx, {
+  revenueChart = new Chart(revenueCtx, {
     type: "bar",
-    data: data,
+    data: revenueData,
     options: options,
   });
+
+  // Conditionally create the sales chart only if salesGoal exists for the period
+  if (salesGoal[period] !== undefined) {
+    const salesCtx = document.querySelector("#salesChart").getContext("2d");
+
+    // Data for sales chart
+    const salesLabels = ["Sales"];
+    const salesGoalData = [salesGoal[period]];
+    const actualSalesData = [actualSales[period]];
+
+    // Sales chart data
+    const salesData = {
+      labels: salesLabels,
+      datasets: [
+        {
+          label: "Goal",
+          data: salesGoalData,
+          backgroundColor: "rgba(75, 192, 192, 1)",
+          borderColor: "rgba(75, 192, 192, 1)",
+          borderWidth: 1,
+        },
+        {
+          label: "Actual",
+          data: actualSalesData,
+          backgroundColor: "rgba(153, 102, 255, 1)",
+          borderColor: "rgba(153, 102, 255, 1)",
+          borderWidth: 1,
+        },
+      ],
+    };
+
+    const salesOptions = {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: `Period ${period}`,
+        },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: "x",
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+            },
+            pinch: {
+              enabled: true,
+            },
+            mode: "x",
+          },
+        },
+      },
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const clickedElementIndex = elements[0].index;
+          const label = salesData.labels[clickedElementIndex];
+          if (label === "Sales" && monthlySales[period]) {
+            createPieChart(period, monthlySales[period], "Sales Breakdown");
+          }
+        }
+      },
+    };
+
+    if (salesChart) {
+      salesChart.destroy();
+    }
+    salesChart = new Chart(salesCtx, {
+      type: "bar",
+      data: salesData,
+      options: salesOptions,
+    });
+  }
 }
 
 function createPieChart(period, data, title) {
@@ -358,14 +465,14 @@ function createPieChart(period, data, title) {
         label: `${title} for Period ${period}`,
         data: Object.values(data),
         backgroundColor: [
-          "rgba(255, 99, 132, 0.2)",
-          "rgba(54, 162, 235, 0.2)",
-          "rgba(255, 206, 86, 0.2)",
+          'rgba(0, 123, 255, 0.8)',  // Blue
+          'rgba(123, 0, 255, 0.8)',   // Purple
+          'rgba(64, 224, 208, 0.8)' 
         ],
         borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
+          'rgba(0, 123, 255, 0.8)',  // Blue
+          'rgba(123, 0, 255, 0.8)',   // Purple
+          'rgba(64, 224, 208, 0.8)' 
         ],
         borderWidth: 1,
       },
@@ -405,5 +512,6 @@ function zoom(type, period) {
 document
   .getElementById("resetZoomButton")
   .addEventListener("click", function () {
-    barChart.resetZoom();
+    if (revenueChart) revenueChart.resetZoom();
+    if (salesChart) salesChart.resetZoom();
   });
