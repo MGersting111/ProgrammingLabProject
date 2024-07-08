@@ -82,4 +82,3 @@ const pieCharts = {
       .getElementById("analyseButton")
       .addEventListener("click", analyseProduct);
   });
-  /

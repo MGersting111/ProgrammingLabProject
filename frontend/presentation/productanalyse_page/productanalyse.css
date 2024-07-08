@@ -12,7 +12,7 @@ body {
     margin-top: 20px;
 }
 
-.chart-container, .line-charts-container {
+.chart-container, .line-charts-container, .revenueLineChartsContainer {
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
@@ -43,13 +43,13 @@ body {
     margin-top: 10px;
 }
 
-.lineChartsContainer {
+.lineChartsContainer, .revenueLineChartsContainer {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
 }
 
-.lineChartsContainer .line-chart {
+.lineChartsContainer .line-chart, .revenueLineChartsContainer .line-chart {
     flex: 0 0 48%; /* Adjust width for side-by-side display */
     max-width: 48%;
 }
