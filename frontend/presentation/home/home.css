@@ -243,3 +243,11 @@ canvas{
     height: 500px;
     width: 80%;
   }
+  .chart-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  .chart-container canvas {
+    max-width: 45%; /* Adjust as needed */
+  }
