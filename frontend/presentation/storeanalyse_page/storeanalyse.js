@@ -132,11 +132,21 @@ function createPieContainer(pointIndex) {
   const pieContainer = document.getElementById("pieContainer");
   let html = `
   <p style="color: white;">Store Name: ${storeNames[pointIndex]}</p>
-  <p style="color: white;">Total Sales: ${storeTotalSales[pointIndex]}</p>
-  <p style="color: white;">Average Sales: ${storeAvgSales[pointIndex]}</p>
-  <p style="color: white;">Total Revenue: ${storeTotalRevenue[pointIndex]}</p>
-  <p style="color: white;">Average Revenue: ${storeAvgRevenue[pointIndex]}</p>
-  <p style="color: white;">Total Customers: ${storeTotalCustomers[pointIndex]}</p>
+  <p style="color: white;">Total Sales: ${Math.round(
+    storeTotalSales[pointIndex]
+  )}</p>
+  <p style="color: white;">Average Sales: ${Math.round(
+    storeAvgSales[pointIndex]
+  )}</p>
+  <p style="color: white;">Total Revenue: ${Math.round(
+    storeTotalRevenue[pointIndex]
+  )}</p>
+  <p style="color: white;">Average Revenue: ${Math.round(
+    storeAvgRevenue[pointIndex]
+  )}</p>
+  <p style="color: white;">Total Customers: ${
+    storeTotalCustomers[pointIndex]
+  }</p>
 `;
   pieContainer.style.color = "white";
   pieContainer.style.display = "flex";

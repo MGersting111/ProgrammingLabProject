@@ -324,7 +324,8 @@ function createMapChart() {
 
       for (var i = 0; i < summedValuesPerStore.length; i++) {
         var currentSize = summedValuesPerStore[i] / scale;
-        var currentText = storeNames[i] + " value: " + summedValuesPerStore[i];
+        var currentText =
+          storeNames[i] + " value: " + Math.round(summedValuesPerStore[i]);
         cityMonthlyValueList[storeNames[i]] = summedValuesPerStore[i];
         citySize.push(currentSize);
         hoverText.push(currentText);
@@ -357,6 +358,9 @@ function createMapChart() {
       console.log(data);
       var layout = {
         title: `Revenue per Store from ${dateFrom} to ${dateTo}`,
+        titlefont: {
+          color: "White", // Farbe der Überschrift
+        },
         showlegend: false,
 
         width: 1200, // Breite des Diagramms
@@ -551,6 +555,7 @@ function createMapInfoContainer(storeName, fromDate, toDate) {
     })
     .then((data) => {
       const infoDiv = document.getElementById("infoDiv");
+      infoDiv.style.minWidth = 300;
       if (infoDiv.innerHTML !== "") {
         infoDiv.innerHTML = "";
       }
@@ -559,9 +564,11 @@ function createMapInfoContainer(storeName, fromDate, toDate) {
         p.innerHTML = `
           <strong>Store ID:</strong> ${item.storeId}<br>
           <strong>Order Count:</strong> ${item.orderCount}<br>
-          <strong>Total Revenue:</strong> ${item.totalRevenue}<br>
+          <strong>Total Revenue:</strong> ${Math.round(item.totalRevenue)}<br>
           <strong>Customer Count:</strong> ${item.customerCount}<br>
-          <strong>Revenue Per Customer:</strong> ${item.revenuePerCustomer}<br>
+          <strong>Revenue Per Customer:</strong> ${Math.round(
+            item.revenuePerCustomer
+          )}<br>
           <hr>
         `;
         infoDiv.appendChild(p);
