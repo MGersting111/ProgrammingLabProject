@@ -1,12 +1,12 @@
 function createDashboard() {
+  console.log("createDashboard");
+  const products = new Products();
   const dashboardUrl =
     "http://localhost:5004/api/Dashboard?startDate=2021-01-01&endDate=2022-12-30";
 
   fetch(dashboardUrl)
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
-
       const avgRevenuePerStore = Math.round(data.avgRevenuePerStore);
       const bestSellingProduct = data.bestSellingProduct;
       const mostPurchasedSize = data.mostPurchasedSize;
@@ -41,7 +41,8 @@ function createDashboard() {
       const topProductsElement = document.getElementById("topProductsValue");
       topProductsElement.innerHTML = ""; // Clear existing content
       top3Products.forEach((product) => {
-        topProductsElement.innerHTML += `SKU: ${product.sku} <br>  Total Orders: ${product.totalOrders}<br>`;
+        productName = products.productsData[product.sku];
+        topProductsElement.innerHTML += `SKU: ${product.sku} - ${productName} <br>  Total Orders: ${product.totalOrders}<br>`;
       });
 
       const topStoresElement = document.getElementById("topStoresValue");
@@ -108,16 +109,20 @@ function createDashboard() {
           scales: {
             x: {
               display: true,
+              ticks: { color: "white" },
               title: {
                 display: true,
                 text: "Month",
+                color: "white",
               },
             },
             y: {
               display: true,
+              ticks: { color: "white" },
               title: {
                 display: true,
                 text: "Revenue",
+                color: "white",
               },
             },
           },
@@ -169,7 +174,8 @@ function createMapChart() {
 
       for (var i = 0; i < summedValuesPerStore.length; i++) {
         var currentSize = summedValuesPerStore[i] / scale;
-        var currentText = storeNames[i] + " value: " + summedValuesPerStore[i];
+        var roundedValue = Math.round(summedValuesPerStore[i]);
+        var currentText = storeNames[i] + " revenue: " + roundedValue + "$";
         cityMonthlyValueList[storeNames[i]] = summedValuesPerStore[i];
         citySize.push(currentSize);
         hoverText.push(currentText);
@@ -200,7 +206,10 @@ function createMapChart() {
       ];
 
       var layout = {
-        title: `Revenue per Store from Jan 2021 to Dec 2021`,
+        title: `Revenue per Store`,
+        titlefont: {
+          color: "White", // Farbe der Überschrift
+        },
         showlegend: false,
 
         width: 1200, // Breite des Diagramms
