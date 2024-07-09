@@ -61,6 +61,7 @@ const storeRevenueValues = [];
 const storeSaleValues = [];
 const storeCustomerValues = [];
 const storeAvgRevenueValues = [];
+const storeProductMonthlySales = {};
 
 const allStoreProductNames = [];
 const allStoreProductRevenues = [];
@@ -77,6 +78,8 @@ let avgRevenueChart;
 let customerChart;
 let currentStores = [];
 let barCharts = {};
+let storeProductCharts = new Map();
+let storeProductLineList = [];
 
 function resetStoreData() {
   currentStores = [];
@@ -84,7 +87,9 @@ function resetStoreData() {
   salesChart = null;
   avgRevenueChart = null;
   customerChart = null;
+  storeProductCharts = new Map();
   barCharts = {};
+  storeProductLineList = [];
   document.getElementById("canvasContainer").innerHTML = "";
   document.getElementById("mapContainer").innerHTML = "";
   Plotly.purge("mapContainer");
@@ -104,6 +109,7 @@ function resetStoreData() {
   storeAvgRevenueValues.length = 0;
   allStoreProductNames.length = 0;
   allStoreProductRevenues.length = 0;
+  storeProductMonthlySales.length = 0;
 }
 
 async function analyseStore() {
@@ -112,8 +118,7 @@ async function analyseStore() {
   var data = await getData();
   if (data) {
     dataSet = orderData(data);
-    console.log(allStoreProductNames[0]);
-    console.log(allStoreProductRevenues[0]);
+
     createMapChart(
       dataSet.storeLat,
       dataSet.storeLong,
@@ -121,6 +126,21 @@ async function analyseStore() {
       dataSet.storeNames
     );
   }
+}
+
+function createPieContainer(pointIndex) {
+  const pieContainer = document.getElementById("pieContainer");
+  let html = `
+  <p style="color: white;">Store Name: ${storeNames[pointIndex]}</p>
+  <p style="color: white;">Total Sales: ${storeTotalSales[pointIndex]}</p>
+  <p style="color: white;">Average Sales: ${storeAvgSales[pointIndex]}</p>
+  <p style="color: white;">Total Revenue: ${storeTotalRevenue[pointIndex]}</p>
+  <p style="color: white;">Average Revenue: ${storeAvgRevenue[pointIndex]}</p>
+  <p style="color: white;">Total Customers: ${storeTotalCustomers[pointIndex]}</p>
+`;
+  pieContainer.style.color = "white";
+  pieContainer.style.display = "flex";
+  pieContainer.innerHTML = html;
 }
 
 function getData() {
@@ -159,6 +179,45 @@ function orderData(data) {
     storeTotalRevenue.push(store.totalRevenue);
     storeAvgRevenue.push(store.avgRevenue);
     storeTotalCustomers.push(store.totalCustomers);
+    if (!storeProductMonthlySales[store.storeId]) {
+      storeProductMonthlySales[store.storeId] = {};
+    }
+    let storeProductSalesNames = [];
+    let products = new Products();
+    let productData = products.productsData;
+    let monthsGer = [
+      "Januar",
+      "Februar",
+      "März",
+      "April",
+      "Mai",
+      "Juni",
+      "Juli",
+      "August",
+      "September",
+      "Oktober",
+      "November",
+      "Dezember",
+    ];
+
+    store.monthlyProductSales.forEach((product) => {
+      let productName = productData[product.productSKU];
+      if (!storeProductSalesNames.includes(productName)) {
+        storeProductSalesNames.push(productName);
+        storeProductMonthlySales[store.storeId][productName] = {};
+        monthsGer.forEach((month) => {
+          storeProductMonthlySales[store.storeId][productName][month] = 0;
+        });
+      }
+      for (let year in product.sales) {
+        for (let month in product.sales[year]) {
+          let monthlySales = product.sales[year][month];
+          storeProductMonthlySales[store.storeId][productName][month] +=
+            monthlySales;
+        }
+      }
+    });
+    storeProductSalesNames = [];
     let allMonthlyRevenues = [];
     let allMonthlySales = [];
     let allMonthlyCustomers = [];
@@ -199,6 +258,7 @@ function orderData(data) {
   });
 
   months24 = months24.slice(0, storeRevenueValues[0].length);
+  console.log(storeProductMonthlySales);
   return {
     storeIds,
     storeNames,
@@ -215,6 +275,7 @@ function orderData(data) {
     storeAvgRevenueValues,
     allStoreProductNames,
     allStoreProductRevenues,
+    storeProductMonthlySales,
   };
 }
 //-------------------------------
@@ -257,6 +318,9 @@ function createMapChart(cityLat, cityLon, cityRevenue, cityName) {
 
   var layout = {
     title: `Revenue per Store from ${dateFrom} to ${dateTo}`,
+    titlefont: {
+      color: "White", // Farbe der Überschrift
+    },
     showlegend: false,
 
     width: 1000, // Breite des Diagramms
@@ -290,7 +354,13 @@ function createMapChart(cityLat, cityLon, cityRevenue, cityName) {
   Plotly.newPlot("mapContainer", data, layout, { showLink: false });
   mapContainer.on("plotly_click", function (data) {
     const pointIndex = data.points[0].pointIndex;
+    createPieContainer(pointIndex);
     if (currentStores.includes(pointIndex)) {
+      if (storeProductCharts.get(storeIds[pointIndex])) {
+        storeProductCharts.get(storeIds[pointIndex]).destroy();
+        storeProductCharts.delete(storeIds[pointIndex]);
+      }
+
       currentStores.splice(currentStores.indexOf(pointIndex), 1);
       blackColors[pointIndex] = "#000000";
       Plotly.restyle("mapContainer", { "marker.color": [blackColors] });
@@ -384,7 +454,8 @@ function createMapChart(cityLat, cityLon, cityRevenue, cityName) {
         allStoreProductRevenues[pointIndex],
         storeNames[pointIndex] + " Product Revenues",
         () => {},
-        colors[pointIndex]
+        colors[pointIndex],
+        storeIds[pointIndex]
       );
     }
   });
@@ -466,6 +537,85 @@ function removeDataFromLineChart(chart, chartName) {
 
 //----------------------
 
+function createBarChart(
+  labels,
+  dataValues,
+  chartName,
+  onClick,
+  color,
+  storeId
+) {
+  let canvasContainer = document.getElementById("canvasContainer");
+  let newCanvas = document.createElement("canvas");
+  newCanvas.className = "canvas-item";
+  canvasContainer.appendChild(newCanvas);
+
+  let ctx = newCanvas.getContext("2d");
+
+  // Erstellen des Charts
+  barChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: chartName,
+          data: dataValues,
+          backgroundColor: color,
+          borderColor: color,
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+      onClick: (event, elements) => {
+        if (elements.length > 0) {
+          let pointIndex = storeIds.indexOf(storeId);
+          const index = elements[0].index;
+          const label = labels[index];
+          const value = dataValues[index];
+          let storeProductLabel =
+            storeNames[pointIndex] + ":" + label + " Monthly Sales";
+          if (storeProductLineList.includes(storeProductLabel)) {
+            removeDataFromLineChart(
+              storeProductCharts.get(storeId),
+              storeProductLabel
+            );
+            return;
+          }
+          if (storeProductCharts.has(storeId)) {
+            storeProductLineList.push(storeProductLabel);
+            const lineChart = storeProductCharts.get(storeId);
+            addDataToLineChart(
+              lineChart,
+              Object.values(storeProductMonthlySales[storeId][label]),
+              storeProductLabel,
+              generateDifferentColor(color)
+            );
+          } else {
+            storeProductLineList.push(storeProductLabel);
+            let newChart = createLineChart(
+              months,
+              Object.values(storeProductMonthlySales[storeId][label]),
+              storeProductLabel,
+              () => {},
+              color
+            );
+            storeProductCharts.set(storeId, newChart);
+          }
+        }
+      },
+    },
+  });
+  return barChart;
+}
+
+//-----------
 function createDonutChart(dataMap, chartName, onClick, canvaId) {
   const ctx = document.getElementById(canvaId).getContext("2d");
   const labels = dataMap.map((obj) => Object.keys(obj)[0]);
@@ -515,45 +665,16 @@ function createDonutChart(dataMap, chartName, onClick, canvaId) {
   });
 }
 
-function createBarChart(labels, dataValues, chartName, onClick, color) {
-  let canvasContainer = document.getElementById("canvasContainer");
+function generateDifferentColor() {
+  // Generieren Sie zufällige RGB-Werte
+  let rgb = [
+    Math.floor(Math.random() * 256),
+    Math.floor(Math.random() * 256),
+    Math.floor(Math.random() * 256),
+  ];
 
-  let newCanvas = document.createElement("canvas");
-  newCanvas.className = "canvas-item";
-  canvasContainer.appendChild(newCanvas);
+  // Konvertieren Sie die RGB-Werte in eine Hexadezimalfarbe
+  let color = rgb.map((value) => value.toString(16).padStart(2, "0")).join("");
 
-  let ctx = newCanvas.getContext("2d");
-
-  // Erstellen des Charts
-  barChart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: chartName,
-          data: dataValues,
-          backgroundColor: color,
-          borderColor: color,
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
-      },
-      onClick: (event, elements) => {
-        if (elements.length > 0) {
-          const index = elements[0].index;
-          const label = labels[index];
-          const value = dataValues[index];
-          onClick(label, value);
-        }
-      },
-    },
-  });
-  return barChart;
+  return "#" + color;
 }

@@ -9,6 +9,17 @@
     flex-wrap: wrap;
     justify-content: space-between;
   }
+
+  #pieContainer {
+    min-width: 600px;
+    margin-left: 20px; /* Abstand vom mapContainer */
+    border-radius: 10px; /* Abgerundete Ecken */
+    background-color: #77B0AA; /* Grüne Hintergrundfarbe */
+    display: flex;
+    flex-direction: column; /* Flexbox verwenden, um das Innenleben zu zentrieren */
+    justify-content: center; /* Horizontale Zentrierung */
+    align-items: center; /* Vertikale Zentrierung */
+  }
   
   .canvas-item {
     flex-basis: calc(33.33% - 10px); /* Drei Elemente pro Zeile, mit 10px Abstand zwischen den Elementen */
