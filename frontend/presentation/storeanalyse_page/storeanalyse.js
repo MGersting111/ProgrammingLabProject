@@ -47,6 +47,13 @@ let colors = [
   "#31a354",
   "#74c476",
 ];
+let totalMonths;
+let startSlice;
+let endSlice;
+let yearFrom;
+let yearTo;
+let startMonth;
+let endMonth;
 let months24 = [...months, ...months];
 const storeIds = [];
 const storeNames = [];
@@ -156,9 +163,13 @@ function createPieContainer(pointIndex) {
 function getData() {
   dateFrom = document.getElementById("fromDate").value;
   dateTo = document.getElementById("toDate").value;
-  let yearFrom = dateFrom.split("-")[0];
-  let yearTo = dateTo.split("-")[0];
-
+  yearFrom = dateFrom.split("-")[0];
+  yearTo = dateTo.split("-")[0];
+  startMonth = parseInt(dateFrom.split("-")[1]) - 1; // Monat aus dateFrom extrahieren und in eine Zahl umwandeln
+  endMonth = parseInt(dateTo.split("-")[1]) - 1; // Monat aus dateFrom extrahieren und in eine Zahl umwandeln
+  totalMonths = (yearTo - yearFrom) * 12 + endMonth - startMonth + 1;
+  startSlice = totalMonths <= 24 ? 0 : totalMonths - 24;
+  endSlice = totalMonths;
   const url = `${storeBaseUrl}?fromDate=${dateFrom}&toDate=${dateTo}`;
   return fetch(url, {
     method: "GET",
@@ -477,7 +488,7 @@ function createLineChart(dataLabels, dataValues, chartName, onClick, color) {
   let newCanvas = document.createElement("canvas");
   newCanvas.className = "canvas-item";
   canvasContainer.appendChild(newCanvas);
-
+  dataLabels = months24.slice(startSlice, endSlice);
   let ctx = newCanvas.getContext("2d");
 
   let chart = new Chart(ctx, {
@@ -609,9 +620,12 @@ function createBarChart(
             );
           } else {
             storeProductLineList.push(storeProductLabel);
+            let values = Object.values(
+              storeProductMonthlySales[storeId][label]
+            );
             let newChart = createLineChart(
-              months,
-              Object.values(storeProductMonthlySales[storeId][label]),
+              months.slice(startMonth, endMonth + 1),
+              values,
               storeProductLabel,
               () => {},
               color

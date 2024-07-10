@@ -25,14 +25,14 @@ th, td {
 }
 
 thead {
-    background-color: #EC9740;
+    background-color: #2D8BBA;
     font-weight: bold;
 }
 
 tbody tr:nth-child(even) {
-    background-color: #FCDF7B;
+    background-color: #6CE5E8;
 }
 
 tbody tr:nth-child(odd) {
-    background-color: #FFBF6B;
+    background-color: #41B8D5;
 }
