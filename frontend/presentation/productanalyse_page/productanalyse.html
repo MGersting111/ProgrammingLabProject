@@ -105,25 +105,46 @@
       </div>
     </div>
   </div>
-  <div class="lineChartsContainer">
-    <canvas id="totalSalesChart" class="line-chart"></canvas>
-    <canvas id="cumulativeSalesChart" class="line-chart"></canvas>
-    <canvas id="totalRevenueChart" class="line-chart"></canvas>
-    <canvas id="cumulativeRevenueChart" class="line-chart"></canvas>
+  <div class="barChartsContainer">
+    <canvas id="avgSizeRevenueBarChart" class="bar-chart"></canvas>
+    <canvas id="avgSizeSalesBarChart" class="bar-chart"></canvas>
+    <canvas id="avgCategoryRevenueBarChart" class="bar-chart"></canvas>
+    <canvas id="avgCategorySalesBarChart" class="bar-chart"></canvas>
   </div>
-  <div class="revenueLineChartsContainer">
-    <canvas id="totalRevenueChart" class="line-chart"></canvas>
-    <canvas id="cumulativeRevenueChart" class="line-chart"></canvas>
+  <div class="lineChartsContainer">
+    <div class="row">
+      <div class="col-md-6">
+        <canvas id="totalSalesChart" class="line-chart"></canvas>
+      </div>
+      <div class="col-md-6">
+        <canvas id="cumulativeSalesChart" class="line-chart"></canvas>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <canvas id="totalRevenueChart" class="line-chart"></canvas>
+      </div>
+      <div class="col-md-6">
+        <canvas id="cumulativeRevenueChart" class="line-chart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="barChartContainer">
+    <canvas id="avgSizeRevenueBarChart" class="bar-chart"></canvas>
+    <canvas id="avgSizeSalesBarChart" class="bar-chart"></canvas>
+    <canvas id="avgCategoryRevenueBarChart" class="bar-chart"></canvas>
+    <canvas id="avgCategorySalesBarChart" class="bar-chart"></canvas>
   </div>
   <div class="donutChartContainer">
-    <canvas id="donutChart" class="donut-chart"></canvas>
+    <div class="col-md-6">
+      <canvas id="donutChart" class="donut-chart"></canvas>
+    </div>
+    <div class="col-md-6">
+      <canvas id="revenueDonutChart" class="donut-chart"></canvas>
+    </div>
   </div>
-  <div class="additionalChartsContainer">
-    <button id="radarChartButton" class="btn btn-secondary" style="display:none;">Radar Chart</button>
-    <button id="growthRateChartButton" class="btn btn-secondary" style="display:none;">Growth Rate Chart</button>
-    <canvas id="radarChart" class="additional-chart" style="display:none;"></canvas>
-    <canvas id="growthRateChart" class="additional-chart" style="display:none;"></canvas>
-</div>
+  </div>
+  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="productanalyse.js"></script>
 </body>

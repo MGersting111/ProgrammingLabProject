@@ -1,7 +1,6 @@
 const goalApiBaseUrl = "http://localhost:5004/api/Goal";
-const actualDataApiBaseUrl =
-  "http://localhost:5004/api/TotalNumber/FilteredStoreInfo";
-const salesApiBaseUrl = "http://localhost:5004/api/ProductSales"; // New endpoint for product sales
+const actualDataApiBaseUrl = "http://localhost:5004/api/TotalNumber/FilteredStoreInfo";
+const salesApiBaseUrl = "http://localhost:5004/api/ProductSales";
 const pieChartContainer = document.querySelector("#pieChartContainer");
 let revenueChart;
 let salesChart;
@@ -11,47 +10,78 @@ let salesGoal = {};
 let actualRevenue = {};
 let actualSales = {};
 let monthlyRevenue = {};
-let monthlySales = {}; // Add monthlySales for storing sales data
+let monthlySales = {};
 let currentPeriod = 1;
+let createdGoalIds = {}; // Store created goal IDs for periods
 
-function postDataBasedOnInput(salesGoalValue, revenueGoalValue) {
+function postDataBasedOnInput() {
   const topic = document.getElementById("topicSelect").value;
   const period = document.getElementById("periodSelect").value;
   const dataInput = document.getElementById("dataInput").value;
 
-  const goal = {
-    name: topic,
-    period: parseInt(period),
-    salesGoal:
-      salesGoalValue !== undefined ? salesGoalValue : parseInt(dataInput),
-    revenueGoal:
-      revenueGoalValue !== undefined ? revenueGoalValue : parseFloat(dataInput), // Use revenueGoal if available
-  };
-
-  console.log("Posting new goal:", goal);
-
-  return fetch(goalApiBaseUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(goal),
-  })
-    .then((response) => {
+  // Fetch the existing goal for the period
+  fetch(`${goalApiBaseUrl}/period/${period}`)
+    .then(response => {
       if (!response.ok) {
-        throw new Error(
-          `Network response was not ok: ${response.status} ${response.statusText}`
-        );
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
       }
       return response.json();
     })
-    .then((data) => {
-      console.log("Posted new goal:", data);
-      return data;
-    })
-    .catch((error) => {
-      console.error("Post goal error:", error);
-      throw error;
+    .then(existingGoal => {
+      let goal;
+
+      if (existingGoal) {
+        // Existing goal, preserve the other field's value
+        goal = {
+          ...existingGoal,
+          name: `GoalsForPeriod${period}`,
+          period: parseInt(period),
+        };
+      } else {
+        // New goal
+        goal = {
+          name: `GoalsForPeriod${period}`,
+          period: parseInt(period),
+          salesGoal: 0,
+          revenueGoal: 0,
+        };
+      }
+
+      // Update the goal values based on the selected topic
+      if (topic === "SalesGoal") {
+        goal.salesGoal = parseInt(dataInput);
+      } else if (topic === "RevenueGoal") {
+        goal.revenueGoal = parseFloat(dataInput);
+      }
+
+      const method = existingGoal ? "PUT" : "POST";
+      const url = existingGoal ? `${goalApiBaseUrl}/${existingGoal.id}` : goalApiBaseUrl;
+
+      return fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(goal),
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          createdGoalIds[period] = data.id;
+          console.log(method === "PUT" ? "Updated goal successfully" : "Posted new goal:", data);
+          return data;
+        })
+        .catch(error => {
+          console.error("Error in saving goal:", error);
+          throw error;
+        });
     });
 }
 
@@ -92,9 +122,7 @@ function fetchDataBasedOnInput() {
   })
     .then((response) => {
       if (!response.ok) {
-        throw new Error(
-          `Network response was not ok: ${response.status} ${response.statusText}`
-        );
+        throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
       }
       return response.json();
     })
@@ -156,13 +184,7 @@ function fetchDataBasedOnInput() {
           throw new Error("Invalid period selected.");
       }
 
-      updateFrontend(
-        dataInput,
-        actualRevenue[period],
-        actualSales[period],
-        topic,
-        period
-      ); // Update frontend with the user input and actual data
+      updateFrontend(dataInput, actualRevenue[period], actualSales[period], topic, period);
       createSlide(period, topic, actualRevenue[period], actualSales[period]);
       return {
         salesGoal: parseInt(dataInput),
@@ -175,13 +197,7 @@ function fetchDataBasedOnInput() {
     });
 }
 
-function updateFrontend(
-  userGoal,
-  fetchedActualRevenue,
-  fetchedActualSales,
-  topic,
-  period
-) {
+function updateFrontend(userGoal, fetchedActualRevenue, fetchedActualSales, topic, period) {
   if (topic === "RevenueGoal") {
     revenueGoal[period] = parseFloat(userGoal);
     actualRevenue[period] = fetchedActualRevenue;
@@ -189,57 +205,157 @@ function updateFrontend(
     salesGoal[period] = parseInt(userGoal);
     actualSales[period] = fetchedActualSales;
   }
-  createBarChart(period); // Update the chart
+  createBarChart(period);
 }
 
-document
-  .getElementById("dataForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevent the form from submitting traditionally
+document.getElementById("dataForm").addEventListener("submit", function (event) {
+  event.preventDefault();
 
-    fetchDataBasedOnInput()
-      .then(({ salesGoal, revenueGoal }) => {
-        return postDataBasedOnInput(salesGoal, revenueGoal); // Pass salesGoal and revenueGoal to the post function
-      })
-      .then(() => {
-        document.getElementById("dataForm").reset();
-        closeWrapper();
-      })
-      .catch((error) => {
-        console.error("Error during form submission:", error);
-        alert("Error: " + error.message); // Display error message
-      });
-  });
+  fetchDataBasedOnInput()
+    .then(({ salesGoal, revenueGoal }) => {
+      return postDataBasedOnInput(salesGoal, revenueGoal);
+    })
+    .then(() => {
+      document.getElementById("dataForm").reset();
+      closeWrapper();
+    })
+    .catch((error) => {
+      console.error("Error during form submission:", error);
+      alert("Error: " + error.message);
+    });
+});
 
 function closeWrapper() {
-  document.getElementById("inputWrapper").classList.remove("show"); // Hide the wrapper
+  document.getElementById("inputWrapper").classList.remove("show");
 }
 
 document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("openModal").addEventListener("click", function () {
-    document.getElementById("inputWrapper").classList.add("show"); // Show the wrapper
+    document.getElementById("goalSelectionWrapper").classList.add("show");
   });
 
-  // Optional: Close when clicking outside the form box
+  document.getElementById("newGoalButton").addEventListener("click", function () {
+    document.getElementById("goalSelectionWrapper").classList.remove("show");
+    document.getElementById("newGoalWrapper").classList.add("show");
+  });
+
+  document.getElementById("existingGoalButton").addEventListener("click", function () {
+    document.getElementById("goalSelectionWrapper").classList.remove("show");
+    document.getElementById("existingGoalWrapper").classList.add("show");
+  });
+
   window.addEventListener("click", function (event) {
     let formBox = document.querySelector(".form-box");
-    if (
-      event.target == document.getElementById("inputWrapper") &&
-      !formBox.contains(event.target)
-    ) {
-      closeWrapper();
+    if (event.target == document.getElementById("goalSelectionWrapper") && !formBox.contains(event.target)) {
+      closeGoalSelectionWrapper();
+    }
+    if (event.target == document.getElementById("newGoalWrapper") && !formBox.contains(event.target)) {
+      closeNewGoalWrapper();
+    }
+    if (event.target == document.getElementById("existingGoalWrapper") && !formBox.contains(event.target)) {
+      closeExistingGoalWrapper();
     }
   });
 
-  // Arrow button event listeners
   document.getElementById("left-arrow").addEventListener("click", slideLeft);
   document.getElementById("right-arrow").addEventListener("click", slideRight);
+
+  document.getElementById("deleteAllGoalsButton").addEventListener("click", deleteAllGoals);
+  
+  document.getElementById("fetchGoalForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const goalId = document.getElementById("goalIdInput").value;
+    fetchGoalById(goalId)
+      .then(goal => {
+        if (goal) {
+          console.log("Fetched goal:", goal); // Debug print
+          createdGoalIds[goal.period] = goal.id;
+          revenueGoal[goal.period] = goal.revenueGoal;
+          salesGoal[goal.period] = goal.salesGoal;
+          createSlide(goal.period, "RevenueGoal", actualRevenue[goal.period], actualSales[goal.period]);
+          createBarChart(goal.period);
+          document.getElementById("fetchGoalForm").reset();
+          closeExistingGoalWrapper();
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching goal by ID:", error);
+        alert("Error: " + error.message);
+      });
+  });
+  
+  fetchGoalsOnLoad();
 });
+
+function closeGoalSelectionWrapper() {
+  document.getElementById("goalSelectionWrapper").classList.remove("show");
+}
+
+function closeNewGoalWrapper() {
+  document.getElementById("newGoalWrapper").classList.remove("show");
+}
+
+function closeExistingGoalWrapper() {
+  document.getElementById("existingGoalWrapper").classList.remove("show");
+}
+
+function fetchGoalById(id) {
+  console.log(`Fetching goal by ID: ${id}`); // Debug print
+  return fetch(`${goalApiBaseUrl}/id?id=${id}`)
+    .then(response => {
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log(`Goal with ID ${id} not found`); // Debug print
+          return null;
+        }
+        throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(goal => {
+      console.log("Fetched goal data:", goal); // Debug print
+      return goal;
+    })
+    .catch(error => {
+      console.error(`Error fetching goal by ID ${id}:`, error);
+      throw error;
+    });
+}
+
+function fetchGoalsOnLoad() {
+  for (let period = 1; period <= 4; period++) {
+    fetch(`${goalApiBaseUrl}/period/${period}`)
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 404) {
+            return null;
+          }
+          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(existingGoal => {
+        if (existingGoal) {
+          createdGoalIds[period] = existingGoal.id;
+          if (existingGoal.salesGoal !== 0) {
+            salesGoal[period] = existingGoal.salesGoal;
+          }
+          if (existingGoal.revenueGoal !== 0) {
+            revenueGoal[period] = existingGoal.revenueGoal;
+          }
+          createSlide(period, existingGoal.name, actualRevenue[period], actualSales[period]);
+          createBarChart(period);
+        }
+      })
+      .catch(error => {
+        console.error(`Error fetching goal for period ${period}:`, error);
+      });
+  }
+}
 
 function createSlide(period, topic, actualRevenue, actualSales) {
   const slidesContainer = document.getElementById("slides");
 
-  // Find existing slide for the period or create a new one
   let slide = slidesContainer.querySelector(`.slide[data-period="${period}"]`);
   if (!slide) {
     slide = document.createElement("div");
@@ -248,10 +364,7 @@ function createSlide(period, topic, actualRevenue, actualSales) {
     slidesContainer.appendChild(slide);
   }
 
-  // Populate the slide with the necessary content
-  let slideContent = `
-        <h5>Period: ${period}</h5>
-    `;
+  let slideContent = `<h5>Period: ${period}</h5>`;
   if (revenueGoal[period] !== undefined) {
     slideContent += `<p>Actual Revenue: ${actualRevenue}</p>`;
     slideContent += `<p>Goal Revenue: ${revenueGoal[period]}</p>`;
@@ -261,7 +374,6 @@ function createSlide(period, topic, actualRevenue, actualSales) {
     slideContent += `<p>Goal Sales: ${salesGoal[period]}</p>`;
   }
 
-  // Add zoom buttons
   if (revenueGoal[period] !== undefined) {
     slideContent += `<button class="zoom-button" onclick="zoom('revenue', ${period})"><i class="fas fa-search-plus"></i></button>`;
   }
@@ -276,8 +388,7 @@ function createSlide(period, topic, actualRevenue, actualSales) {
 function updateSlidesVisibility() {
   const slides = document.querySelectorAll(".slide");
   slides.forEach((slide) => {
-    slide.style.display =
-      slide.dataset.period == currentPeriod ? "block" : "none";
+    slide.style.display = slide.dataset.period == currentPeriod ? "block" : "none";
   });
 }
 
@@ -296,12 +407,10 @@ function slideRight() {
 function createBarChart(period) {
   const revenueCtx = document.querySelector("#revenueGoalChart").getContext("2d");
 
-  // Data for revenue chart
   const revenueLabels = ["Revenue"];
   const revenueGoalData = revenueGoal[period] !== undefined ? [revenueGoal[period]] : [];
   const actualRevenueData = actualRevenue[period] !== undefined ? [actualRevenue[period]] : [];
 
-  // Revenue chart data
   const revenueData = {
     labels: revenueLabels,
     datasets: [
@@ -370,16 +479,13 @@ function createBarChart(period) {
     options: options,
   });
 
-  // Conditionally create the sales chart only if salesGoal exists for the period
   if (salesGoal[period] !== undefined) {
     const salesCtx = document.querySelector("#salesChart").getContext("2d");
 
-    // Data for sales chart
     const salesLabels = ["Sales"];
     const salesGoalData = [salesGoal[period]];
     const actualSalesData = [actualSales[period]];
 
-    // Sales chart data
     const salesData = {
       labels: salesLabels,
       datasets: [
@@ -453,8 +559,7 @@ function createBarChart(period) {
 function createPieChart(period, data, title) {
   const pieChartContainer = document.querySelector("#pieChartContainer");
   pieChartContainer.style.display = "block";
-  pieChartContainer.innerHTML =
-    '<canvas id="pieChart" style="display: block;"></canvas>'; // Reset pie chart container
+  pieChartContainer.innerHTML = '<canvas id="pieChart" style="display: block;"></canvas>';
 
   const ctx = document.querySelector("#pieChart").getContext("2d");
 
@@ -465,14 +570,14 @@ function createPieChart(period, data, title) {
         label: `${title} for Period ${period}`,
         data: Object.values(data),
         backgroundColor: [
-          'rgba(0, 123, 255, 0.8)',  // Blue
-          'rgba(123, 0, 255, 0.8)',   // Purple
-          'rgba(64, 224, 208, 0.8)' 
+          'rgba(0, 123, 255, 0.8)',
+          'rgba(123, 0, 255, 0.8)',
+          'rgba(64, 224, 208, 0.8)'
         ],
         borderColor: [
-          'rgba(0, 123, 255, 0.8)',  // Blue
-          'rgba(123, 0, 255, 0.8)',   // Purple
-          'rgba(64, 224, 208, 0.8)' 
+          'rgba(0, 123, 255, 0.8)',
+          'rgba(123, 0, 255, 0.8)',
+          'rgba(64, 224, 208, 0.8)'
         ],
         borderWidth: 1,
       },
@@ -481,7 +586,6 @@ function createPieChart(period, data, title) {
 
   const options = {
     responsive: true,
-    //maintainAspectRatio: false, // Ensure the pie chart is smaller
     plugins: {
       title: {
         display: true,
@@ -508,10 +612,43 @@ function zoom(type, period) {
   }
 }
 
-// Reset Zoom-Funktion
-document
-  .getElementById("resetZoomButton")
-  .addEventListener("click", function () {
-    if (revenueChart) revenueChart.resetZoom();
-    if (salesChart) salesChart.resetZoom();
-  });
+document.getElementById("resetZoomButton").addEventListener("click", function () {
+  if (revenueChart) revenueChart.resetZoom();
+  if (salesChart) salesChart.resetZoom();
+});
+
+function deleteAllGoals() {
+  console.log("Delete all goals button clicked"); // Add log to check if the function is called
+  const deletePromises = Object.values(createdGoalIds).map((id) =>
+    fetch(`${goalApiBaseUrl}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Delete request failed: ${response.status} ${response.statusText}`);
+      }
+      return response;
+    })
+  );
+
+  Promise.all(deletePromises)
+    .then(() => {
+      console.log("All goals deleted successfully");
+      // Update the frontend to reflect the deletion
+      revenueGoal = {};
+      salesGoal = {};
+      actualRevenue = {};
+      actualSales = {};
+      monthlyRevenue = {};
+      monthlySales = {};
+      currentPeriod = 1;
+      updateSlidesVisibility();
+      createBarChart(currentPeriod);
+      createdGoalIds = {}; // Clear the stored goal IDs
+    })
+    .catch((error) => {
+      console.error("Error deleting all goals:", error);
+    });
+}

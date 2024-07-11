@@ -12,7 +12,7 @@ body {
     margin-top: 20px;
 }
 
-.chart-container, .line-charts-container, .revenueLineChartsContainer {
+.chart-container, .line-charts-container {
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
@@ -29,7 +29,7 @@ body {
     max-width: 50%;
 }
 
-.pie-chart, .line-chart {
+.pie-chart, .line-chart, .bar-chart {
     width: 100%;
     height: 400px; /* Increase height for better visibility */
     margin: 20px;
@@ -43,15 +43,47 @@ body {
     margin-top: 10px;
 }
 
-.lineChartsContainer, .revenueLineChartsContainer {
+.lineChartsContainer {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: center;
     margin-top: 20px;
 }
 
-.lineChartsContainer .line-chart, .revenueLineChartsContainer .line-chart {
+.lineChartsContainer .row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.lineChartsContainer .col-md-6 {
     flex: 0 0 48%; /* Adjust width for side-by-side display */
     max-width: 48%;
+}
+
+.donutChartContainer {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.donut-chart {
+    width: 45%;
+    height: 400px; /* Increase height for better visibility */
+}
+
+.barChartsContainer {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.bar-chart {
+    width: 45%;
+    height: 400px; /* Increase height for better visibility */
+    margin: 20px;
 }
 
 canvas {
