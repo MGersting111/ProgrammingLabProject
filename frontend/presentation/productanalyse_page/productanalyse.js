@@ -6,7 +6,10 @@ let typeChart;
 let categoryChart;
 let totalSalesChart;
 let cumulativeSalesChart;
+let totalRevenueChart;
+let cumulativeRevenueChart;
 let donutChart;
+let revenueDonutChart;
 
 function analyseProduct() {
   getData();
@@ -115,14 +118,14 @@ function createPieChart(ctx, data, title, colors) {
         if (elements.length > 0) {
           const clickedElementIndex = elements[0].index;
           const label = Object.keys(data)[clickedElementIndex];
-          fetchLineChartData(label, title === 'Product Sizes' ? 'size' : 'category');
+          fetchLineChartData(label, title === 'Product Sizes' ? 'size' : 'category', colors);
         }
       }
     }
   });
 }
 
-function fetchLineChartData(label, chartType) {
+function fetchLineChartData(label, chartType, colors) {
   const dateFrom = new Date(document.getElementById("fromDate").value);
   const dateTo = new Date(document.getElementById("toDate").value);
 
@@ -144,18 +147,9 @@ function fetchLineChartData(label, chartType) {
   .then(data => {
     console.log("Fetched line chart data:", data);
     if (chartType === 'size') {
-      updateLineCharts(data.productSalesBySize, label, 'Size', [
-        'rgba(173, 216, 230, 0.8)', // Light Blue for Small
-        'rgba(100, 149, 237, 0.8)', // Medium Blue for Medium
-        'rgba(65, 105, 225, 0.8)',  // Royal Blue for Large
-        'rgba(0, 0, 139, 0.8)'      // Dark Blue for Extra Large
-      ]);
+      updateLineCharts(data.productSalesBySize, data.productRevenueBySize, label, 'Size', colors);
     } else if (chartType === 'category') {
-      updateLineCharts(data.productSalesByCategory, label, 'Category', [
-        'rgba(0, 123, 255, 0.8)',   // Blue for Classic
-        'rgba(123, 0, 255, 0.8)',   // Purple for Vegetarian
-        'rgba(64, 224, 208, 0.8)'   // Turquise for Specialty
-      ]);
+      updateLineCharts(data.productSalesByCategory, data.productRevenueByCategory, label, 'Category', colors);
     }
   })
   .catch(error => {
@@ -163,7 +157,7 @@ function fetchLineChartData(label, chartType) {
   });
 }
 
-function updateLineCharts(data, label, chartType, colors) {
+function updateLineCharts(salesData, revenueData, label, chartType, colors) {
   const dateFrom = new Date(document.getElementById("fromDate").value);
   const dateTo = new Date(document.getElementById("toDate").value);
   const year = dateFrom.getFullYear();
@@ -176,8 +170,8 @@ function updateLineCharts(data, label, chartType, colors) {
     currentDate.setMonth(currentDate.getMonth() + 1);
   }
 
-  const datasets = Object.keys(data).map((key, index) => {
-    const metrics = data[key][year];
+  const salesDatasets = Object.keys(salesData).map((key, index) => {
+    const metrics = salesData[key][year];
     const values = months.map((month, idx) => {
       const monthNumber = new Date(dateFrom.getFullYear(), idx).toLocaleString('default', { month: 'long' }).substring(0, 3);
       return metrics[monthNumber] || 0;
@@ -201,8 +195,58 @@ function updateLineCharts(data, label, chartType, colors) {
     };
   });
 
-  const cumulativeDatasets = Object.keys(data).map((key, index) => {
-    const metrics = data[key][year];
+  const cumulativeSalesDatasets = Object.keys(salesData).map((key, index) => {
+    const metrics = salesData[key][year];
+    const values = months.map((month, idx) => {
+      const monthNumber = new Date(dateFrom.getFullYear(), idx).toLocaleString('default', { month: 'long' }).substring(0, 3);
+      return metrics[monthNumber] || 0;
+    });
+    const cumulativeValues = values.reduce((acc, val) => {
+      if (acc.length > 0) {
+        acc.push(acc[acc.length - 1] + val);
+      } else {
+        acc.push(val);
+      }
+      return acc;
+    }, []);
+
+    return {
+      label: key,
+      data: cumulativeValues,
+      borderColor: key === label ? 'rgba(255, 0, 0, 1)' : colors[index % colors.length],
+      borderWidth: key === label ? 2 : 1,
+      fill: false,
+      pointBackgroundColor: key === label ? 'rgba(255, 0, 0, 1)' : colors[index % colors.length]
+    };
+  });
+
+  const revenueDatasets = Object.keys(revenueData).map((key, index) => {
+    const metrics = revenueData[key][year];
+    const values = months.map((month, idx) => {
+      const monthNumber = new Date(dateFrom.getFullYear(), idx).toLocaleString('default', { month: 'long' }).substring(0, 3);
+      return metrics[monthNumber] || 0;
+    });
+    const cumulativeValues = values.reduce((acc, val) => {
+      if (acc.length > 0) {
+        acc.push(acc[acc.length - 1] + val);
+      } else {
+        acc.push(val);
+      }
+      return acc;
+    }, []);
+
+    return {
+      label: key,
+      data: values,
+      borderColor: key === label ? 'rgba(255, 0, 0, 1)' : colors[index % colors.length],
+      borderWidth: key === label ? 2 : 1,
+      fill: false,
+      pointBackgroundColor: key === label ? 'rgba(255, 0, 0, 1)' : colors[index % colors.length]
+    };
+  });
+
+  const cumulativeRevenueDatasets = Object.keys(revenueData).map((key, index) => {
+    const metrics = revenueData[key][year];
     const values = months.map((month, idx) => {
       const monthNumber = new Date(dateFrom.getFullYear(), idx).toLocaleString('default', { month: 'long' }).substring(0, 3);
       return metrics[monthNumber] || 0;
@@ -228,19 +272,33 @@ function updateLineCharts(data, label, chartType, colors) {
 
   const totalSalesData = {
     labels: months,
-    datasets: datasets
+    datasets: salesDatasets
   };
 
   const cumulativeSalesData = {
     labels: months,
-    datasets: cumulativeDatasets
+    datasets: cumulativeSalesDatasets
+  };
+
+  const totalRevenueData = {
+    labels: months,
+    datasets: revenueDatasets
+  };
+
+  const cumulativeRevenueData = {
+    labels: months,
+    datasets: cumulativeRevenueDatasets
   };
 
   const ctx1 = document.getElementById('totalSalesChart').getContext('2d');
   const ctx2 = document.getElementById('cumulativeSalesChart').getContext('2d');
+  const ctx3 = document.getElementById('totalRevenueChart').getContext('2d');
+  const ctx4 = document.getElementById('cumulativeRevenueChart').getContext('2d');
 
   if (totalSalesChart) totalSalesChart.destroy();
   if (cumulativeSalesChart) cumulativeSalesChart.destroy();
+  if (totalRevenueChart) totalRevenueChart.destroy();
+  if (cumulativeRevenueChart) cumulativeRevenueChart.destroy();
 
   totalSalesChart = new Chart(ctx1, {
     type: 'line',
@@ -273,7 +331,7 @@ function updateLineCharts(data, label, chartType, colors) {
         if (elements.length > 0) {
           const clickedElementIndex = elements[0].index;
           const month = months[clickedElementIndex];
-          showDonutChart(month, data, chartType);
+          showDonutCharts(month, salesData, revenueData, chartType, colors);
         }
       }
     }
@@ -310,14 +368,93 @@ function updateLineCharts(data, label, chartType, colors) {
         if (elements.length > 0) {
           const clickedElementIndex = elements[0].index;
           const month = months[clickedElementIndex];
-          showDonutChart(month, data, chartType);
+          showDonutCharts(month, salesData, revenueData, chartType, colors);
+        }
+      }
+    }
+  });
+
+  totalRevenueChart = new Chart(ctx3, {
+    type: 'line',
+    data: totalRevenueData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        title: {
+          display: true,
+          text: `Monthly Revenue for ${label} (${chartType})`
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Month'
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Revenue'
+          },
+          beginAtZero: true
+        }
+      },
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const clickedElementIndex = elements[0].index;
+          const month = months[clickedElementIndex];
+          showDonutCharts(month, salesData, revenueData, chartType, colors);
+        }
+      }
+    }
+  });
+
+  cumulativeRevenueChart = new Chart(ctx4, {
+    type: 'line',
+    data: cumulativeRevenueData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        title: {
+          display: true,
+          text: `Cumulative Revenue for ${label} (${chartType})`
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Month'
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Cumulative Revenue'
+          },
+          beginAtZero: true
+        }
+      },
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const clickedElementIndex = elements[0].index;
+          const month = months[clickedElementIndex];
+          showDonutCharts(month, salesData, revenueData, chartType, colors);
         }
       }
     }
   });
 }
 
-function showDonutChart(month, data, chartType) {
+function showDonutCharts(month, salesData, revenueData, chartType, colors) {
+  showDonutChart(month, salesData, chartType, colors);
+  showRevenueDonutChart(month, revenueData, chartType, colors);
+}
+
+function showDonutChart(month, data, chartType, colors) {
   const year = new Date(document.getElementById("fromDate").value).getFullYear();
   const monthData = Object.keys(data).reduce((acc, key) => {
     const metrics = data[key][year];
@@ -326,6 +463,7 @@ function showDonutChart(month, data, chartType) {
   }, {});
 
   const ctx = document.getElementById('donutChart').getContext('2d');
+  
   if (donutChart) {
     donutChart.destroy();
   }
@@ -336,14 +474,7 @@ function showDonutChart(month, data, chartType) {
       labels: Object.keys(monthData),
       datasets: [{
         data: Object.values(monthData),
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(153, 102, 255, 0.6)',
-          'rgba(255, 159, 64, 0.6)'
-        ]
+        backgroundColor: colors
       }]
     },
     options: {
@@ -353,6 +484,41 @@ function showDonutChart(month, data, chartType) {
         title: {
           display: true,
           text: `Sales Breakdown for ${month} (${chartType})`
+        }
+      }
+    }
+  });
+}
+
+function showRevenueDonutChart(month, data, chartType, colors) {
+  const year = new Date(document.getElementById("fromDate").value).getFullYear();
+  const monthData = Object.keys(data).reduce((acc, key) => {
+    const metrics = data[key][year];
+    acc[key] = metrics[month] || 0;
+    return acc;
+  }, {});
+
+  const ctx = document.getElementById('revenueDonutChart').getContext('2d');
+  if (revenueDonutChart) {
+    revenueDonutChart.destroy();
+  }
+
+  revenueDonutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(monthData),
+      datasets: [{
+        data: Object.values(monthData),
+        backgroundColor: colors
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: `Revenue Breakdown for ${month} (${chartType})`
         }
       }
     }

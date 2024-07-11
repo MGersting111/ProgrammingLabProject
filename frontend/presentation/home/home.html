@@ -121,6 +121,7 @@
           <i class="fas fa-chevron-right arrow-icon"></i>
         </button>
         <button class="plus-button" id="openModal">+</button>
+        <button class="btn btn-danger" id="deleteAllGoalsButton">Delete All Goals</button>
       </div>
       <div class="box chart-box">
         <div class="chart-container">
@@ -131,9 +132,22 @@
       </div>
     </div>
 
-    <div class="wrapper" id="inputWrapper">
+    <div class="wrapper" id="goalSelectionWrapper">
       <div class="form-box">
-        <span class="icon-close" onclick="closeWrapper()">
+        <span class="icon-close" onclick="closeGoalSelectionWrapper()">
+          <i class="bx bx-x"></i>
+        </span>
+        <h2>Select Goal Option</h2>
+        <div class="input-box">
+          <button class="custom-button" id="newGoalButton">New Goal</button>
+          <button class="custom-button" id="existingGoalButton">Existing Goal</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper" id="newGoalWrapper">
+      <div class="form-box">
+        <span class="icon-close" onclick="closeNewGoalWrapper()">
           <i class="bx bx-x"></i>
         </span>
         <h2>Add New Goal</h2>
@@ -164,6 +178,25 @@
           </div>
           <button type="submit" class="custom-button" id="fetchDataButton">
             OK
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="wrapper" id="existingGoalWrapper">
+      <div class="form-box">
+        <span class="icon-close" onclick="closeExistingGoalWrapper()">
+          <i class="bx bx-x"></i>
+        </span>
+        <h2>Fetch Existing Goal</h2>
+        <form id="fetchGoalForm">
+          <div class="input-box">
+            <span class="icon"><i class="bx bx-id-card"></i></span>
+            <input type="text" id="goalIdInput" required />
+            <label for="goalIdInput">Goal ID</label>
+          </div>
+          <button type="submit" class="custom-button" id="fetchGoalButton">
+            Fetch
           </button>
         </form>
       </div>

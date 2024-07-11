@@ -52,7 +52,7 @@ namespace api.Controllers
         }
 
         // PUT: api/Goal/5
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<IActionResult> PutGoal(int id, Goal goal)
         {
             if (id != goal.Id)
