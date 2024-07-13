@@ -105,35 +105,34 @@
       </div>
     </div>
   </div>
-  <div class="barChartsContainer">
+  <button id="toggleBarChartsButton" class="btn btn-secondary">Toggle Bar Charts</button>
+  <div id="barChartsContainer" class="barChartsContainer">
     <canvas id="avgSizeRevenueBarChart" class="bar-chart"></canvas>
-    <canvas id="avgSizeSalesBarChart" class="bar-chart"></canvas>
     <canvas id="avgCategoryRevenueBarChart" class="bar-chart"></canvas>
+    <canvas id="avgSizeSalesBarChart" class="bar-chart"></canvas>
     <canvas id="avgCategorySalesBarChart" class="bar-chart"></canvas>
   </div>
   <div class="lineChartsContainer">
     <div class="row">
       <div class="col-md-6">
         <canvas id="totalSalesChart" class="line-chart"></canvas>
+        <button id="toggleSalesGrowthRateButton" class="btn btn-secondary mt-2">Toggle Sales Growth Rate</button>
       </div>
       <div class="col-md-6">
         <canvas id="cumulativeSalesChart" class="line-chart"></canvas>
+        <canvas id="salesGrowthRateChart" class="line-chart" style="display: none;"></canvas>
       </div>
     </div>
     <div class="row">
       <div class="col-md-6">
         <canvas id="totalRevenueChart" class="line-chart"></canvas>
+        <button id="toggleRevenueGrowthRateButton" class="btn btn-secondary mt-2">Toggle Revenue Growth Rate</button>
       </div>
       <div class="col-md-6">
         <canvas id="cumulativeRevenueChart" class="line-chart"></canvas>
+        <canvas id="revenueGrowthRateChart" class="line-chart" style="display: none;"></canvas>
       </div>
     </div>
-  </div>
-  <div class="barChartContainer">
-    <canvas id="avgSizeRevenueBarChart" class="bar-chart"></canvas>
-    <canvas id="avgSizeSalesBarChart" class="bar-chart"></canvas>
-    <canvas id="avgCategoryRevenueBarChart" class="bar-chart"></canvas>
-    <canvas id="avgCategorySalesBarChart" class="bar-chart"></canvas>
   </div>
   <div class="donutChartContainer">
     <div class="col-md-6">
@@ -142,7 +141,6 @@
     <div class="col-md-6">
       <canvas id="revenueDonutChart" class="donut-chart"></canvas>
     </div>
-  </div>
   </div>
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
