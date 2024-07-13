@@ -10,6 +10,8 @@ let totalSalesChart;
 let cumulativeSalesChart;
 let totalRevenueChart;
 let cumulativeRevenueChart;
+let salesGrowthRateChart;
+let revenueGrowthRateChart;
 let donutChart;
 let revenueDonutChart;
 let avgSizeRevenueBarChart;
@@ -355,11 +357,15 @@ function updateLineCharts(salesData, revenueData, label, chartType, colors) {
   const ctx2 = document.getElementById('cumulativeSalesChart').getContext('2d');
   const ctx3 = document.getElementById('totalRevenueChart').getContext('2d');
   const ctx4 = document.getElementById('cumulativeRevenueChart').getContext('2d');
+  const ctx5 = document.getElementById('salesGrowthRateChart').getContext('2d');
+  const ctx6 = document.getElementById('revenueGrowthRateChart').getContext('2d');
 
   if (totalSalesChart) totalSalesChart.destroy();
   if (cumulativeSalesChart) cumulativeSalesChart.destroy();
   if (totalRevenueChart) totalRevenueChart.destroy();
   if (cumulativeRevenueChart) cumulativeRevenueChart.destroy();
+  if (salesGrowthRateChart) salesGrowthRateChart.destroy();
+  if (revenueGrowthRateChart) revenueGrowthRateChart.destroy();
 
   totalSalesChart = new Chart(ctx1, {
     type: 'line',
@@ -508,6 +514,100 @@ function updateLineCharts(salesData, revenueData, label, chartType, colors) {
       }
     }
   });
+
+  // Calculate growth rates
+  const calculateGrowthRates = (data) => {
+    const growthRates = [];
+    for (let i = 1; i < data.length; i++) {
+      const growthRate = ((data[i] - data[i - 1]) / data[i - 1]) * 100;
+      growthRates.push(growthRate);
+    }
+    return growthRates;
+  };
+
+  const salesGrowthRates = salesDatasets.map(dataset => ({
+    label: dataset.label,
+    data: calculateGrowthRates(dataset.data),
+    borderColor: dataset.label === label ? 'rgba(255, 0, 0, 1)' : dataset.borderColor,
+    borderWidth: dataset.label === label ? 2 : 1,
+    fill: false,
+    pointBackgroundColor: dataset.label === label ? 'rgba(255, 0, 0, 1)' : dataset.pointBackgroundColor
+  }));
+
+  const revenueGrowthRates = revenueDatasets.map(dataset => ({
+    label: dataset.label,
+    data: calculateGrowthRates(dataset.data),
+    borderColor: dataset.label === label ? 'rgba(255, 0, 0, 1)' : dataset.borderColor,
+    borderWidth: dataset.label === label ? 2 : 1,
+    fill: false,
+    pointBackgroundColor: dataset.label === label ? 'rgba(255, 0, 0, 1)' : dataset.pointBackgroundColor
+  }));
+
+  salesGrowthRateChart = new Chart(ctx5, {
+    type: 'line',
+    data: {
+      labels: months.slice(1), // Growth rates are calculated between months, so we have one less label
+      datasets: salesGrowthRates
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        title: {
+          display: true,
+          text: `Sales Growth Rate for ${label} (${chartType})`
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Month'
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Growth Rate (%)'
+          },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  revenueGrowthRateChart = new Chart(ctx6, {
+    type: 'line',
+    data: {
+      labels: months.slice(1), // Growth rates are calculated between months, so we have one less label
+      datasets: revenueGrowthRates
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        title: {
+          display: true,
+          text: `Revenue Growth Rate for ${label} (${chartType})`
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Month'
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Growth Rate (%)'
+          },
+          beginAtZero: true
+        }
+      }
+    }
+  });
 }
 
 function showDonutCharts(month, salesData, revenueData, chartType, colors) {
@@ -524,7 +624,7 @@ function showDonutChart(month, data, chartType, colors) {
   }, {});
 
   const ctx = document.getElementById('donutChart').getContext('2d');
-  
+
   if (donutChart) {
     donutChart.destroy();
   }
@@ -598,10 +698,29 @@ function toggleBarCharts() {
   } else {
     barChartsContainer.style.display = 'none';
     toggleBarChartsButton.textContent = 'Show Bar Charts';
+    }
   }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('analyseButton').addEventListener('click', analyseProduct);
-  document.getElementById('toggleBarChartsButton').addEventListener('click', toggleBarCharts);
-});
+  
+  function toggleGrowthCharts(chartType) {
+    const cumulativeChart = chartType === 'sales' ? document.getElementById('cumulativeSalesChart') : document.getElementById('cumulativeRevenueChart');
+    const growthRateChart = chartType === 'sales' ? document.getElementById('salesGrowthRateChart') : document.getElementById('revenueGrowthRateChart');
+  
+    if (cumulativeChart.style.display === 'none' || cumulativeChart.style.display === '') {
+      cumulativeChart.style.display = 'block';
+      growthRateChart.style.display = 'none';
+      document.getElementById(`toggle${chartType === 'sales' ? 'Sales' : 'Revenue'}GrowthRateButton`).textContent = `Show ${chartType.charAt(0).toUpperCase() + chartType.slice(1)} Growth Rate`;
+    } else {
+      cumulativeChart.style.display = 'none';
+      growthRateChart.style.display = 'block';
+      document.getElementById(`toggle${chartType === 'sales' ? 'Sales' : 'Revenue'}GrowthRateButton`).textContent = `Show Cumulative ${chartType.charAt(0).toUpperCase() + chartType.slice(1)}`;
+    }
+  }
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('analyseButton').addEventListener('click', analyseProduct);
+    document.getElementById('toggleBarChartsButton').addEventListener('click', toggleBarCharts);
+    document.getElementById('toggleSalesGrowthRateButton').addEventListener('click', () => toggleGrowthCharts('sales'));
+    document.getElementById('toggleRevenueGrowthRateButton').addEventListener('click', () => toggleGrowthCharts('revenue'));
+  });
+  
+   
