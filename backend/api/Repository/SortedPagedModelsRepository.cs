@@ -52,7 +52,7 @@ namespace api.Repository
             var totalRevenues = await _context.Orders
             .Where(o => storeIds.Contains(o.StoreId))
             .GroupBy(o => o.StoreId)
-            .Select(g => new { StoreId = g.Key, TotalRevenue = g.Sum(o => o.total) })
+            .Select(g => new { StoreId = g.Key, TotalRevenue = g.Sum(o => (int)o.total) })
             .ToListAsync();
 
             var customerCounts = await _context.Orders

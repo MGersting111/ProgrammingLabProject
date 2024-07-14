@@ -19,7 +19,7 @@ namespace api.Dto
         public string City { get; set; } = string.Empty;
         public string State { get; set; } = string.Empty;
         public double Distance { get; set; }
-        public double TotalRevenue { get; set; }
+        public int TotalRevenue { get; set; }
         public int CustomerCount { get; set; }
     }
 }

@@ -265,7 +265,7 @@ namespace api.Repository
                         .Select(g => g.Sum(o => o.total))
                         .ToListAsync()
                         .ConfigureAwait(false);
-                    return totalRevenues.Select(tr => (double)tr).ToArray();
+                    return totalRevenues.Select(tr => Math.Floor((double)tr)).ToArray();
 
                 case "ordercount":
                     var orderCounts = await _context.Orders

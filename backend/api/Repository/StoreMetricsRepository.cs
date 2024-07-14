@@ -52,9 +52,9 @@ namespace api.Repository
                     State = store.State,
                     City = store.City,
                     TotalSales = storeGroup.Count(),
-                    TotalRevenue = storeGroup.Sum(o => o.total),
-                    AvgRevenue = storeGroup.Average(o => o.total),
-                    AvgSales = storeGroup.Count() > 0 ? storeGroup.Average(o => o.NItems) : 0,
+                    TotalRevenue = (long)storeGroup.Sum(o => o.total),
+                    AvgRevenue = (long)storeGroup.Average(o => o.total),
+                    AvgSales = storeGroup.Count() > 0 ? (long)storeGroup.Average(o => o.NItems) : 0,
                     TotalCustomers = storeGroup.Select(o => o.CustomerId).Distinct().Count(),
                     MonthlySales = storeGroup
                         .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
@@ -73,7 +73,7 @@ namespace api.Repository
                             yearGroup => yearGroup.Key.ToString(),
                             yearGroup => yearGroup.ToDictionary(
                                 monthGroup => CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthGroup.Key.Month),
-                                monthGroup => monthGroup.Sum(o => o.total))),
+                                monthGroup => (long)monthGroup.Sum(o => o.total))),
                     MonthlyAvgRevenuePerSale = storeGroup
                         .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
                         .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
@@ -82,7 +82,7 @@ namespace api.Repository
                             yearGroup => yearGroup.Key.ToString(),
                             yearGroup => yearGroup.ToDictionary(
                                 monthGroup => CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthGroup.Key.Month),
-                                monthGroup => monthGroup.Average(o => o.total))),
+                                monthGroup => (long)monthGroup.Average(o => o.total))),
                     MonthlyCustomers = storeGroup
                         .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
                         .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
@@ -101,7 +101,7 @@ namespace api.Repository
                             ProductSKU = g.Key,
                             ProductName = g.First().Product.Name,
                             TotalSales = g.Select(oi => oi.OrderId).Distinct().Count(),
-                            TotalRevenue = g.Sum(oi => oi.Order.total)
+                            TotalRevenue = (long)g.Sum(oi => oi.Order.total)
                             // Add additional fields as necessary
                         }).ToList(),
 

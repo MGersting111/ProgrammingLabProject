@@ -6,14 +6,14 @@ namespace api.Dto
         public string State { get; set; }
         public string City { get; set; }
         public int TotalSales { get; set; }
-        public double TotalRevenue { get; set; }
-        public double AvgRevenue { get; set; }
-        public double AvgSales { get; set; }
+        public long TotalRevenue { get; set; }
+        public long AvgRevenue { get; set; }
+        public long AvgSales { get; set; }
         public int TotalCustomers { get; set; }
         public List<ProductSales> ProductSales { get; set; } = new List<ProductSales>();
         public Dictionary<string, Dictionary<string, int>> MonthlySales { get; set; } = new Dictionary<string, Dictionary<string, int>>();
-        public Dictionary<string, Dictionary<string, double>> MonthlyRevenue { get; set; } = new Dictionary<string, Dictionary<string, double>>();
-        public Dictionary<string, Dictionary<string, double>> MonthlyAvgRevenuePerSale { get; set; } = new Dictionary<string, Dictionary<string, double>>();
+        public Dictionary<string, Dictionary<string, long>> MonthlyRevenue { get; set; } = new Dictionary<string, Dictionary<string, long>>();
+        public Dictionary<string, Dictionary<string, long>> MonthlyAvgRevenuePerSale { get; set; } = new Dictionary<string, Dictionary<string, long>>();
         public Dictionary<string, Dictionary<string, int>> MonthlyCustomers { get; set; } = new Dictionary<string, Dictionary<string, int>>();
         public List<MonthlyProductSales> MonthlyProductSales { get; set; } = new List<MonthlyProductSales>();
     }
@@ -23,7 +23,7 @@ namespace api.Dto
         public string ProductSKU { get; set; }
         public string ProductName { get; set; }
         public int TotalSales { get; set; }
-        public double TotalRevenue { get; set; }
+        public long TotalRevenue { get; set; }
     }
 
     public class MonthlyProductSales
