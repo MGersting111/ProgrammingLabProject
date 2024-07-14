@@ -217,17 +217,13 @@ document.getElementById("dataForm").addEventListener("submit", function (event) 
     })
     .then(() => {
       document.getElementById("dataForm").reset();
-      closeWrapper();
+      // Removed closeWrapper() call
     })
     .catch((error) => {
       console.error("Error during form submission:", error);
       alert("Error: " + error.message);
     });
 });
-
-function closeWrapper() {
-  document.getElementById("inputWrapper").classList.remove("show");
-}
 
 document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("openModal").addEventListener("click", function () {
@@ -557,7 +553,6 @@ function createBarChart(period) {
 }
 
 function createPieChart(period, data, title) {
-  const pieChartContainer = document.querySelector("#pieChartContainer");
   pieChartContainer.style.display = "block";
   pieChartContainer.innerHTML = '<canvas id="pieChart" style="display: block;"></canvas>';
 
@@ -644,11 +639,43 @@ function deleteAllGoals() {
       monthlyRevenue = {};
       monthlySales = {};
       currentPeriod = 1;
-      updateSlidesVisibility();
-      createBarChart(currentPeriod);
+      clearAllCharts();
+      clearSlideContent();
       createdGoalIds = {}; // Clear the stored goal IDs
     })
     .catch((error) => {
       console.error("Error deleting all goals:", error);
     });
 }
+
+function clearAllCharts() {
+  if (revenueChart) {
+    revenueChart.destroy();
+    revenueChart = null;
+  }
+  if (salesChart) {
+    salesChart.destroy();
+    salesChart = null;
+  }
+  if (pieChart) {
+    pieChart.destroy();
+    pieChart = null;
+  }
+  pieChartContainer.style.display = "none";
+  pieChartContainer.innerHTML = '';
+}
+
+function clearSlideContent() {
+  const slidesContainer = document.getElementById("slides");
+  slidesContainer.innerHTML = '';
+  updateSlidesVisibility();
+  createBarChart(currentPeriod);
+}
+
+function updateSlidesVisibility() {
+  const slides = document.querySelectorAll(".slide");
+  slides.forEach((slide) => {
+    slide.style.display = slide.dataset.period == currentPeriod ? "block" : "none";
+  });
+}
+
