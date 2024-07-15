@@ -322,7 +322,7 @@ function createMapChart(cityLat, cityLon, cityRevenue, cityName) {
   const mapContainer = document.getElementById("mapContainer");
   //mapContainer.style.display = "block";
   let scale = 120000;
-  scale = Math.max(...cityRevenue) / 45;
+  scale = Math.max(...cityRevenue) / 35;
   var citySize = [];
   var hoverText = [];
 
