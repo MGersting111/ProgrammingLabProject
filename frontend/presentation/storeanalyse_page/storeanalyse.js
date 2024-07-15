@@ -166,10 +166,18 @@ function getData() {
   yearFrom = dateFrom.split("-")[0];
   yearTo = dateTo.split("-")[0];
   startMonth = parseInt(dateFrom.split("-")[1]) - 1; // Monat aus dateFrom extrahieren und in eine Zahl umwandeln
-  endMonth = parseInt(dateTo.split("-")[1]) - 1; // Monat aus dateFrom extrahieren und in eine Zahl umwandeln
+  endMonth = parseInt(dateTo.split("-")[1]) - 1;
+  console.log(startMonth, endMonth);
+  if (yearFrom == "2022") {
+    startMonth += 12;
+  }
+  if (yearTo == "2022") {
+    endMonth += 13;
+  }
+  console.log(startMonth, endMonth);
   totalMonths = (yearTo - yearFrom) * 12 + endMonth - startMonth + 1;
-  startSlice = totalMonths <= 24 ? 0 : totalMonths - 24;
-  endSlice = totalMonths;
+  startSlice = startMonth;
+  endSlice = endMonth;
   const url = `${storeBaseUrl}?fromDate=${dateFrom}&toDate=${dateTo}`;
   return fetch(url, {
     method: "GET",
@@ -219,25 +227,37 @@ function orderData(data) {
       "Oktober",
       "November",
       "Dezember",
+      "Januar",
+      "Februar",
+      "März",
+      "April",
+      "Mai",
+      "Juni",
+      "Juli",
+      "August",
+      "September",
+      "Oktober",
+      "November",
+      "Dezember",
     ];
 
     store.monthlyProductSales.forEach((product) => {
       let productName = productData[product.productSKU];
       if (!storeProductSalesNames.includes(productName)) {
         storeProductSalesNames.push(productName);
-        storeProductMonthlySales[store.storeId][productName] = {};
-        monthsGer.forEach((month) => {
-          storeProductMonthlySales[store.storeId][productName][month] = 0;
-        });
+        storeProductMonthlySales[store.storeId][productName] = [];
       }
+      let saleList = [];
       for (let year in product.sales) {
         for (let month in product.sales[year]) {
           let monthlySales = product.sales[year][month];
-          storeProductMonthlySales[store.storeId][productName][month] +=
-            monthlySales;
+          saleList.push(monthlySales);
         }
       }
+
+      storeProductMonthlySales[store.storeId][productName] = saleList;
     });
+
     storeProductSalesNames = [];
     let allMonthlyRevenues = [];
     let allMonthlySales = [];
@@ -278,8 +298,6 @@ function orderData(data) {
     storeProductRevenues = [];
   });
 
-  months24 = months24.slice(0, storeRevenueValues[0].length);
-  console.log(storeProductMonthlySales);
   return {
     storeIds,
     storeNames,
@@ -303,7 +321,8 @@ function orderData(data) {
 function createMapChart(cityLat, cityLon, cityRevenue, cityName) {
   const mapContainer = document.getElementById("mapContainer");
   //mapContainer.style.display = "block";
-  const scale = 120000;
+  let scale = 120000;
+  scale = Math.max(...cityRevenue) / 35;
   var citySize = [];
   var hoverText = [];
 
@@ -488,7 +507,9 @@ function createLineChart(dataLabels, dataValues, chartName, onClick, color) {
   let newCanvas = document.createElement("canvas");
   newCanvas.className = "canvas-item";
   canvasContainer.appendChild(newCanvas);
+  console.log(months24);
   dataLabels = months24.slice(startSlice, endSlice);
+  console.log(startSlice, endSlice);
   let ctx = newCanvas.getContext("2d");
 
   let chart = new Chart(ctx, {
