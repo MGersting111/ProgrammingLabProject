@@ -48,12 +48,12 @@ namespace api.Repository
                 TotalRevenue = 0,
                 TotalSize = new Dictionary<string, int>(),
                 TotalCategory = new Dictionary<string, int>(),
-                AvgSalesBySize = new Dictionary<string, int>(),
-                AvgSalesByCategory = new Dictionary<string, int>(),
+                AvgSalesBySize = new Dictionary<string, double>(),
+                AvgSalesByCategory = new Dictionary<string, double>(),
                 TotalRevenueBySize = new Dictionary<string, int>(),
                 TotalRevenueByCategory = new Dictionary<string, int>(),
-                AvgRevenueBySize = new Dictionary<string, int>(),
-                AvgRevenueByCategory = new Dictionary<string, int>()
+                AvgRevenueBySize = new Dictionary<string, double>(),
+                AvgRevenueByCategory = new Dictionary<string, double>()
 
             };
 
@@ -170,25 +170,25 @@ namespace api.Repository
             // Calculate average revenue per size
             foreach (var size in productSaleInfo.TotalRevenueBySize.Keys)
             {
-                productSaleInfo.AvgRevenueBySize[size] = productSaleInfo.TotalRevenueBySize[size] / (int)productSaleInfo.TotalSize[size];
+                productSaleInfo.AvgRevenueBySize[size] = productSaleInfo.TotalRevenueBySize[size] / (double)productSaleInfo.TotalSize[size];
             }
 
             // Calculate average revenue per category
             foreach (var category in productSaleInfo.TotalRevenueByCategory.Keys)
             {
-                productSaleInfo.AvgRevenueByCategory[category] = productSaleInfo.TotalRevenueByCategory[category] / (int)productSaleInfo.TotalCategory[category];
+                productSaleInfo.AvgRevenueByCategory[category] = productSaleInfo.TotalRevenueByCategory[category] / (double)productSaleInfo.TotalCategory[category];
             }
 
             // Calculate average sales per size
             foreach (var size in productSaleInfo.TotalSize.Keys)
             {
-                productSaleInfo.AvgSalesBySize[size] = productSaleInfo.TotalSize[size] / (int)numMonths;
+                productSaleInfo.AvgSalesBySize[size] = productSaleInfo.TotalSize[size] / (double)numMonths;
             }
 
             // Calculate average sales per category
             foreach (var category in productSaleInfo.TotalCategory.Keys)
             {
-                productSaleInfo.AvgSalesByCategory[category] = productSaleInfo.TotalCategory[category] / (int)numMonths;
+                productSaleInfo.AvgSalesByCategory[category] = productSaleInfo.TotalCategory[category] / (double)numMonths;
             }
             await SetCachedProductSaleInfoAsync(cacheKey, productSaleInfo, DateTime.UtcNow.AddDays(365));
             return productSaleInfo;

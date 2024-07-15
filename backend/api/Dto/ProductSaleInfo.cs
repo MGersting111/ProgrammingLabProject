@@ -22,12 +22,12 @@ namespace api.Dto
         public int TotalRevenue { get; set; }
         public Dictionary<string, int> TotalSize { get; set; } = new(); // Total sales per size
         public Dictionary<string, int> TotalCategory { get; set; } = new();
-        public Dictionary<string, int> AvgSalesBySize { get; set; } 
-        public Dictionary<string, int> AvgSalesByCategory { get; set; }
+        public Dictionary<string, double> AvgSalesBySize { get; set; } 
+        public Dictionary<string, double> AvgSalesByCategory { get; set; }
         public Dictionary<string, int> TotalRevenueBySize { get; set; }
         public Dictionary<string, int> TotalRevenueByCategory { get; set; }
-        public Dictionary<string, int> AvgRevenueBySize { get; set; }
-        public Dictionary<string, int> AvgRevenueByCategory { get; set; }
+        public Dictionary<string, double> AvgRevenueBySize { get; set; }
+        public Dictionary<string, double> AvgRevenueByCategory { get; set; }
         
     }
 }
