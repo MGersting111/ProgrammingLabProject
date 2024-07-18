@@ -32,15 +32,15 @@ namespace api.Repository
 
         public async Task<List<ChartsInfo>> GetDiagramDataAsync(FilterCharts filter, ComparisonType comparisonType)
         {
-            var startTimeString = filter.StartTime.ToString("yyyyMMddHHmmss");
-            var endTimeString = filter.EndTime.ToString("yyyyMMddHHmmss");
-            var storeIdString = filter.StoreId ?? "no-store";
-            var metricsString = String.Join("-", filter.Metrics);
-            var cacheKey = $"CompareCharts-{storeIdString}-{startTimeString}-{endTimeString}-{comparisonType.ToString()}-{metricsString}";
-            var cachedData = await GetCachedDataAsync(cacheKey);
-            if (cachedData != null)
+            var startTimeString = filter.StartTime.ToString("yyyyMMddHHmmss"); //metrics for the cache key
+            var endTimeString = filter.EndTime.ToString("yyyyMMddHHmmss"); //metrics for the cache key
+            var storeIdString = filter.StoreId ?? "no-store"; //metrics for the cache key
+            var metricsString = String.Join("-", filter.Metrics); //metrics for the cache key
+            var cacheKey = $"CompareCharts-{storeIdString}-{startTimeString}-{endTimeString}-{comparisonType.ToString()}-{metricsString}"; //how the key will look like
+            var cachedData = await GetCachedDataAsync(cacheKey); //get the data from the cache
+            if (cachedData != null) //if the data is in the cache
             {
-                return cachedData; // Daten aus dem Cache zurückgeben
+                return cachedData; // return the data
             }
 
             _context.Database.SetCommandTimeout(300);
@@ -260,46 +260,47 @@ namespace api.Repository
                     }
                     break;
             }
-            await SetCachedDataAsync(cacheKey, chartsInfos, DateTime.UtcNow.AddDays(365));
+            // rest of the code
+            await SetCachedDataAsync(cacheKey, chartsInfos, DateTime.UtcNow.AddDays(365)); //set the data in the cache
             return chartsInfos;
         }
-        private async Task<List<ChartsInfo>> GetCachedDataAsync(string cacheKey)
+        private async Task<List<ChartsInfo>> GetCachedDataAsync(string cacheKey) //get the data from the cache method
         {
           
-            var cacheEntry = await _context.CacheEntries
+            var cacheEntry = await _context.CacheEntries 
                 .AsNoTracking()
                 .FirstOrDefaultAsync(ce => ce.CacheKey == cacheKey && ce.ExpirationDate > DateTime.UtcNow);
 
             if (cacheEntry != null)
             {
-                return JsonConvert.DeserializeObject<List<ChartsInfo>>(cacheEntry.JsonValue);
+                return JsonConvert.DeserializeObject<List<ChartsInfo>>(cacheEntry.JsonValue); 
             }
 
             return null;
         }
 
-        private async Task SetCachedDataAsync(string cacheKey, List<ChartsInfo> data, DateTime expirationDate)
+        private async Task SetCachedDataAsync(string cacheKey, List<ChartsInfo> data, DateTime expirationDate) //set the data in the cache method
         {
            
-            var jsonData = JsonConvert.SerializeObject(data);
-            var cacheEntry = await _context.CacheEntries.FindAsync(cacheKey);
+            var jsonData = JsonConvert.SerializeObject(data); //convert the data to json
+            var cacheEntry = await _context.CacheEntries.FindAsync(cacheKey); //check if the data is already in the cache
 
-            if (cacheEntry != null)
+            if (cacheEntry != null) //if the data is already in the cache
             {
-                cacheEntry.JsonValue = jsonData;
-                cacheEntry.ExpirationDate = expirationDate;
+                cacheEntry.JsonValue = jsonData; //update the data
+                cacheEntry.ExpirationDate = expirationDate;//update the expiration date
             }
             else
             {
                 _context.CacheEntries.Add(new CacheEntry
                 {
-                    CacheKey = cacheKey,
-                    JsonValue = jsonData,
-                    ExpirationDate = expirationDate
+                    CacheKey = cacheKey, //add the data to the cache
+                    JsonValue = jsonData,//add the data to the cache
+                    ExpirationDate = expirationDate //add the data to the cache
                 });
             }
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); //save the changes
         }
     }
 }
